@@ -1,0 +1,18 @@
+[Unit]
+Description=Nexapa Laravel Queue Worker
+After=network-online.target mysql.service mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/nexapa-api
+ExecStart=/usr/bin/php /var/www/nexapa-api/artisan queue:work database --sleep=3 --tries=3 --timeout=300 --max-time=3600
+Restart=always
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=360
+
+[Install]
+WantedBy=multi-user.target

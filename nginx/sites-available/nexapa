@@ -1,0 +1,83 @@
+server {
+    server_name app.nexapa.me;
+
+    root /var/www/nexapa-web/dist;
+    index index.html;
+
+    location /assets/ {
+        try_files $uri =404;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/app.nexapa.me/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/app.nexapa.me/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+
+server {
+    server_name api.nexapa.me;
+
+    root /var/www/nexapa-api/public;
+    index index.php;
+
+    client_max_body_size 500M;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/app.nexapa.me/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/app.nexapa.me/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+
+}
+server {
+    if ($host = app.nexapa.me) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    listen [::]:80;
+    server_name app.nexapa.me;
+    return 404; # managed by Certbot
+
+
+}
+
+server {
+    if ($host = api.nexapa.me) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    listen [::]:80;
+    server_name api.nexapa.me;
+    return 404; # managed by Certbot
+
+
+}

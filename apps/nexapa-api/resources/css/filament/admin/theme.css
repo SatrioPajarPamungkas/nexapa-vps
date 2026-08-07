@@ -1,0 +1,457 @@
+@import '/vendor/filament/filament/dist/theme.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Nexapa Admin — Operational Dashboard
+ * Restrained dark theme matching spec:
+ * page bg #090b10, widget surface slightly lighter, thin blue-gray borders,
+ * 16px radius, restrained shadow, nexapa blue neutral, green only for verified healthy, red only for failures, amber for warnings.
+ */
+
+:root {
+    --nexapa-bg: #090b10;
+    --nexapa-surface: #12141d;
+    --nexapa-surface-hover: #171a27;
+    --nexapa-surface-2: #1a1d2b;
+    --nexapa-border: rgba(148, 163, 184, 0.14);
+    --nexapa-border-strong: rgba(148, 163, 184, 0.22);
+    --nexapa-blue: #3b82f6;
+    --nexapa-blue-dim: rgba(59,130,246,0.14);
+    --nexapa-text: #e2e8f0;
+    --nexapa-text-muted: #94a3b8;
+    --nexapa-text-faint: #64748b;
+}
+
+/* Force dark background */
+.fi-body,
+.fi-layout,
+.fi-main {
+    background: var(--nexapa-bg) !important;
+}
+
+.fi-body {
+    color: var(--nexapa-text);
+}
+
+/* Sidebar */
+.fi-sidebar {
+    background: #0c0e16 !important;
+    border-right: 1px solid var(--nexapa-border);
+}
+.fi-sidebar-header {
+    background: transparent !important;
+    border-bottom: 1px solid var(--nexapa-border);
+}
+.fi-topbar,
+.fi-header {
+    background: rgba(12,14,22,0.85) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--nexapa-border);
+}
+
+/* Remove default welcome padding etc - dashboard header compact */
+.fi-page {
+    gap: 1rem !important;
+}
+.fi-page > section {
+    gap: 1rem !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 1.5rem !important;
+}
+
+/* Generic widget card overrides - restrained */
+.nexapa-widget-card {
+    background: var(--nexapa-surface) !important;
+    border: 1px solid var(--nexapa-border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.25) !important;
+    overflow: hidden;
+}
+.nexapa-widget-card .fi-section-content {
+    padding: 1rem 1.1rem !important;
+}
+.nexapa-widget-card .fi-section-header {
+    background: transparent !important;
+    border-bottom: 1px solid var(--nexapa-border) !important;
+    padding: 0.85rem 1.1rem !important;
+}
+
+/* Title style */
+.nexapa-widget-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--nexapa-text);
+}
+
+/* ================= Dashboard Header ================= */
+.nexapa-dashboard-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem 1rem;
+    align-items: flex-end;
+    padding: 0.25rem 0.25rem 0.5rem;
+    border-bottom: 1px solid var(--nexapa-border);
+    margin-bottom: 0.25rem;
+}
+.nexapa-dashboard-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    color: #f1f5f9;
+}
+.nexapa-dashboard-subtitle {
+    font-size: 0.8125rem;
+    color: var(--nexapa-text-muted);
+    margin-top: 0.2rem;
+}
+.nexapa-dashboard-header-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+}
+.nexapa-dashboard-links {
+    display: flex;
+    gap: 0.75rem;
+}
+.nexapa-external-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--nexapa-text-muted);
+    padding: 0.25rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid var(--nexapa-border);
+    background: rgba(255,255,255,0.02);
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+.nexapa-external-link:hover {
+    color: var(--nexapa-blue);
+    border-color: rgba(59,130,246,0.3);
+    background: rgba(59,130,246,0.08);
+}
+.nexapa-external-link-icon {
+    width: 12px;
+    height: 12px;
+    opacity: 0.7;
+}
+.nexapa-last-updated {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.70rem;
+    color: var(--nexapa-text-faint);
+}
+.nexapa-last-updated-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background: #10b981;
+    box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+}
+
+/* ================= Primary Metrics ================= */
+.nexapa-primary-metrics-widget .fi-section-content {
+    padding: 0 !important;
+}
+.nexapa-metrics-section {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.nexapa-metrics-section .fi-section-content {
+    padding: 0 !important;
+}
+.nexapa-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 0.75rem;
+}
+@media (min-width: 1024px) {
+    .nexapa-metrics-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+}
+.nexapa-metric-card {
+    position: relative;
+    background: var(--nexapa-surface);
+    border: 1px solid var(--nexapa-border);
+    border-radius: 16px;
+    padding: 0.9rem 1rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.25);
+    transition: border-color 0.15s;
+}
+.nexapa-metric-card:hover { border-color: var(--nexapa-border-strong); }
+.nexapa-metric-label {
+    font-size: 0.70rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--nexapa-text-muted);
+}
+.nexapa-metric-label-danger { color: #fca5a5; display:flex; align-items:center; gap:0.35rem; }
+.nexapa-metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-top: 0.35rem;
+    color: var(--nexapa-text);
+}
+.nexapa-metric-value-info { color: #60a5fa; }
+.nexapa-metric-value-danger { color: #f87171; }
+.nexapa-metric-desc {
+    font-size: 0.72rem;
+    color: var(--nexapa-text-faint);
+    margin-top: 0.25rem;
+}
+.nexapa-metric-dot-danger {
+    width:6px; height:6px; border-radius: 9999px; background:#ef4444; display:inline-block;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.18);
+}
+.nexapa-metric-clickable { cursor: pointer; }
+.nexapa-metric-clickable:hover { border-color: rgba(239,68,68,0.35); }
+.nexapa-metric-link-overlay { position:absolute; inset:0; border-radius:16px; }
+
+/* ================= Publishing Operations ================= */
+.nexapa-segmented-bar {
+    display: flex;
+    height: 10px;
+    border-radius: 9999px;
+    overflow: hidden;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.nexapa-segment { transition: width 0.3s ease; }
+.nexapa-legend-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    gap: 0.4rem 0.9rem;
+    margin-top: 0.9rem;
+}
+@media (min-width: 640px) { .nexapa-legend-grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+.nexapa-legend-item {
+    display:flex; align-items:center; justify-content:space-between;
+    font-size: 0.78rem;
+    padding: 0.25rem 0;
+}
+.nexapa-legend-left { display:flex; align-items:center; gap:0.4rem; }
+.nexapa-legend-dot { width:8px; height:8px; border-radius:9999px; display:inline-block; flex-shrink:0; }
+.nexapa-legend-label { color: var(--nexapa-text-muted); }
+.nexapa-legend-count { font-weight:600; font-variant-numeric: tabular-nums; }
+.nexapa-total-row {
+    margin-top:0.8rem; padding-top:0.7rem; border-top:1px solid var(--nexapa-border);
+    display:flex; justify-content:space-between; font-size:0.78rem; color: var(--nexapa-text-muted);
+}
+.nexapa-total-row strong { color: var(--nexapa-text); }
+
+/* ================= Needs Attention ================= */
+.nexapa-operational-state {
+    display:flex; gap:0.75rem; align-items: flex-start;
+    padding:0.7rem 0.2rem;
+}
+.nexapa-green-dot {
+    width:8px; height:8px; border-radius:9999px; background:#10b981; margin-top:0.35rem;
+    box-shadow: 0 0 0 4px rgba(16,185,129,0.18);
+    flex-shrink:0;
+}
+.nexapa-operational-title { font-size:0.85rem; font-weight:600; color: #a7f3d0; }
+.nexapa-operational-sub { font-size:0.75rem; color: var(--nexapa-text-muted); margin-top:0.15rem; }
+.nexapa-attention-list { display:flex; flex-direction:column; gap:0.6rem; }
+.nexapa-attention-item {
+    display:flex; justify-content:space-between; gap:0.6rem;
+    padding:0.65rem 0.75rem; border-radius:10px;
+    border:1px solid var(--nexapa-border);
+    background: rgba(255,255,255,0.02);
+}
+.nexapa-attention-danger { border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.06); }
+.nexapa-attention-warning { border-color: rgba(245,158,11,0.25); background: rgba(245,158,11,0.06); }
+.nexapa-attention-item-title { font-size:0.80rem; font-weight:600; color: var(--nexapa-text); display:flex; gap:0.35rem; align-items:center; }
+.nexapa-attention-count { font-weight:700; color: #f87171; }
+.nexapa-attention-item-desc { font-size:0.72rem; color: var(--nexapa-text-muted); margin-top:0.2rem; line-height:1.35; }
+.nexapa-attention-link {
+    align-self:center; font-size:0.72rem; font-weight:600;
+    color: var(--nexapa-blue); display:inline-flex; gap:0.15rem; align-items:center;
+    padding:0.25rem 0.5rem; border-radius:6px; background: rgba(59,130,246,0.10); border:1px solid rgba(59,130,246,0.18);
+    text-decoration:none; white-space:nowrap;
+}
+.nexapa-attention-link:hover { background: rgba(59,130,246,0.18); }
+
+/* ================= System Health ================= */
+.nexapa-health-grid { display:flex; flex-direction:column; }
+.nexapa-health-row {
+    display:flex; justify-content:space-between; align-items:center;
+    gap:0.75rem; padding:0.60rem 0; border-bottom:1px solid rgba(148,163,184,0.08);
+    font-size:0.80rem;
+}
+.nexapa-health-row:last-child { border-bottom:none; }
+.nexapa-health-left { display:flex; align-items:center; gap:0.5rem; min-width:0; }
+.nexapa-health-dot { width:7px; height:7px; border-radius:9999px; display:inline-block; flex-shrink:0; }
+.nexapa-health-dot-ok { background:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,0.18); }
+.nexapa-health-dot-warning { background:#f59e0b; box-shadow:0 0 0 3px rgba(245,158,11,0.18); }
+.nexapa-health-dot-error { background:#ef4444; box-shadow:0 0 0 3px rgba(239,68,68,0.18); }
+.nexapa-health-dot-neutral { background:#64748b; }
+.nexapa-health-label { color: var(--nexapa-text-muted); white-space:nowrap; }
+.nexapa-health-right { display:flex; flex-direction:column; align-items:flex-end; gap:0.1rem; min-width:0; }
+.nexapa-health-status { font-weight:600; font-size:0.78rem; line-height:1.2; }
+.nexapa-health-status-ok { color: #6ee7b7; }
+.nexapa-health-status-warning { color: #fcd34d; }
+.nexapa-health-status-error { color: #fca5a5; }
+.nexapa-health-status-neutral { color: var(--nexapa-text-faint); }
+.nexapa-health-detail { font-size:0.70rem; color: var(--nexapa-text-faint); max-width:16rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ================= Media Storage ================= */
+.nexapa-media-hero { padding:0.25rem 0 0.75rem; border-bottom:1px solid var(--nexapa-border); }
+.nexapa-media-hero-main { display:flex; align-items:baseline; gap:0.6rem; }
+.nexapa-media-hero-value { font-size:1.6rem; font-weight:700; letter-spacing:-0.02em; color: var(--nexapa-text); }
+.nexapa-media-hero-label { font-size:0.75rem; color: var(--nexapa-text-muted); }
+.nexapa-media-stats { display:flex; flex-direction:column; gap:0.1rem; margin-top:0.6rem; }
+.nexapa-media-stat { display:flex; align-items:center; gap:0.45rem; padding:0.45rem 0; font-size:0.80rem; }
+.nexapa-media-stat-dot { width:7px; height:7px; border-radius:9999px; display:inline-block; }
+.nexapa-media-stat-label { flex:1; color: var(--nexapa-text-muted); }
+.nexapa-media-stat-value { font-weight:600; color: var(--nexapa-text); font-variant-numeric: tabular-nums; }
+.nexapa-media-stat-divider { height:1px; background: var(--nexapa-border); margin:0.3rem 0; }
+.nexapa-media-note { font-size:0.70rem; color: var(--nexapa-text-faint); margin-top:0.6rem; }
+
+/* ================= Recent Activity ================= */
+.nexapa-activity-list { display:flex; flex-direction:column; }
+.nexapa-activity-item { display:flex; gap:0.7rem; padding:0.6rem 0; border-bottom:1px solid rgba(148,163,184,0.08); }
+.nexapa-activity-item:last-child { border-bottom:none; }
+.nexapa-activity-avatar {
+    width:28px; height:28px; border-radius:9999px; background:#1e293b; border:1px solid var(--nexapa-border);
+    display:flex; align-items:center; justify-content:center; font-size:0.70rem; font-weight:600; color: var(--nexapa-text-muted);
+    flex-shrink:0;
+}
+.nexapa-activity-content { min-width:0; flex:1; }
+.nexapa-activity-title-row { display:flex; flex-wrap:wrap; align-items:center; gap:0.35rem; }
+.nexapa-activity-title { font-size:0.80rem; font-weight:500; color: var(--nexapa-text); line-height:1.3; }
+.nexapa-activity-badge {
+    font-size:0.65rem; padding:0.1rem 0.35rem; border-radius:5px; border:1px solid var(--nexapa-border);
+    background: rgba(255,255,255,0.04); color: var(--nexapa-text-muted); line-height:1.2;
+}
+.nexapa-activity-badge-danger { color:#fca5a5; border-color: rgba(239,68,68,0.25); background: rgba(239,68,68,0.10); }
+.nexapa-activity-badge-success { color:#6ee7b7; border-color: rgba(16,185,129,0.25); background: rgba(16,185,129,0.10); }
+.nexapa-activity-meta { font-size:0.70rem; color: var(--nexapa-text-faint); margin-top:0.15rem; display:flex; gap:0.3rem; flex-wrap:wrap; }
+.nexapa-activity-dot { opacity:0.6; }
+.nexapa-activity-category { text-transform: capitalize; }
+
+/* Empty state */
+.nexapa-empty-state { text-align:center; padding:1.4rem 0.5rem; }
+.nexapa-empty-icon { font-size:1.2rem; color: var(--nexapa-text-faint); margin-bottom:0.35rem; }
+.nexapa-empty-text { font-size:0.85rem; font-weight:500; color: var(--nexapa-text-muted); }
+.nexapa-empty-subtext { font-size:0.72rem; color: var(--nexapa-text-faint); margin-top:0.2rem; }
+
+/* ================= Quick Actions ================= */
+.nexapa-quick-actions { display:flex; flex-direction:column; gap:0.5rem; }
+.nexapa-quick-action {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:0.6rem 0.75rem; border-radius:10px; border:1px solid var(--nexapa-border);
+    background: rgba(255,255,255,0.02); font-size:0.80rem; font-weight:500;
+    color: var(--nexapa-text-muted); text-decoration:none; transition: all 0.14s ease;
+}
+.nexapa-quick-action:hover { background: rgba(255,255,255,0.05); border-color: var(--nexapa-border-strong); color: var(--nexapa-text); }
+.nexapa-quick-action-danger { border-color: rgba(239,68,68,0.18); }
+.nexapa-quick-action-danger:hover { border-color: rgba(239,68,68,0.35); background: rgba(239,68,68,0.08); color:#fca5a5; }
+.nexapa-quick-action-label {}
+.nexapa-quick-action-arrow { width:14px; height:14px; opacity:0.5; }
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .nexapa-dashboard-header { flex-direction:column; align-items:flex-start; }
+    .nexapa-dashboard-header-meta { align-items:flex-start; width:100%; }
+    .nexapa-metrics-grid { gap:0.6rem; }
+    .nexapa-metric-card { padding:0.75rem 0.85rem; }
+    .nexapa-metric-value { font-size:1.25rem; }
+}
+
+/* Remove leftover heavy shadows/blur from previous theme attempts */
+.fi-section, .fi-wi-stats-overview-stat, .fi-widget {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+.fi-section-content, .fi-table-container {
+    background: transparent !important;
+}
+
+/* Ensure dark mode compat */
+.dark .fi-section,
+.dark .fi-wi-stats-overview-stat,
+.dark .fi-widget {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.25) !important;
+}
+
+/* Fix main container width */
+.fi-main-ctn {
+    max-width: 100% !important;
+}
+
+/* Dashboard widgets grid - 12 col with 8/4 layout */
+.fi-dashboard-page.nexapa-dashboard-page {
+    --cols-default: 1;
+    --cols-sm: 2;
+    --cols-md: 12;
+    --cols-lg: 12;
+    --cols-xl: 12;
+}
+.fi-dashboard-page .fi-widgets {
+    gap: 0.9rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+}
+
+/* Ensure header spans full width and doesn't collapse into grid cell */
+.nexapa-dashboard-page .nexapa-dashboard-header.cols-12 {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    grid-column: 1 / -1;
+}
+/* Force 12-col behavior in Filament grid system for desktop */
+@media (min-width: 1024px) {
+    .nexapa-dashboard-page .fi-grid {
+        grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    }
+}
+.nexapa-dashboard-page .fi-grid > .fi-wi {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Tablet and mobile: stack cleanly without overflow - important alerts first */
+@media (max-width: 1023px) {
+    .nexapa-dashboard-page .fi-grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+    .nexapa-metrics-grid {
+        grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+    }
+    /* On tablet/mobile, order: Primary (1), Attention (2), Publishing (3), Media (4), System (5), Quick (6), Recent (7) */
+    /* DOM order is Primary, Publishing, Attention, System, Media, Recent, Quick */
+    /* Reorder so critical alerts appear before secondary info */
+    .nexapa-primary-metrics-widget { order: 1; }
+    .nexapa-needs-attention-widget { order: 2; }
+    .nexapa-publishing-widget { order: 3; }
+    .nexapa-system-health-widget { order: 5; }
+    .nexapa-media-storage-widget { order: 4; }
+    .nexapa-recent-activity-widget { order: 7; }
+    .nexapa-quick-actions-widget { order: 6; }
+}
+@media (max-width: 640px) {
+    .nexapa-metrics-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Prevent horizontal overflow globally for dashboard */
+.nexapa-dashboard-page {
+    overflow-x: clip;
+    width: 100%;
+    max-width: 100%;
+}

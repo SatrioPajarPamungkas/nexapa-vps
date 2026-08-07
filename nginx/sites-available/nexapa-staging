@@ -1,0 +1,65 @@
+server {
+
+    # NEXAPA SSI HEADER START
+    ssi on;
+    ssi_types text/html;
+    ssi_silent_errors off;
+    # NEXAPA SSI HEADER END
+
+    server_name new.nexapa.me;
+
+    root /var/www/nexapa-staging;
+    index index.html;
+
+    charset utf-8;
+
+    add_header X-Nexapa-Staging "active" always;
+    add_header X-Robots-Tag "noindex, nofollow, noarchive" always;
+    add_header X-Content-Type-Options "nosniff" always;
+
+    location = / {
+        try_files /index.html =404;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~* \.(css|js|jpg|jpeg|png|gif|svg|webp|ico|woff|woff2|ttf|eot)$ {
+        try_files $uri =404;
+        expires 7d;
+        access_log off;
+    }
+
+    error_page 404 /404.html;
+
+    location = /404.html {
+        internal;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/new.nexapa.me/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/new.nexapa.me/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+server {
+    if ($host = new.nexapa.me) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    listen [::]:80;
+
+    server_name new.nexapa.me;
+    return 404; # managed by Certbot
+
+
+}

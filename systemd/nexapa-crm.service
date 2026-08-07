@@ -1,0 +1,30 @@
+[Unit]
+Description=Nexapa CRM Next.js
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=nexapacrm
+Group=nexapacrm
+WorkingDirectory=/srv/nexapa-crm/app
+
+EnvironmentFile=/srv/nexapa-crm/app/.env.local
+Environment=NODE_ENV=production
+Environment=NEXT_TELEMETRY_DISABLED=1
+Environment=HOME=/srv/nexapa-crm
+Environment=HOSTNAME=127.0.0.1
+Environment=PORT=3000
+
+ExecStart=/usr/bin/node /srv/nexapa-crm/app/.next/standalone/server.js
+
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+KillSignal=SIGINT
+
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

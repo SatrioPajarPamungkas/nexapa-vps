@@ -1,0 +1,72 @@
+server {
+    listen 80;
+    listen [::]:80;
+
+    server_name nexapa.me;
+
+    return 301 https://nexapa.me$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+
+    server_name nexapa.me;
+
+    root /var/www/nexapa-site;
+    index index.html;
+
+    charset utf-8;
+
+    ssi on;
+    ssi_silent_errors off;
+
+    ssl_certificate /etc/letsencrypt/live/app.nexapa.me/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/app.nexapa.me/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    add_header X-Nexapa-Production "active" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
+    location = / {
+        try_files /index.html =404;
+
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header X-Nexapa-Production "active" always;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~* \.html$ {
+        try_files $uri =404;
+
+        add_header Cache-Control "no-cache, no-store, must-revalidate" always;
+        add_header X-Nexapa-Production "active" always;
+    }
+
+    location ~* \.(css|js|jpg|jpeg|png|gif|svg|webp|ico|woff|woff2|ttf|eot)$ {
+        try_files $uri =404;
+        expires 7d;
+        access_log off;
+    }
+
+    location ~ \.php$ {
+        return 404;
+    }
+
+    error_page 404 /404.html;
+
+    location = /404.html {
+        internal;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}

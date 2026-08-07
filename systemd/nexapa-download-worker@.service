@@ -1,0 +1,21 @@
+[Unit]
+Description=Nexapa Download Worker Instance %i
+After=network-online.target mysql.service mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+UMask=0007
+WorkingDirectory=/opt/nexapa-download-worker
+EnvironmentFile=/etc/nexapa-download-worker/worker.env
+ExecStart=/usr/bin/python3 /opt/nexapa-download-worker/worker.py --poll-seconds 1
+Environment=NEXAPA_WORKER_ID=vps-download-%i
+Restart=always
+RestartSec=1
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+[Install]
+WantedBy=multi-user.target

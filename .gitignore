@@ -1,0 +1,42 @@
+# VPS backups
+backup/
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Dependencies
+node_modules/
+vendor/
+
+# Existing repositories
+.git/
+
+# Laravel runtime
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Temporary/cache
+*.log
+*.cache
+.phpunit.result.cache
+
+# Database dumps
+*.sql
+*.sqlite
+*.db
+*.dump
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z

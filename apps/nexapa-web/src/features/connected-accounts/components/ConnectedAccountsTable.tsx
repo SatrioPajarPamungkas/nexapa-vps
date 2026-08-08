@@ -486,6 +486,31 @@ export function ConnectedAccountsTable({
           )}
         </div>
       )}
+
+      <div
+        data-connect-buttons-below-list
+        className="flex flex-wrap gap-2 border-t border-white/15 pt-4"
+      >
+        {(selectedPlatform === "all" || selectedPlatform === "tiktok") && (
+          <button
+            type="button"
+            onClick={() => onConnectPlatform("tiktok")}
+            className="inline-flex h-10 items-center justify-center rounded-xl bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+          >
+            + Connect TikTok
+          </button>
+        )}
+
+        {(selectedPlatform === "all" || selectedPlatform === "facebook") && (
+          <button
+            type="button"
+            onClick={() => onConnectPlatform("facebook")}
+            className="inline-flex h-10 items-center justify-center rounded-xl bg-blue-600 px-4 text-[12px] font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+          >
+            + Connect Facebook
+          </button>
+        )}
+      </div>
     </section>
   );
 }

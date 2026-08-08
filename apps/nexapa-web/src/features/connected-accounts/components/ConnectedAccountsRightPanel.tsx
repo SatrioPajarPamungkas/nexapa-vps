@@ -18,13 +18,6 @@ export function ConnectedAccountsRightPanel() {
           >
             Connect TikTok
           </button>
-          <button
-            type="button"
-            onClick={() => hook.handleConnectPlatform("facebook")}
-            className="flex w-full items-center justify-between rounded-xl border border-white/20 bg-white/12 px-3 py-2 text-[11px] font-semibold text-slate-800 backdrop-blur-xl transition hover:bg-white/20"
-          >
-            Connect Facebook
-          </button>
         </div>
       </div>
       <ConnectionHealthPanel />

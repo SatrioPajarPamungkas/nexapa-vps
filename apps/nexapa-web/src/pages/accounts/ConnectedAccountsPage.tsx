@@ -5,8 +5,6 @@ import { PageHeader } from "@/components/common/PageHeader";
 import { useConnectedAccounts } from "@/features/connected-accounts/hooks/useConnectedAccounts";
 import { PlatformGrid } from "@/features/connected-accounts/components/PlatformGrid";
 import { ConnectAccountDialog } from "@/features/connected-accounts/components/ConnectAccountDialog";
-import { ConnectedAccountsSummaryBanner } from "@/features/connected-accounts/components/ConnectedAccountsSummaryBanner";
-import { ConnectedAccountsRightPanel } from "@/features/connected-accounts/components/ConnectedAccountsRightPanel";
 import { ConnectedAccountsTable } from "@/features/connected-accounts/components/ConnectedAccountsTable";
 
 type AccountPlatformFilter = "all" | "tiktok" | "facebook";
@@ -153,9 +151,8 @@ export function ConnectedAccountsPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 bg-transparent lg:grid-cols-[1fr_320px]">
+          <div className="bg-transparent">
             <div className="min-w-0 space-y-5 bg-transparent">
-              <ConnectedAccountsSummaryBanner />
               <PlatformGrid
                 selectedPlatform={selectedPlatform}
                 onPlatformSelect={setSelectedPlatform}
@@ -181,9 +178,6 @@ export function ConnectedAccountsPage() {
                 onConnect={hook.openConnectDialog}
                 onConnectPlatform={hook.handleConnectPlatform}
               />
-            </div>
-            <div className="hidden bg-transparent lg:block">
-              <ConnectedAccountsRightPanel />
             </div>
           </div>
         )}

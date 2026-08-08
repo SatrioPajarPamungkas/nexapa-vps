@@ -48,13 +48,6 @@ export function ConnectedAccountsSummaryBanner() {
           >
             Connect TikTok
           </button>
-          <button
-            type="button"
-            onClick={() => hook.handleConnectPlatform("facebook")}
-            className="inline-flex h-9 items-center gap-2 rounded-xl border border-white/20 bg-white/12 px-4 text-[12px] font-semibold text-slate-800 backdrop-blur-xl transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-0"
-          >
-            Connect Facebook
-          </button>
         </div>
       </div>
     </section>

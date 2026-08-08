@@ -1,0 +1,491 @@
+@import "tailwindcss";
+@import "./design-tokens.css";
+
+@theme {
+  --color-navy-950: #0b1220;
+  --color-navy-900: #111c33;
+  --color-navy-800: #162040;
+  --color-navy-700: #1d2a56;
+  --color-navy-600: #2a3a72;
+  --color-navy-500: #3a4f96;
+  --color-blue-accent-600: #2563eb;
+  --color-blue-accent-500: #3b82f6;
+  --color-blue-accent-50: #eff6ff;
+  --color-cyan-accent-500: #06b6d4;
+  --color-cyan-accent-400: #22d3ee;
+  --color-cyan-accent-50: #ecfeff;
+
+  --color-shell-bg: #f8fafc;
+  --color-shell-card: #ffffff;
+  --color-shell-border: #e2e8f0;
+  --color-shell-sidebar: #ffffff;
+  --color-shell-text: #0f172a;
+  --color-shell-text-secondary: #64748b;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: theme(colors.slate.300) transparent;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body {
+  font-family: ui-sans-system, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--color-shell-bg);
+  color: var(--color-shell-text);
+  overflow-x: hidden;
+  margin: 0;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+*:focus-visible {
+  outline: 2px solid theme(colors.blue.600);
+  outline-offset: 2px;
+}
+
+/* Sidebar animations */
+@keyframes sidebar-slide-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes sidebar-slide-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes backdrop-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes backdrop-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Navigation active indicator */
+@keyframes nav-pill-enter {
+  from { opacity: 0; transform: scaleY(0.85); }
+  to { opacity: 1; transform: scaleY(1); }
+}
+
+/* Chart animations */
+@keyframes chart-line-draw {
+  from { stroke-dashoffset: var(--path-length, 1000); }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes chart-area-reveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes chart-bar-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@keyframes donut-reveal {
+  from { stroke-dashoffset: var(--circumference, 283); }
+  to { stroke-dashoffset: var(--target-offset, 0); }
+}
+
+/* Workflow visual animations */
+@keyframes wf-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes wf-pulse-dot {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes wf-connector-reveal {
+  from { stroke-dashoffset: 500; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes wf-port-pulse {
+  0%, 100% { opacity: 0.4; r: 3; }
+  50% { opacity: 0.8; r: 4; }
+}
+
+/* Card entrance animations */
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Logo animation */
+@keyframes logo-breathe {
+  0%, 100% { filter: drop-shadow(0 0 0px transparent); }
+  50% { filter: drop-shadow(0 0 4px rgba(6, 182, 212, 0.3)); }
+}
+
+/* Sidebar collapse label fade */
+.sidebar-collapse-enter {
+  animation: fade-in 200ms ease-out forwards;
+}
+
+.sidebar-collapse-exit {
+  animation: fade-in 150ms ease-in reverse forwards;
+}
+
+/* Card animation classes */
+.animate-card-enter {
+  animation: card-enter 400ms ease-out both;
+}
+
+.animate-stagger-1 { animation-delay: 50ms; }
+.animate-stagger-2 { animation-delay: 100ms; }
+.animate-stagger-3 { animation-delay: 150ms; }
+.animate-stagger-4 { animation-delay: 200ms; }
+.animate-stagger-5 { animation-delay: 250ms; }
+.animate-stagger-6 { animation-delay: 300ms; }
+.animate-stagger-7 { animation-delay: 350ms; }
+.animate-stagger-8 { animation-delay: 400ms; }
+
+/* Chart line animation */
+.chart-line-animated {
+  stroke-dasharray: var(--path-length, 1000);
+  stroke-dashoffset: var(--path-length, 1000);
+  animation: chart-line-draw 1.5s ease-out forwards;
+  animation-delay: 300ms;
+}
+
+.chart-area-animated {
+  animation: chart-area-reveal 1s ease-out forwards;
+  animation-delay: 600ms;
+  opacity: 0;
+}
+
+.chart-bar-animated {
+  transform-origin: bottom;
+  animation: chart-bar-grow 0.8s ease-out forwards;
+  animation-delay: 200ms;
+}
+
+.donut-segment {
+  animation: donut-reveal 1.2s ease-out forwards;
+  animation-delay: 200ms;
+}
+
+/* Workflow node float (staggered timing) */
+.wf-float-a { animation: wf-float 4s ease-in-out infinite 0s; }
+.wf-float-b { animation: wf-float 3.5s ease-in-out infinite 0.6s; }
+.wf-float-c { animation: wf-float 4.2s ease-in-out infinite 1.2s; }
+.wf-float-d { animation: wf-float 3.8s ease-in-out infinite 0.3s; }
+.wf-float-e { animation: wf-float 3.6s ease-in-out infinite 1.8s; }
+
+/* Workflow connector */
+.wf-connector-path {
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
+  animation: wf-connector-reveal 1.5s ease-out forwards;
+}
+
+/* Workflow pulse travel visibility */
+.wf-pulse-travel { opacity: 0; animation: fade-in 0.5s ease-out 1.5s forwards; }
+
+/* Node hover (applied via SVG group) */
+svg g[class^="wf-float"]:hover {
+  filter: drop-shadow(0 4px 8px rgba(59, 130, 246, 0.12));
+  transition: filter 200ms ease;
+}
+
+/* Logo ambient */
+.logo-ambient { animation: logo-breathe 4s ease-in-out infinite; }
+
+/* Sidebar hover micro-motion */
+.nav-item-icon {
+  transition: transform 150ms ease, color 150ms ease;
+}
+.group:hover .nav-item-icon {
+  transform: translateY(-1px);
+}
+
+/* Media library card entrance */
+@keyframes media-card-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.media-card-enter {
+  animation: media-card-enter 350ms ease-out both;
+}
+
+/* Downloader drawer slide-in */
+@keyframes drawer-slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.drawer-slide-in {
+  animation: drawer-slide-in 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Sticky action bar slide-up */
+@keyframes sticky-bar-appear {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sticky-action-bar {
+  animation: sticky-bar-appear 300ms ease-out both;
+}
+
+/* Scheduler week view time grid */
+@keyframes current-time-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.week-time-indicator {
+  animation: current-time-pulse 3s ease-in-out infinite;
+}
+
+/* Drag and drop states */
+.drag-over-target {
+  background-color: rgba(59, 130, 246, 0.08);
+  box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.dragging-card {
+  opacity: 0.6;
+  transform: scale(0.97);
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+
+/* Schedule card entrance */
+@keyframes schedule-card-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.schedule-card-enter {
+  animation: schedule-card-enter 300ms ease-out both;
+}
+
+/* Nexapa Appearance - CSS variables & glass utilities */
+:root {
+  --nexapa-card-alpha: 0.10;
+  --nexapa-card-blur: 24px;
+  --nexapa-sidebar-alpha: 0.65;
+  --nexapa-topbar-alpha: 0.05;
+  --nexapa-overlay-alpha: 0.02;
+  --nexapa-wallpaper-url: none;
+  --nexapa-wallpaper-position: center;
+  --nexapa-wallpaper-size: cover;
+  --nexapa-wallpaper-attachment: fixed;
+  --nexapa-motion-speed: 1;
+  --nexapa-motion-intensity: 20;
+  /* Company scope alias - allows homepage hero to consume company vars while falling back to generic vars */
+  --nexapa-company-wallpaper-url: var(--nexapa-wallpaper-url);
+  --nexapa-company-wallpaper-position: var(--nexapa-wallpaper-position);
+  --nexapa-company-wallpaper-size: var(--nexapa-wallpaper-size);
+}
+
+.nexapa-glass-card {
+  background-color: rgba(255,255,255,var(--nexapa-card-alpha));
+  backdrop-filter: blur(var(--nexapa-card-blur));
+  -webkit-backdrop-filter: blur(var(--nexapa-card-blur));
+}
+
+.nexapa-sidebar-glass {
+  background-color: rgba(2,6,23,var(--nexapa-sidebar-alpha));
+}
+
+.nexapa-topbar-glass {
+  background-color: rgba(255,255,255,var(--nexapa-topbar-alpha));
+}
+
+.nexapa-overlay-veil {
+  background-color: rgba(2,6,23,var(--nexapa-overlay-alpha));
+}
+
+/* Homepage hero - wallpaper only on hero with navy/indigo/purple overlay */
+.nexapa-home-hero {
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  overflow: hidden;
+  background-image: var(--nexapa-company-wallpaper-url);
+  background-position: var(--nexapa-company-wallpaper-position);
+  background-size: var(--nexapa-company-wallpaper-size);
+  background-repeat: no-repeat;
+}
+
+.nexapa-home-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(15, 23, 42, 0.42) 0%,
+      rgba(30, 64, 175, 0.24) 38%,
+      rgba(79, 70, 229, 0.20) 68%,
+      rgba(126, 34, 206, 0.14) 100%
+    );
+}
+
+.nexapa-home-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 65%,
+    rgba(241, 245, 249, 0.45) 85%,
+    rgb(241, 245, 249) 100%
+  );
+}
+
+/* Ensure direct content inside hero stays above wallpaper and overlay layers */
+.nexapa-home-hero > *,
+.nexapa-home-hero .nexapa-home-hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Subtle blue tint for glass card only inside homepage hero - keep readable, not solid */
+.nexapa-home-hero .nexapa-glass-card {
+  background-color: rgba(248, 250, 255, 0.16);
+  /* preserve blur from var */
+}
+
+/* Section after hero - solid clean grey to hide wallpaper after hero */
+.nexapa-home-after-hero {
+  position: relative;
+  background-color: rgb(241, 245, 249);
+}
+
+/* When homepage hero exists, hide global fixed wallpaper to ensure wallpaper only on hero */
+body:has(.nexapa-home-hero) .nexapa-wallpaper-layer,
+body:has(.nexapa-home-hero) .nexapa-overlay-veil {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Animated gradients - light motion only */
+@keyframes nexapa-gradient-drift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes nexapa-gradient-float {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); }
+  50% { transform: translate3d(0,-12px,0) scale(1.03); }
+}
+
+html[data-nexapa-animated="aurora_blue"] .nexapa-wallpaper-layer {
+  background-image: var(--nexapa-gradient-css);
+  background-size: 200% 200%;
+  animation: nexapa-gradient-drift calc(18s / var(--nexapa-motion-speed)) ease-in-out infinite;
+}
+
+html[data-nexapa-animated="windows_flow"] .nexapa-wallpaper-layer {
+  background-image: var(--nexapa-gradient-css);
+  background-size: 180% 180%;
+  animation: nexapa-gradient-drift calc(22s / var(--nexapa-motion-speed)) ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+  html[data-nexapa-animated] .nexapa-wallpaper-layer {
+    animation-duration: calc(30s / var(--nexapa-motion-speed));
+  }
+}
+
+/* Reduced motion overrides */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .chart-line-animated {
+    stroke-dashoffset: 0;
+  }
+
+  .chart-area-animated,
+  .chart-bar-animated,
+  .donut-segment {
+    animation: none;
+    opacity: 1;
+  }
+
+  .workflow-float-1,
+  .workflow-float-2,
+  .workflow-float-3,
+  .workflow-dot-pulse,
+  .workflow-orbit,
+  .workflow-connection,
+  .logo-ambient,
+  .wf-float-a,
+  .wf-float-b,
+  .wf-float-c,
+  .wf-float-d,
+  .wf-float-e,
+  .wf-pulse-travel,
+  .sticky-action-bar,
+  .media-card-enter,
+  .animate-card-enter,
+  .schedule-card-enter,
+  .week-time-indicator {
+    animation: none;
+  }
+
+  .drawer-slide-in {
+    animation: none;
+    transform: none;
+  }
+
+  .wf-connector-path {
+    stroke-dashoffset: 0;
+  }
+
+  svg g[class^="wf-float"]:hover {
+    filter: none;
+  }
+
+  .nav-item-icon:hover {
+    transform: none;
+  }
+
+  html[data-nexapa-animated] .nexapa-wallpaper-layer {
+    animation: none !important;
+  }
+
+  .nexapa-appearance-preview-anim {
+    animation: none !important;
+  }
+}

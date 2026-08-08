@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <defs>
+        <linearGradient id="fluxena-g" x1="10" y1="8" x2="51" y2="56">
+            <stop offset="0" stop-color="#ffd35b"/>
+            <stop offset=".48" stop-color="#ff983c"/>
+            <stop offset="1" stop-color="#ff583c"/>
+        </linearGradient>
+    </defs>
+
+    <path
+        d="M11 10h43L44 22H21z"
+        fill="url(#fluxena-g)"
+    />
+
+    <path
+        d="M21 25h29L39 37H11z"
+        fill="url(#fluxena-g)"
+        opacity=".88"
+    />
+
+    <path
+        d="M11 40h25L25 53H11z"
+        fill="url(#fluxena-g)"
+        opacity=".72"
+    />
+</svg>

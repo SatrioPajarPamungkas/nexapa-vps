@@ -1,0 +1,85 @@
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 64 64"
+    role="img"
+    aria-labelledby="title"
+>
+    <title id="title">Nexapa</title>
+
+    <defs>
+        <linearGradient
+            id="nxBlue"
+            x1="8"
+            y1="8"
+            x2="52"
+            y2="56"
+            gradientUnits="userSpaceOnUse"
+        >
+            <stop offset="0" stop-color="#7294ff"/>
+            <stop offset=".52" stop-color="#5578ff"/>
+            <stop offset="1" stop-color="#4569e8"/>
+        </linearGradient>
+
+        <linearGradient
+            id="nxCyan"
+            x1="40"
+            y1="45"
+            x2="52"
+            y2="58"
+            gradientUnits="userSpaceOnUse"
+        >
+            <stop offset="0" stop-color="#5fe2ff"/>
+            <stop offset="1" stop-color="#2fb4e8"/>
+        </linearGradient>
+    </defs>
+
+    <!-- Bagian kiri atas -->
+    <path
+        d="M12 10
+           L24 17
+           L24 27
+           L12 20
+           Z"
+        fill="url(#nxBlue)"
+    />
+
+    <!-- Bagian kanan atas -->
+    <path
+        d="M31 15
+           L43 22
+           L43 38
+           L31 31
+           Z"
+        fill="url(#nxBlue)"
+    />
+
+    <!-- Garis diagonal utama -->
+    <path
+        d="M12 25
+           L48 47
+           L48 57
+           L12 35
+           Z"
+        fill="url(#nxBlue)"
+    />
+
+    <!-- Bagian kiri bawah -->
+    <path
+        d="M12 39
+           L29 49
+           L29 59
+           L12 49
+           Z"
+        fill="url(#nxBlue)"
+    />
+
+    <!-- Aksen cyan -->
+    <path
+        d="M35 48
+           L45 54
+           L45 62
+           L35 56
+           Z"
+        fill="url(#nxCyan)"
+    />
+</svg>

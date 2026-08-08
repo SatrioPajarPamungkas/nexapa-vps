@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750">
+    <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#dfe8ff"/>
+            <stop offset=".55" stop-color="#c7d9ff"/>
+            <stop offset="1" stop-color="#ddccff"/>
+        </linearGradient>
+        <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#347cff"/>
+            <stop offset="1" stop-color="#675cff"/>
+        </linearGradient>
+    </defs>
+
+    <rect width="1200" height="750" rx="44" fill="url(#bg)"/>
+    <rect x="1" y="1" width="1198" height="748" rx="43"
+          fill="none" stroke="#aec2eb" stroke-width="2"/>
+
+    <rect width="210" height="750" rx="44" fill="#31466d"/>
+    <rect x="180" width="30" height="750" fill="#31466d"/>
+
+    <g font-family="Arial">
+        <text x="35" y="55" fill="#fff" font-size="24" font-weight="700">NEXAPA</text>
+        <text x="35" y="76" fill="#aab9d5" font-size="10" letter-spacing="2">SOCIAL PUBLISHING</text>
+
+        <text x="35" y="145" fill="#b8c5db" font-size="13">Dashboard</text>
+        <text x="35" y="195" fill="#b8c5db" font-size="13">Media Library</text>
+
+        <rect x="20" y="225" width="170" height="48" rx="14" fill="#526a92"/>
+        <text x="52" y="255" fill="#fff" font-size="13" font-weight="700">Connected Accounts</text>
+
+        <text x="35" y="315" fill="#b8c5db" font-size="13">Publisher</text>
+        <text x="35" y="365" fill="#b8c5db" font-size="13">Scheduler</text>
+        <text x="35" y="415" fill="#b8c5db" font-size="13">History</text>
+        <text x="35" y="465" fill="#b8c5db" font-size="13">Settings</text>
+    </g>
+
+    <text x="250" y="62" fill="#3473de" font-family="Arial"
+          font-size="12" letter-spacing="2">PUBLISHING</text>
+    <text x="250" y="108" fill="#14213a" font-family="Arial"
+          font-size="36" font-weight="700">Connected Accounts</text>
+    <text x="250" y="140" fill="#63718b" font-family="Arial"
+          font-size="14">Kelola seluruh akun publikasi dan penjadwalan.</text>
+
+    <rect x="250" y="175" width="910" height="128" rx="26"
+          fill="#ffffff" fill-opacity=".46" stroke="#a8bee6"/>
+
+    <text x="280" y="215" fill="#182541" font-family="Arial"
+          font-size="18" font-weight="700">Manage all publishing accounts</text>
+    <text x="280" y="245" fill="#64728c" font-family="Arial"
+          font-size="13">Connect and manage social accounts for publishing and automation.</text>
+
+    <rect x="880" y="213" width="125" height="44" rx="22" fill="url(#blue)"/>
+    <text x="942" y="240" fill="#fff" font-family="Arial"
+          font-size="12" font-weight="700" text-anchor="middle">Connect TikTok</text>
+
+    <rect x="1018" y="213" width="112" height="44" rx="22"
+          fill="#fff" fill-opacity=".52" stroke="#abc0e5"/>
+    <text x="1074" y="240" fill="#35435e" font-family="Arial"
+          font-size="12" font-weight="700" text-anchor="middle">Facebook</text>
+
+    <text x="250" y="350" fill="#182541" font-family="Arial"
+          font-size="18" font-weight="700">Publishing Platforms</text>
+
+    <g font-family="Arial" font-size="13" text-anchor="middle">
+        <g transform="translate(250 375)">
+            <rect width="165" height="118" rx="24" fill="#fff" fill-opacity=".42" stroke="#a9bee4"/>
+            <circle cx="82" cy="42" r="22" fill="#111"/>
+            <text x="82" y="84" fill="#182541" font-weight="700">TikTok</text>
+            <text x="82" y="105" fill="#77849c" font-size="10">Not connected</text>
+        </g>
+
+        <g transform="translate(430 375)">
+            <rect width="165" height="118" rx="24" fill="#fff" fill-opacity=".42" stroke="#a9bee4"/>
+            <circle cx="82" cy="42" r="22" fill="#347cff"/>
+            <text x="82" y="84" fill="#182541" font-weight="700">Facebook</text>
+            <text x="82" y="105" fill="#77849c" font-size="10">Not connected</text>
+        </g>
+
+        <g transform="translate(610 375)">
+            <rect width="165" height="118" rx="24" fill="#fff" fill-opacity=".42" stroke="#a9bee4"/>
+            <circle cx="82" cy="42" r="22" fill="#fd5c63"/>
+            <text x="82" y="84" fill="#182541" font-weight="700">Instagram</text>
+            <text x="82" y="105" fill="#77849c" font-size="10">Coming soon</text>
+        </g>
+
+        <g transform="translate(790 375)">
+            <rect width="165" height="118" rx="24" fill="#fff" fill-opacity=".42" stroke="#a9bee4"/>
+            <circle cx="82" cy="42" r="22" fill="#ff2020"/>
+            <text x="82" y="84" fill="#182541" font-weight="700">YouTube</text>
+            <text x="82" y="105" fill="#77849c" font-size="10">Coming soon</text>
+        </g>
+
+        <g transform="translate(970 375)">
+            <rect width="165" height="118" rx="24" fill="#fff" fill-opacity=".42" stroke="#a9bee4"/>
+            <circle cx="82" cy="42" r="22" fill="#ee2546"/>
+            <text x="82" y="84" fill="#182541" font-weight="700">Pinterest</text>
+            <text x="82" y="105" fill="#77849c" font-size="10">Coming soon</text>
+        </g>
+    </g>
+
+    <rect x="250" y="535" width="910" height="150" rx="27"
+          fill="#fff" fill-opacity=".47" stroke="#a9bee4"/>
+
+    <circle cx="705" cy="590" r="25" fill="#fff" fill-opacity=".65"/>
+    <text x="705" y="638" fill="#182541" font-family="Arial"
+          font-size="15" font-weight="700" text-anchor="middle">No connected accounts yet</text>
+    <text x="705" y="661" fill="#6d7a91" font-family="Arial"
+          font-size="11" text-anchor="middle">Hubungkan akun untuk mulai melakukan publikasi.</text>
+</svg>

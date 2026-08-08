@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <defs>
+        <linearGradient id="studiqra-g" x1="8" y1="8" x2="55" y2="55">
+            <stop offset="0" stop-color="#ff718f"/>
+            <stop offset=".5" stop-color="#ff4c9c"/>
+            <stop offset="1" stop-color="#ff9b55"/>
+        </linearGradient>
+    </defs>
+
+    <path
+        d="M15 10l35 20c3 2 3 6 0 8L15 58z"
+        fill="url(#studiqra-g)"
+    />
+
+    <path
+        d="M15 10v48L7 51V17z"
+        fill="#ff7d70"
+        opacity=".78"
+    />
+
+    <path
+        d="M26 24l17 10-17 10z"
+        fill="#ffffff"
+        opacity=".88"
+    />
+</svg>

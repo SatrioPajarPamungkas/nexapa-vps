@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <defs>
+        <linearGradient id="dateryn-g" x1="9" y1="9" x2="54" y2="56">
+            <stop offset="0" stop-color="#68ffd1"/>
+            <stop offset=".52" stop-color="#1ed0c0"/>
+            <stop offset="1" stop-color="#0fa6dd"/>
+        </linearGradient>
+    </defs>
+
+    <ellipse cx="32" cy="14" rx="21" ry="9" fill="url(#dateryn-g)"/>
+
+    <path
+        d="M11 14v14c0 5 9 9 21 9s21-4 21-9V14c0 5-9 9-21 9s-21-4-21-9z"
+        fill="url(#dateryn-g)"
+        opacity=".82"
+    />
+
+    <path
+        d="M11 30v14c0 5 9 9 21 9s21-4 21-9V30c0 5-9 9-21 9s-21-4-21-9z"
+        fill="url(#dateryn-g)"
+        opacity=".62"
+    />
+
+    <ellipse
+        cx="32"
+        cy="44"
+        rx="21"
+        ry="9"
+        fill="url(#dateryn-g)"
+        opacity=".76"
+    />
+</svg>

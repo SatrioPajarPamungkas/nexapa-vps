@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <defs>
+        <linearGradient id="synqara-a" x1="8" y1="7" x2="51" y2="45">
+            <stop offset="0" stop-color="#52e5ff"/>
+            <stop offset="1" stop-color="#078cff"/>
+        </linearGradient>
+
+        <linearGradient id="synqara-b" x1="12" y1="20" x2="56" y2="58">
+            <stop offset="0" stop-color="#3c7cff"/>
+            <stop offset="1" stop-color="#1255d8"/>
+        </linearGradient>
+    </defs>
+
+    <path
+        d="M32 6l23 13-11 7-12-7-11 6 11 6-11 7L9 31V18z"
+        fill="url(#synqara-a)"
+    />
+
+    <path
+        d="M32 33l11-7 12 7v13L32 59 9 46l11-7 12 7 11-6z"
+        fill="url(#synqara-b)"
+    />
+</svg>

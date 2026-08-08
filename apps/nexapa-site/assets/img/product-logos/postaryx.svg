@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <defs>
+        <linearGradient id="postaryx-g" x1="11" y1="8" x2="54" y2="55">
+            <stop offset="0" stop-color="#ff7298"/>
+            <stop offset=".48" stop-color="#ff3b79"/>
+            <stop offset="1" stop-color="#ff7b56"/>
+        </linearGradient>
+    </defs>
+
+    <path
+        d="M14 9h23c12 0 20 7 20 19s-8 19-20 19h-9v8H14zm14 12v14h9c5 0 8-3 8-7s-3-7-8-7z"
+        fill="url(#postaryx-g)"
+        fill-rule="evenodd"
+    />
+
+    <path
+        d="M30 24l11 7-11 7z"
+        fill="#ffffff"
+        opacity=".82"
+    />
+</svg>

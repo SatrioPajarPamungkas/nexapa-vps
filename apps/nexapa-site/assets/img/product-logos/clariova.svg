@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <defs>
+        <linearGradient id="clariova-g" x1="10" y1="8" x2="54" y2="55">
+            <stop offset="0" stop-color="#55f0c0"/>
+            <stop offset=".55" stop-color="#20cba7"/>
+            <stop offset="1" stop-color="#2587b8"/>
+        </linearGradient>
+    </defs>
+
+    <path
+        d="M48 17a21 21 0 1 0 0 30"
+        fill="none"
+        stroke="url(#clariova-g)"
+        stroke-width="11"
+        stroke-linecap="round"
+    />
+
+    <circle
+        cx="43"
+        cy="32"
+        r="8"
+        fill="none"
+        stroke="#86ffe0"
+        stroke-width="4"
+    />
+</svg>

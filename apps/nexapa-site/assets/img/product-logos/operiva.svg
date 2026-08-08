@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+    <defs>
+        <linearGradient id="operiva-g" x1="8" y1="8" x2="55" y2="55">
+            <stop offset="0" stop-color="#cbff62"/>
+            <stop offset=".48" stop-color="#50d474"/>
+            <stop offset="1" stop-color="#1496b8"/>
+        </linearGradient>
+    </defs>
+
+    <path
+        d="M51 20a22 22 0 1 0 1 22"
+        fill="none"
+        stroke="url(#operiva-g)"
+        stroke-width="10"
+        stroke-linecap="round"
+    />
+
+    <path
+        d="M45 8l12 10-15 4z"
+        fill="#aef35f"
+    />
+
+    <circle
+        cx="32"
+        cy="32"
+        r="7"
+        fill="url(#operiva-g)"
+    />
+</svg>

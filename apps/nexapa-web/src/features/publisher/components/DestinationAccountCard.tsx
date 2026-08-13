@@ -28,8 +28,14 @@ const PLATFORM_COLORS: Record<PublishPlatform, string> = {
 
 export function DestinationAccountCard({ account, selected, onToggle, singleSelect = false }: Props) {
   const Icon = ICON_MAP[account.platform];
-  const showAvatar = account.platform === "facebook" && account.avatarUrl;
+  const showAvatar = Boolean(account.avatarUrl) && (account.platform === "facebook" || account.platform === "tiktok");
   const initials = account.label.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+  const displayIdentifier =
+    account.platform === "tiktok"
+      ? account.identifier && !account.identifier.startsWith("-") && account.identifier.length < 40
+        ? account.identifier
+        : "TikTok account"
+      : account.identifier;
 
   return (
     <label className={cn("group flex cursor-pointer items-center gap-3 rounded-xl border p-3 backdrop-blur-xl transition-all", selected ? "border-blue-400/35 bg-blue-500/12 shadow-sm ring-1 ring-blue-400/20" : "border-white/10 bg-white/6 hover:border-white/15 hover:bg-white/14")}>
@@ -53,7 +59,7 @@ export function DestinationAccountCard({ account, selected, onToggle, singleSele
           <span>{PLATFORM_DISPLAY[account.platform]}</span>
           {account.accountType && <><span className="text-white/30">&middot;</span><span className="truncate rounded-full border border-white/10 bg-white/5 px-1.5 py-0.5 text-[9px]">{account.accountType.replace('facebook_', '')}</span></>}
           <span className="text-white/30">&middot;</span>
-          <span className="truncate">{account.identifier}</span>
+          <span className="truncate">{displayIdentifier}</span>
           <span className="text-white/30">&middot;</span>
           <span className={cn("rounded-full border px-1.5 py-0.5 text-[9px] font-medium backdrop-blur-xl", account.status === "demo" ? "border-amber-400/25 bg-amber-400/15 text-amber-800" : account.status === "authorization-required" ? "border-amber-400/25 bg-amber-400/15 text-amber-800" : "border-white/15 bg-white/8 text-slate-500")}>{account.status === "demo" ? "Demo" : account.status === "backend-required" ? "Backend needed" : account.status === "authorization-required" ? "Auth needed" : "Ready"}</span>
         </span>

@@ -17,7 +17,7 @@ type Props = {
   onRefetch: () => void;
 };
 
-const DEFAULT_CALLBACK_URL = "https://api.nexapa.me/api/v1/oauth/facebook/callback";
+const DEFAULT_CALLBACK_URL = "https://api.nexapa.app/api/v1/oauth/facebook/callback";
 
 export function MetaIntegrationSettingsForm({
   settings,

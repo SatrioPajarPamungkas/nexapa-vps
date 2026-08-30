@@ -2,13 +2,20 @@
 
 namespace App\Filament\Pages;
 
+use App\Exceptions\UserProvisioningException;
 use App\Filament\Resources\UserResource;
 use App\Models\User;
+use App\Services\AdminCredentialVaultService;
+use App\Services\AdminPasswordService;
 use App\Services\UnifiedUserDirectoryService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Support\Carbon;
+use Throwable;
 
 class UnifiedUserDetails extends Page
 {
@@ -24,6 +31,10 @@ class UnifiedUserDetails extends Page
 
     public ?string $crmError = null;
 
+    public ?string $vaultPassword = null;
+
+    public ?string $passwordUpdatedAt = null;
+
     public static function canAccess(): bool
     {
         return auth()->user()?->isAdmin() === true;
@@ -35,6 +46,20 @@ class UnifiedUserDetails extends Page
         $this->publisher = $detail['publisher'];
         $this->crm = $detail['crm']?->toArray() ?? [];
         $this->crmError = $detail['crmError'];
+
+        $email = $this->email();
+        if ($email !== null) {
+            try {
+                $vault = app(AdminCredentialVaultService::class);
+                $credential = $vault->find($email);
+                $this->vaultPassword = $vault->reveal($email, auth()->id());
+                $this->passwordUpdatedAt = $credential?->password_updated_at?->format('d M Y H:i');
+            } catch (Throwable $exception) {
+                report($exception);
+                $this->vaultPassword = null;
+                $this->passwordUpdatedAt = null;
+            }
+        }
     }
 
     public function getTitle(): string
@@ -44,7 +69,52 @@ class UnifiedUserDetails extends Page
 
     protected function getHeaderActions(): array
     {
-        return [Action::make('back')->label('Kembali')->icon('heroicon-o-arrow-left')->url(AllUsers::getUrl())];
+        return [
+            Action::make('changePassword')
+                ->label('Ganti Password')
+                ->icon('heroicon-o-key')
+                ->color('warning')
+                ->form([
+                    TextInput::make('new_password')
+                        ->label('Password Baru')
+                        ->password()
+                        ->revealable()
+                        ->required()
+                        ->minLength(8)
+                        ->maxLength(128),
+                    TextInput::make('new_password_confirmation')
+                        ->label('Konfirmasi Password Baru')
+                        ->password()
+                        ->revealable()
+                        ->required()
+                        ->same('new_password'),
+                ])
+                ->action(function (array $data): void {
+                    $email = $this->email();
+                    if ($email === null) {
+                        Notification::make()->danger()->title('Email pengguna tidak ditemukan')->send();
+
+                        return;
+                    }
+
+                    try {
+                        app(AdminPasswordService::class)->reset(
+                            $email,
+                            $this->publisher,
+                            isset($this->crm['id']) ? (string) $this->crm['id'] : null,
+                            $data['new_password'],
+                            auth()->id(),
+                        );
+
+                        $this->vaultPassword = $data['new_password'];
+                        $this->passwordUpdatedAt = now()->format('d M Y H:i');
+                        Notification::make()->success()->title('Password berhasil diperbarui')->send();
+                    } catch (UserProvisioningException $e) {
+                        Notification::make()->danger()->title('Gagal memperbarui password')->body($e->getMessage())->send();
+                    }
+                }),
+            Action::make('back')->label('Kembali')->icon('heroicon-o-arrow-left')->url(AllUsers::getUrl()),
+        ];
     }
 
     public function identityInfolist(Infolist $infolist): Infolist
@@ -64,6 +134,8 @@ class UnifiedUserDetails extends Page
                 $this->crm['email_confirmed_at'] ?? null !== null => true,
                 default => false,
             },
+            'vault_password' => $this->vaultPassword,
+            'password_updated_at' => $this->passwordUpdatedAt,
         ])->schema([
             Infolists\Components\Section::make('Ringkasan')
                 ->schema([
@@ -78,6 +150,18 @@ class UnifiedUserDetails extends Page
                     Infolists\Components\TextEntry::make('publisher_id')->label('ID Publisher')->copyable()->placeholder('Tidak ada'),
                     Infolists\Components\TextEntry::make('crm_id')->label('ID CRM')->copyable()->placeholder('Tidak ada'),
                 ])->columns(['default' => 1, 'md' => 3])->columnSpanFull(),
+            Infolists\Components\Section::make('Credential Vault')
+                ->description('Password disimpan terenkripsi dan hanya dapat dilihat oleh Super Admin.')
+                ->schema([
+                    Infolists\Components\TextEntry::make('vault_password')
+                        ->label('Password')
+                        ->copyable()
+                        ->copyMessage('Password disalin')
+                        ->placeholder('Belum tersimpan — gunakan Ganti Password'),
+                    Infolists\Components\TextEntry::make('password_updated_at')
+                        ->label('Terakhir diperbarui')
+                        ->placeholder('Belum tersedia'),
+                ])->columns(['default' => 1, 'md' => 2])->columnSpanFull(),
         ]);
     }
 
@@ -92,7 +176,7 @@ class UnifiedUserDetails extends Page
                         ->label('Verifikasi Email')
                         ->dateTime('d M Y H:i')
                         ->placeholder('Belum terverifikasi')
-                        ->formatStateUsing(fn ($state): string => $state ? 'Terverifikasi pada ' . $state->format('d M Y H:i') : 'Belum terverifikasi')
+                        ->formatStateUsing(fn ($state): string => $state ? 'Terverifikasi pada '.$state->format('d M Y H:i') : 'Belum terverifikasi')
                         ->badge()
                         ->color(fn ($state): string => $state ? 'success' : 'warning'),
                     Infolists\Components\TextEntry::make('created_at')
@@ -121,9 +205,8 @@ class UnifiedUserDetails extends Page
                     Infolists\Components\TextEntry::make('account_role')->label('Role')->badge()->placeholder('Belum tersedia'),
                     Infolists\Components\TextEntry::make('email_confirmed_at')
                         ->label('Verifikasi Email')
-                        ->dateTime('d M Y H:i')
                         ->placeholder('Belum terverifikasi')
-                        ->formatStateUsing(fn ($state): string => $state ? 'Terverifikasi pada ' . $state->format('d M Y H:i') : 'Belum terverifikasi')
+                        ->formatStateUsing(fn ($state): string => $state ? 'Terverifikasi pada '.Carbon::parse($state)->format('d M Y H:i') : 'Belum terverifikasi')
                         ->badge()
                         ->color(fn ($state): string => $state ? 'success' : 'warning'),
                     Infolists\Components\TextEntry::make('created_at')
@@ -145,5 +228,12 @@ class UnifiedUserDetails extends Page
     public function crmUrl(): ?string
     {
         return isset($this->crm['id']) ? CrmUserDetails::getUrl(['record' => $this->crm['id']]) : null;
+    }
+
+    private function email(): ?string
+    {
+        $email = $this->publisher?->email ?? $this->crm['email'] ?? null;
+
+        return is_string($email) && $email !== '' ? strtolower(trim($email)) : null;
     }
 }

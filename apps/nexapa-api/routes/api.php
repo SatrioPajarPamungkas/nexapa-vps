@@ -16,6 +16,9 @@ use App\Http\Controllers\Api\Worker\WorkerJobController;
 use App\Http\Controllers\Api\Worker\WorkerResultsController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\InternalCrmEntitlementController;
+use App\Http\Controllers\Api\InternalCrmLoginController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\OAuth\TikTokOAuthController;
@@ -46,7 +49,10 @@ Route::prefix('v1/worker')
 
 // User-facing Routes (guest API access)
 Route::prefix('v1')
-    ->middleware(EnsureGuestApiAccess::class)
+    ->middleware([
+        EnsureGuestApiAccess::class,
+        'subscription.active',
+    ])
     ->group(function () {
         // Download Jobs
         Route::post('download-jobs', [DownloadJobController::class, 'store']);
@@ -85,9 +91,32 @@ Route::prefix('v1')
         Route::get('activity-logs', [ActivityLogController::class, 'index']);
     });
 
+// Private server-to-server entitlement endpoint.
+Route::get(
+    'internal/crm-entitlement',
+    [InternalCrmEntitlementController::class, 'show']
+)->middleware('throttle:300,1');
+
+// Private CRM login bridge. Credentials are accepted only
+// from the Nexapa CRM server carrying the internal key.
+Route::post(
+    'internal/crm-login',
+    [InternalCrmLoginController::class, 'store']
+)->middleware('throttle:10,1');
+
+// Subscription status remains available when a package expires.
+Route::get(
+    'v1/subscription',
+    [SubscriptionController::class, 'show']
+)->middleware(['auth:sanctum']);
+
 // Protected User Routes (Sanctum auth required + email verified)
 Route::prefix('v1')
-    ->middleware(['auth:sanctum', 'verified'])
+    ->middleware([
+        'auth:sanctum',
+        'verified',
+        'subscription.active',
+    ])
     ->group(function () {
         // Collections
         Route::get('collections', [\App\Http\Controllers\Api\CollectionController::class, 'index']);

@@ -23,6 +23,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { SettingsPanelHead } from './settings-panel-head';
+import { MetaEmbeddedSignup } from './meta-embedded-signup';
 import {
   Accordion,
   AccordionItem,
@@ -431,6 +432,12 @@ export function WhatsAppConfig() {
           </Alert>
         )}
 
+        <MetaEmbeddedSignup
+          onConnected={async () => {
+            if (accountId) await fetchConfig(accountId);
+          }}
+        />
+
         {/* Connection Status */}
         <Alert className="bg-card border-border">
           <div className="flex items-center gap-2">
@@ -554,6 +561,22 @@ export function WhatsAppConfig() {
           </Alert>
         )}
 
+        {/* Legacy manual setup remains available for migration and support,
+            but normal customers should use Embedded Signup above. */}
+        <Accordion className="rounded-lg border border-border bg-card px-4">
+          <AccordionItem className="border-0">
+            <AccordionTrigger className="py-4 text-muted-foreground hover:text-foreground hover:no-underline">
+              <span className="text-left">
+                <span className="block font-medium text-foreground">
+                  Advanced manual setup
+                </span>
+                <span className="mt-0.5 block text-xs font-normal text-muted-foreground">
+                  Legacy fallback for support. Most customers should not paste
+                  API or webhook tokens.
+                </span>
+              </span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-6 pb-4">
         {/* API Credentials */}
         <Card>
           <CardHeader>
@@ -682,6 +705,9 @@ export function WhatsAppConfig() {
             </div>
           </CardContent>
         </Card>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-3">
@@ -744,91 +770,48 @@ export function WhatsAppConfig() {
       <div>
         <Card>
           <CardHeader>
-            <CardTitle className="text-foreground text-base">{t('setupInstructions')}</CardTitle>
+            <CardTitle className="text-foreground text-base">
+              What customers do
+            </CardTitle>
             <CardDescription className="text-muted-foreground">
-              {t('setupInstructionsDesc')}
+              Meta handles consent and asset selection. Nexapa handles the
+              technical setup.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Accordion>
-              <AccordionItem className="border-border">
-                <AccordionTrigger className="text-muted-foreground hover:text-foreground hover:no-underline">
-                  <span className="flex items-center gap-2">
-                    <span className="flex size-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">1</span>
-                    {t('step1')}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  <ol className="list-decimal list-inside space-y-1 text-sm">
-                    <li dangerouslySetInnerHTML={{ __html: t('step1_1') }} />
-                    <li>{t('step1_2')}</li>
-                    <li>{t('step1_3')}</li>
-                    <li>{t('step1_4')}</li>
-                  </ol>
-                </AccordionContent>
-              </AccordionItem>
+          <CardContent className="space-y-4">
+            {[
+              ['1', 'Click Continue with Meta'],
+              ['2', 'Sign in and choose a business portfolio'],
+              ['3', 'Choose or add a WhatsApp phone number'],
+              ['4', 'Confirm access and return to Nexapa'],
+            ].map(([number, label]) => (
+              <div key={number} className="flex items-start gap-3">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {number}
+                </span>
+                <p className="pt-0.5 text-sm text-muted-foreground">
+                  {label}
+                </p>
+              </div>
+            ))}
 
-              <AccordionItem className="border-border">
-                <AccordionTrigger className="text-muted-foreground hover:text-foreground hover:no-underline">
-                  <span className="flex items-center gap-2">
-                    <span className="flex size-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">2</span>
-                    {t('step2')}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  <ol className="list-decimal list-inside space-y-1 text-sm">
-                    <li>{t('step2_1')}</li>
-                    <li>{t('step2_2')}</li>
-                    <li>{t('step2_3')}</li>
-                  </ol>
-                </AccordionContent>
-              </AccordionItem>
+            <Alert className="mt-2 bg-muted/40">
+              <AlertTitle>No customer webhook token</AlertTitle>
+              <AlertDescription className="text-xs">
+                Nexapa owns one verified webhook endpoint. Each workspace is
+                routed by Meta&apos;s phone number ID.
+              </AlertDescription>
+            </Alert>
 
-              <AccordionItem className="border-border">
-                <AccordionTrigger className="text-muted-foreground hover:text-foreground hover:no-underline">
-                  <span className="flex items-center gap-2">
-                    <span className="flex size-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">3</span>
-                    {t('step3')}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  <ol className="list-decimal list-inside space-y-1 text-sm">
-                    <li>{t('step3_1')}</li>
-                    <li dangerouslySetInnerHTML={{ __html: t('step3_2') }} />
-                    <li dangerouslySetInnerHTML={{ __html: t('step3_3') }} />
-                    <li dangerouslySetInnerHTML={{ __html: t('step3_4') }} />
-                  </ol>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem className="border-border">
-                <AccordionTrigger className="text-muted-foreground hover:text-foreground hover:no-underline">
-                  <span className="flex items-center gap-2">
-                    <span className="flex size-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">4</span>
-                    {t('step4')}
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground">
-                  <ol className="list-decimal list-inside space-y-1 text-sm">
-                    <li>{t('step4_1')}</li>
-                    <li>{t('step4_2')}</li>
-                    <li dangerouslySetInnerHTML={{ __html: t('step4_3') }} />
-                    <li dangerouslySetInnerHTML={{ __html: t('step4_4') }} />
-                    <li>{t('step4_5')}</li>
-                  </ol>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-
-            <div className="mt-4 pt-4 border-t border-border">
+            <div className="mt-4 border-t border-border pt-4">
               <a
-                href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started"
+                href="https://developers.facebook.com/docs/whatsapp/embedded-signup"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-primary/80 transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm text-primary transition-colors hover:text-primary/80"
               >
                 <ExternalLink className="size-3.5" />
-                {t('metaDocs')}
+                Meta Embedded Signup documentation
               </a>
             </div>
           </CardContent>

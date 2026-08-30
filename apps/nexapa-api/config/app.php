@@ -54,7 +54,15 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
-    'frontend_url' => env('FRONTEND_URL', 'https://app.nexapa.me'),
+    'frontend_url' => env(
+        'FRONTEND_URL',
+        'https://app.nexapa.app'
+    ),
+
+    'crm_frontend_url' => env(
+        'CRM_FRONTEND_URL',
+        'https://crm.nexapa.app'
+    ),
 
     /*
     |--------------------------------------------------------------------------

@@ -16,7 +16,7 @@ class SystemHealth extends Page
 
     protected static ?int $navigationSort = 7;
 
-    protected static ?string $navigationGroup = 'System';
+    protected static ?string $navigationGroup = 'Operasional Sistem';
 
     public static function canAccess(): bool
     {

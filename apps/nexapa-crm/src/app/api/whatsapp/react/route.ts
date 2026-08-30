@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import { requireRole, toErrorResponse } from '@/lib/auth/account';
 import { sendReactionMessage } from '@/lib/whatsapp/meta-api';
 import { decrypt } from '@/lib/whatsapp/encryption';
-import { sanitizePhoneForMeta } from '@/lib/whatsapp/phone-utils';
 import {
   checkRateLimit,
   rateLimitResponse,
   RATE_LIMITS,
 } from '@/lib/rate-limit';
+import { resolveWhatsAppRecipient } from '@/lib/whatsapp/contact-recipient'
 
 /**
  * POST /api/whatsapp/react
@@ -81,10 +81,10 @@ export async function POST(request: Request) {
     const contact = Array.isArray(conversation.contact)
       ? conversation.contact[0]
       : conversation.contact;
-    if (!contact?.phone) {
+    if (!contact) {
       return NextResponse.json(
-        { error: 'Contact phone number not found' },
-        { status: 400 },
+        { error: 'Contact not found' },
+        { status: 404 },
       );
     }
 
@@ -103,13 +103,13 @@ export async function POST(request: Request) {
     }
 
     const accessToken = decrypt(config.access_token);
-    const sanitizedPhone = sanitizePhoneForMeta(contact.phone);
+    const recipient = resolveWhatsAppRecipient(contact);
 
     try {
       await sendReactionMessage({
         phoneNumberId: config.phone_number_id,
         accessToken,
-        to: sanitizedPhone,
+        to: recipient,
         targetMessageId: targetMessage.message_id,
         emoji,
       });

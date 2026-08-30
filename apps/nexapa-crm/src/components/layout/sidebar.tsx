@@ -8,13 +8,13 @@ import { useAuth } from "@/hooks/use-auth";
 import { useTotalUnread } from "@/hooks/use-total-unread";
 import { useUnreadNotifications } from "@/hooks/use-unread-notifications";
 import {
+  MessageSquare,
   Bell,
   Bot,
   Crown,
   GitBranch,
   LayoutDashboard,
   LogOut,
-  MessageSquare,
   Radio,
   Settings,
   Shield,
@@ -188,9 +188,11 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
             close button is hidden since the sidebar is always-visible. */}
         <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <MessageSquare className="h-4 w-4" />
-            </div>
+            <img
+              src="/assets/branding/nexapa-app-logo.svg"
+              alt="Nexapa"
+              className="h-8 w-auto object-contain"
+            />
             <span className="text-sm font-semibold text-foreground">
               {t("title")}
             </span>

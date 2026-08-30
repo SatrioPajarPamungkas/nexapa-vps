@@ -3,35 +3,70 @@
 namespace App\Notifications;
 
 use Illuminate\Auth\Notifications\VerifyEmail as BaseVerifyEmail;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\URL;
 
 class VerifyEmailNotification extends BaseVerifyEmail
 {
+    public function __construct(
+        private readonly string $destination = 'app'
+    ) {
+    }
+
     protected function verificationUrl($notifiable)
     {
-        $frontendUrl = config('app.frontend_url', 'https://app.nexapa.me');
-        $apiUrl = config('app.url', 'https://api.nexapa.me');
-        
-        $id = $notifiable->getKey();
-        $hash = sha1($notifiable->getEmailForVerification());
-        
-        // Generate signature manually
-        $signature = hash_hmac('sha256', "{$id}|{$hash}", config('app.key'));
-        
-        $route = "/api/v1/auth/email/verify/{$id}/{$hash}";
-        $verifyUrl = $apiUrl . $route . '?signature=' . urlencode($signature);
-        
-        return $frontendUrl . '/verify-email?verify_url=' . urlencode($verifyUrl);
+        $frontendUrl = match ($this->destination) {
+            'crm' => config(
+                'app.crm_frontend_url',
+                'https://crm.nexapa.app'
+            ),
+            default => config(
+                'app.frontend_url',
+                'https://app.nexapa.app'
+            ),
+        };
+
+        $frontendUrl = rtrim(
+            (string) $frontendUrl,
+            '/'
+        );
+
+        $verifyUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(
+                (int) config(
+                    'auth.verification.expire',
+                    60
+                )
+            ),
+            [
+                'id' => $notifiable->getKey(),
+                'hash' => sha1(
+                    $notifiable
+                        ->getEmailForVerification()
+                ),
+            ]
+        );
+
+        return $frontendUrl
+            .'/verify-email?verify_url='
+            .urlencode($verifyUrl);
     }
 
     protected function buildMailMessage($url)
     {
-        return (new \Illuminate\Notifications\Messages\MailMessage)
+        return (new MailMessage)
             ->subject('Verify Your Email Address')
             ->greeting('Hello,')
-            ->line('Click the button below to verify your email address.')
+            ->line(
+                'Click the button below to verify your email address.'
+            )
             ->action('Verify Email', $url)
-            ->line('If you did not create an account, no further action is required.')
-            ->line('This verification link will expire in 60 minutes.');
+            ->line(
+                'If you did not create an account, no further action is required.'
+            )
+            ->line(
+                'This verification link will expire in 60 minutes.'
+            );
     }
 }

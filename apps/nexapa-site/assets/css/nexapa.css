@@ -11332,3 +11332,132 @@ a.nexapa-footer-contact-item:hover {
     pointer-events: auto !important;
 }
 
+
+
+/* NEXAPA SUBSCRIPTION PRICING V2 START */
+
+.nx-billing-toggle {
+    display: inline-flex;
+    margin-top: 30px;
+    padding: 5px;
+    border: 1px solid rgba(112, 137, 195, .28);
+    border-radius: 999px;
+    background: rgba(9, 15, 26, .82);
+}
+
+.nx-billing-toggle button {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 19px;
+    border: 0;
+    border-radius: 999px;
+    color: #8794a8;
+    background: transparent;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .25s ease;
+}
+
+.nx-billing-toggle button span {
+    padding: 4px 7px;
+    border-radius: 999px;
+    color: #4bddb2;
+    background: rgba(75, 221, 178, .11);
+    font-size: 8px;
+}
+
+.nx-billing-toggle button.is-active {
+    color: #fff;
+    background: linear-gradient(135deg, #607fff, #6559df);
+    box-shadow: 0 9px 25px rgba(75, 92, 205, .24);
+}
+
+.nx-pricing-card {
+    min-height: 760px;
+}
+
+.nx-pricing-price strong {
+    font-size: 30px;
+    letter-spacing: -.8px;
+}
+
+.nx-pricing-price em {
+    display: block;
+    margin-top: 9px;
+    color: #4bddb2;
+    font-size: 9px;
+    font-style: normal;
+    font-weight: 700;
+}
+
+.nx-access-products {
+    margin-top: 25px;
+    padding: 28px;
+    border: 1px solid rgba(112, 137, 195, .25);
+    border-radius: 26px;
+    background: rgba(14, 22, 37, .79);
+}
+
+.nx-access-products > span {
+    display: block;
+    margin-bottom: 16px;
+    color: #7e97ff;
+    font-size: 9px;
+    font-weight: 850;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+}
+
+.nx-access-products > div {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.nx-access-products a,
+.nx-access-products article {
+    display: flex;
+    min-height: 90px;
+    flex-direction: column;
+    justify-content: center;
+    padding: 18px;
+    border: 1px solid rgba(112, 137, 195, .2);
+    border-radius: 18px;
+    background: rgba(9, 15, 26, .66);
+}
+
+.nx-access-products strong {
+    color: #eef2fa;
+    font-size: 14px;
+}
+
+.nx-access-products small {
+    margin-top: 5px;
+    color: #8996aa;
+    font-size: 10px;
+}
+
+@media (max-width: 767px) {
+    .nx-billing-toggle {
+        width: 100%;
+    }
+
+    .nx-billing-toggle button {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 12px;
+    }
+
+    .nx-pricing-card {
+        min-height: 0;
+    }
+
+    .nx-access-products > div {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* NEXAPA SUBSCRIPTION PRICING V2 END */

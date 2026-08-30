@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
+use App\Notifications\VerifyEmailNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -22,6 +22,11 @@ class AuthController extends Controller
             'password' => ['required', 'confirmed', 'min:8'],
             'terms_accepted' => ['accepted'],
             'remember' => ['sometimes', 'boolean'],
+            'verification_destination' => [
+                'sometimes',
+                'string',
+                'in:app,crm',
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -32,6 +37,15 @@ class AuthController extends Controller
         }
 
         $data = $validator->validated();
+
+        \Illuminate\Support\Facades\Log::info(
+            'Registration verification destination.',
+            [
+                'destination' =>
+                    $data['verification_destination']
+                        ?? 'app',
+            ]
+        );
         $email = Str::lower(Str::trim($data['email']));
 
         $user = User::create([
@@ -41,7 +55,43 @@ class AuthController extends Controller
             'role' => 'user',
         ]);
 
-        event(new Registered($user));
+        try {
+            $user->notify(
+                new VerifyEmailNotification(
+                    $data['verification_destination']
+                        ?? 'app'
+                )
+            );
+        } catch (\Throwable $exception) {
+            \Illuminate\Support\Facades\Log::warning(
+                'Registration verification email failed.',
+                [
+                    'user_id' => $user->id,
+                    'exception' => $exception::class,
+                ]
+            );
+
+            // Jangan tinggalkan akun setengah jadi jika email
+            // verifikasi pertama gagal dikirim.
+            $user->delete();
+
+            return response()->json([
+                'success' => false,
+                'message' =>
+                    'Email verifikasi gagal dikirim. Periksa alamat email dan coba lagi.',
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+
+        // Browser app.nexapa.app memiliki session Laravel.
+        // Request server-to-server dari CRM bersifat stateless.
+        if ($request->hasSession()) {
+            Auth::login(
+                $user,
+                (bool) ($data['remember'] ?? false)
+            );
+
+            $request->session()->regenerate();
+        }
 
         return response()->json([
             'success' => true,
@@ -77,6 +127,19 @@ class AuthController extends Controller
         $credentials['email'] = strtolower($credentials['email']);
         $remember = $credentials['remember'] ?? false;
         unset($credentials['remember']);
+
+        $loginUser = User::query()
+            ->whereRaw('LOWER(email) = LOWER(?)', [
+                $credentials['email'],
+            ])
+            ->first();
+
+        if ($loginUser?->is_suspended === true) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Anda sedang disuspend. Hubungi administrator.',
+            ], Response::HTTP_FORBIDDEN);
+        }
 
         if (!Auth::attempt($credentials, $remember)) {
             return response()->json([

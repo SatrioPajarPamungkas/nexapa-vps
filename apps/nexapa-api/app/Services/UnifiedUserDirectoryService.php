@@ -8,6 +8,8 @@ use App\Filament\Resources\UserResource;
 use App\Models\User;
 use App\Services\Crm\CrmUserDirectoryService;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class UnifiedUserDirectoryService
 {
@@ -50,6 +52,42 @@ class UnifiedUserDirectoryService
         }
 
         $records = $this->merge($publisherUsers->all(), $crmUsers);
+
+        if (
+            Schema::hasTable('admin_user_lifecycle_states')
+            && $records !== []
+        ) {
+            $emails = array_values(array_filter(array_map(
+                fn (array $record): string => self::normalizeEmail(
+                    $record['email'] ?? null
+                ),
+                $records
+            )));
+
+            $states = DB::table('admin_user_lifecycle_states')
+                ->whereIn('email', $emails)
+                ->pluck('status', 'email');
+
+            foreach ($records as &$record) {
+                $record['lifecycle_status'] = $states[
+                    self::normalizeEmail($record['email'] ?? null)
+                ] ?? 'active';
+            }
+            unset($record);
+
+            $records = array_values(array_filter(
+                $records,
+                fn (array $record): bool =>
+                    ($record['lifecycle_status'] ?? 'active')
+                    !== 'deleted'
+            ));
+        } else {
+            foreach ($records as &$record) {
+                $record['lifecycle_status'] = 'active';
+            }
+            unset($record);
+        }
+
         $source = $filters['source'] ?? null;
         if (filled($source)) {
             $records = array_values(array_filter($records, fn (array $record): bool => match ($source) {

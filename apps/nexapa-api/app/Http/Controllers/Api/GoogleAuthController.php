@@ -18,6 +18,10 @@ class GoogleAuthController extends Controller
 {
     public function redirect()
     {
+        if (! config('services.google_auth_enabled', false)) {
+            abort(404);
+        }
+
         if (!config('services.google.client_id') || !config('services.google.client_secret')) {
             $frontendUrl = config('app.frontend_url') ?? env('FRONTEND_URL', 'https://app.nexapa.me');
             return redirect($frontendUrl . '/login?google_error=not_configured');
@@ -28,6 +32,10 @@ class GoogleAuthController extends Controller
 
     public function callback(Request $request)
     {
+        if (! config('services.google_auth_enabled', false)) {
+            abort(404);
+        }
+
         $frontendUrl = config('app.frontend_url') ?? env('FRONTEND_URL', 'https://app.nexapa.me');
 
         try {
@@ -119,7 +127,7 @@ class GoogleAuthController extends Controller
                 'has_google_id' => isset($googleId),
             ]);
 
-            if (in_array($errorCode, ['account_conflict', 'email_unavailable', 'email_not_verified'])) {
+            if (in_array($errorCode, ['account_conflict', 'email_unavailable', 'email_not_verified', 'account_suspended'])) {
                 return redirect($frontendUrl . '/login?google_error=' . $errorCode);
             }
 
@@ -129,6 +137,10 @@ class GoogleAuthController extends Controller
 
     private function performLogin(User $user): void
     {
+        if ($user->is_suspended === true) {
+            throw new \RuntimeException('account_suspended');
+        }
+
         Auth::login($user);
         request()->session()->regenerate();
     }

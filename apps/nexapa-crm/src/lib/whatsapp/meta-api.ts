@@ -9,7 +9,9 @@
  * instead of a runtime rejection from Meta.
  */
 
-const META_API_VERSION = 'v21.0'
+// Keep every WhatsApp Graph call on the same deploy-configured version used
+// by Embedded Signup. v21.0 is already outside its supported lifecycle.
+const META_API_VERSION = process.env.META_GRAPH_API_VERSION?.trim() || 'v26.0'
 const META_API_BASE = `https://graph.facebook.com/${META_API_VERSION}`
 
 export interface MetaSendResult {

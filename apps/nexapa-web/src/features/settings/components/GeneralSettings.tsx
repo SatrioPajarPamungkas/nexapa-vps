@@ -40,7 +40,7 @@ export function GeneralSettingsForm({ value, onChange }: Props) {
           </div>
           <div>
             <label htmlFor="gen-marketing" className="block text-[12px] font-medium text-slate-700">Marketing domain</label>
-            <input id="gen-marketing" value={value.marketingDomain} onChange={(e) => onChange({ marketingDomain: e.target.value.trim() })} onBlur={() => setTouched((t) => ({ ...t, marketingDomain: true }))} placeholder="https://nexapa.me" className={`mt-1.5 h-9 w-full rounded-lg border bg-white px-3 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${touched.marketingDomain && errors.marketingDomain ? "border-rose-300" : "border-slate-200"}`} />
+            <input id="gen-marketing" value={value.marketingDomain} onChange={(e) => onChange({ marketingDomain: e.target.value.trim() })} onBlur={() => setTouched((t) => ({ ...t, marketingDomain: true }))} placeholder="https://nexapa.app" className={`mt-1.5 h-9 w-full rounded-lg border bg-white px-3 text-[13px] focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${touched.marketingDomain && errors.marketingDomain ? "border-rose-300" : "border-slate-200"}`} />
             {touched.marketingDomain && errors.marketingDomain && <p className="mt-1 text-[11px] text-rose-600">{errors.marketingDomain}</p>}
           </div>
           <div>

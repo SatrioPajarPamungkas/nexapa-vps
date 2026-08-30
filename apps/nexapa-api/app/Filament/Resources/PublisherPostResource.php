@@ -29,7 +29,7 @@ class PublisherPostResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Publisher Posts';
 
-    protected static ?string $navigationGroup = 'Publishing';
+    protected static ?string $navigationGroup = 'Publisher';
 
     public static function shouldRegisterNavigation(): bool
     {

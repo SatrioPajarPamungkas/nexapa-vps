@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthGuard } from "@/features/auth/AuthGuard";
 import { PublicGuard } from "@/features/auth/PublicGuard";
@@ -8,24 +9,107 @@ import { LoginPage } from "@/pages/auth/LoginPage";
 import { SignupPage } from "@/pages/auth/SignupPage";
 import { VerifyEmailPage } from "@/pages/auth/VerifyEmailPage";
 import { GoogleCallbackPage } from "@/pages/auth/GoogleCallbackPage";
-import { DashboardPage } from "@/pages/dashboard/DashboardPage";
-import { DownloaderPage } from "@/pages/downloader/DownloaderPage";
-import { MediaLibraryPage } from "@/pages/library/MediaLibraryPage";
-import { ConnectedAccountsPage } from "@/pages/accounts/ConnectedAccountsPage";
-import { PublisherPage } from "@/pages/publisher/PublisherPage";
-import { SchedulerPage } from "@/pages/scheduler/SchedulerPage";
-import { AffiliatePage } from "@/pages/affiliate/AffiliatePage";
-import { HistoryPage } from "@/pages/history/HistoryPage";
-import { SettingsPage } from "@/pages/settings/SettingsPage";
-import { AppearancePage } from "@/pages/settings/AppearancePage";
-import { ProfilePage } from "@/pages/profile/ProfilePage";
-import { NotificationsPage } from "@/pages/notifications/NotificationsPage";
-import { DeveloperSettingsPage } from "@/pages/developer-settings/DeveloperSettingsPage";
-import { NotFoundPage } from "@/pages/not-found/NotFoundPage";
+const DashboardPage = lazy(() =>
+  import("@/pages/dashboard/DashboardPage").then(
+    (module) => ({ default: module.DashboardPage }),
+  ),
+);
+
+const DownloaderPage = lazy(() =>
+  import("@/pages/downloader/DownloaderPage").then(
+    (module) => ({ default: module.DownloaderPage }),
+  ),
+);
+
+const MediaLibraryPage = lazy(() =>
+  import("@/pages/library/MediaLibraryPage").then(
+    (module) => ({ default: module.MediaLibraryPage }),
+  ),
+);
+
+const ConnectedAccountsPage = lazy(() =>
+  import("@/pages/accounts/ConnectedAccountsPage").then(
+    (module) => ({
+      default: module.ConnectedAccountsPage,
+    }),
+  ),
+);
+
+const PublisherPage = lazy(() =>
+  import("@/pages/publisher/PublisherPage").then(
+    (module) => ({ default: module.PublisherPage }),
+  ),
+);
+
+const SchedulerPage = lazy(() =>
+  import("@/pages/scheduler/SchedulerPage").then(
+    (module) => ({ default: module.SchedulerPage }),
+  ),
+);
+
+const AffiliatePage = lazy(() =>
+  import("@/pages/affiliate/AffiliatePage").then(
+    (module) => ({ default: module.AffiliatePage }),
+  ),
+);
+
+const HistoryPage = lazy(() =>
+  import("@/pages/history/HistoryPage").then(
+    (module) => ({ default: module.HistoryPage }),
+  ),
+);
+
+const SettingsPage = lazy(() =>
+  import("@/pages/settings/SettingsPage").then(
+    (module) => ({ default: module.SettingsPage }),
+  ),
+);
+
+const AppearancePage = lazy(() =>
+  import("@/pages/settings/AppearancePage").then(
+    (module) => ({ default: module.AppearancePage }),
+  ),
+);
+
+const ProfilePage = lazy(() =>
+  import("@/pages/profile/ProfilePage").then(
+    (module) => ({ default: module.ProfilePage }),
+  ),
+);
+
+const NotificationsPage = lazy(() =>
+  import("@/pages/notifications/NotificationsPage").then(
+    (module) => ({ default: module.NotificationsPage }),
+  ),
+);
+
+const DeveloperSettingsPage = lazy(() =>
+  import(
+    "@/pages/developer-settings/DeveloperSettingsPage"
+  ).then((module) => ({
+    default: module.DeveloperSettingsPage,
+  })),
+);
+
+const NotFoundPage = lazy(() =>
+  import("@/pages/not-found/NotFoundPage").then(
+    (module) => ({ default: module.NotFoundPage }),
+  ),
+);
 
 export function AppRouter() {
   return (
-    <Routes>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-50">
+          <div className="flex items-center gap-3 text-sm font-medium text-slate-600">
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600" />
+            Menyiapkan ruang kerja...
+          </div>
+        </div>
+      }
+    >
+      <Routes>
       <Route element={<PublicGuard><AuthLayout /></PublicGuard>}>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
@@ -58,6 +142,7 @@ export function AppRouter() {
 
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }

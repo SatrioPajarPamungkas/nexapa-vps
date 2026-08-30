@@ -418,7 +418,7 @@ export function AppearancePage() {
       <PageHeader
         eyebrow="Settings"
         title="Appearance"
-        description="Manage wallpapers, glass effects, and theme preview. Theme applies per user across app.nexapa.me."
+        description="Manage wallpapers, glass effects, and theme preview. Theme applies per user across app.nexapa.app."
       />
 
       {/* Settings Tabs */}
@@ -482,7 +482,7 @@ export function AppearancePage() {
 
       {activeScope === "company" && (
         <div className="mt-3 rounded-xl border border-violet-400/25 bg-violet-500/10 px-4 py-3 text-[12px] leading-5 text-violet-900 backdrop-blur-xl">
-          Company Website theme applies to <b>nexapa.me</b> (public landing page). Changes are visible to all visitors. Only administrators can modify.
+          Company Website theme applies to <b>nexapa.app</b> (public landing page). Changes are visible to all visitors. Only administrators can modify.
         </div>
       )}
 
@@ -1080,7 +1080,7 @@ export function AppearancePage() {
 
             <div className="mt-4 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-[11px] leading-4 text-slate-600 backdrop-blur-xl">
               {activeScope === "company" ? (
-                <>Company Website scope: theme applies to <b>nexapa.me</b>. One active company theme. Sidebar opacity is ignored for company scope.</>
+                <>Company Website scope: theme applies to <b>nexapa.app</b>. One active company theme. Sidebar opacity is ignored for company scope.</>
               ) : (
                 <>Phase 1 scope: <b>My App Appearance</b>. Only user scope. One active theme per user. Transaction ensured.
                 Animated gradient uses CSS only, no canvas/WebGL. Video wallpaper will be enabled in Phase 2.</>

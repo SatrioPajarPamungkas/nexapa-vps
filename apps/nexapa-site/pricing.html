@@ -2,7 +2,6 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -12,13 +11,13 @@
 
     <meta
         name="description"
-        content="Pilih paket Nexapa CRM, Nexapa Publisher, atau solusi software dan automasi yang disesuaikan dengan kebutuhan bisnis."
+        content="Pilih paket Nexapa untuk mengakses Publisher, CRM WhatsApp, automasi, dan AI dalam satu akun."
     >
 
     <link
         rel="icon"
         type="image/svg+xml"
-        href="/assets/img/logo/nexapa-favicon.svg?v=20260806-115049"
+        href="/assets/img/logo/nexapa-favicon.svg"
     >
 
     <meta name="theme-color" content="#090e17">
@@ -26,13 +25,13 @@
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/all.min.css">
     <link rel="stylesheet" href="assets/css/animate.css">
-    <link rel="stylesheet" href="assets/css/magnific-popup.css">
     <link rel="stylesheet" href="assets/css/meanmenu.css">
-    <link rel="stylesheet" href="assets/css/swiper-bundle.min.css">
-    <link rel="stylesheet" href="assets/css/nice-select.css">
     <link rel="stylesheet" href="assets/css/color.css">
     <link rel="stylesheet" href="assets/css/main.css">
-    <link rel="stylesheet" href="assets/css/nexapa.css?v=20260806-115049">
+    <link
+        rel="stylesheet"
+        href="assets/css/nexapa.css?v=20260827-154500"
+    >
 </head>
 
 <body class="nx-pricing-body">
@@ -40,95 +39,128 @@
     <!--# include virtual="/partials/global-header.html" -->
 
     <main class="nx-pricing-page">
-
         <section class="nx-pricing-hero">
             <div class="nx-pricing-glow nx-pricing-glow-blue"></div>
             <div class="nx-pricing-glow nx-pricing-glow-green"></div>
 
             <div class="container">
-
                 <header class="nx-pricing-heading">
-                    <span>Paket &amp; Harga</span>
+                    <span>Paket Nexapa</span>
 
                     <h1>
-                        Solusi fleksibel untuk
-                        kebutuhan bisnis Anda.
+                        Satu akun untuk menjalankan
+                        bisnis lebih pintar.
                     </h1>
 
                     <p>
-                        Pilih layanan Nexapa sesuai kebutuhan
-                        komunikasi, publikasi, automasi, dan
-                        pengembangan sistem operasional bisnis.
+                        Kelola media sosial melalui Nexapa Publisher,
+                        layani pelanggan melalui Nexapa CRM, dan
+                        percepat pekerjaan menggunakan AI.
                     </p>
+
+                    <div
+                        class="nx-billing-toggle"
+                        aria-label="Pilih periode langganan"
+                    >
+                        <button
+                            type="button"
+                            class="is-active"
+                            data-billing="monthly"
+                        >
+                            Bulanan
+                        </button>
+
+                        <button
+                            type="button"
+                            data-billing="yearly"
+                        >
+                            Tahunan
+                            <span>Hemat 2 bulan</span>
+                        </button>
+                    </div>
                 </header>
 
                 <div class="nx-pricing-grid">
 
-                    <!-- Nexapa CRM -->
-                    <article class="nx-pricing-card is-crm">
-
+                    <article
+                        class="nx-pricing-card is-crm"
+                        data-plan="starter"
+                    >
                         <div class="nx-pricing-card-head">
                             <div class="nx-pricing-icon">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
                                     <path d="M5 5h14v10H9l-4 4V5Z"/>
                                     <path d="M8 9h8M8 12h5"/>
                                 </svg>
                             </div>
 
                             <span class="nx-pricing-status is-active">
-                                Aktif
+                                Starter
                             </span>
                         </div>
 
                         <span class="nx-pricing-category">
-                            Customer Operations
+                            Mulai Berjualan
                         </span>
 
-                        <h2>Nexapa CRM</h2>
+                        <h2>Starter</h2>
 
                         <p class="nx-pricing-description">
-                            Kelola komunikasi pelanggan, kontak,
-                            broadcast, penugasan tim, dan aktivitas
-                            layanan dalam satu platform.
+                            Untuk pemilik usaha yang ingin mulai
+                            mengelola konten dan komunikasi pelanggan
+                            dari satu platform.
                         </p>
 
                         <div class="nx-pricing-price">
-                            <small>Harga layanan</small>
-                            <strong>Penawaran Khusus</strong>
-                            <span>
-                                Disesuaikan dengan pengguna,
-                                kebutuhan fitur, dan implementasi.
+                            <small>Mulai dari</small>
+
+                            <strong
+                                data-monthly="Rp50.000"
+                                data-yearly="Rp500.000"
+                            >
+                                Rp50.000
+                            </strong>
+
+                            <span
+                                data-monthly="/bulan"
+                                data-yearly="/tahun"
+                            >
+                                /bulan
                             </span>
+
+                            <em>Publisher + CRM + AI</em>
                         </div>
 
                         <ul>
-                            <li>Inbox untuk banyak pengguna</li>
-                            <li>Kontak dan segmentasi pelanggan</li>
-                            <li>Broadcast dan template pesan</li>
-                            <li>Penugasan anggota tim</li>
-                            <li>Riwayat aktivitas pelanggan</li>
+                            <li>1 pengguna</li>
+                            <li>3 akun media sosial</li>
+                            <li>1 nomor WhatsApp Business</li>
+                            <li>1.000 kontak CRM</li>
+                            <li>50 penggunaan AI per bulan</li>
+                            <li>Inbox, pipeline, dan penjadwalan</li>
                         </ul>
 
                         <a
                             class="nx-pricing-button"
-                            href="contact.html?service=nexapa-crm"
+                            href="https://app.nexapa.app/register?plan=starter&billing=monthly"
+                            data-base-url="https://app.nexapa.app/register?plan=starter"
                         >
-                            Minta Penawaran
-
-                            <span>↗</span>
+                            Mulai Starter
+                            <span>→</span>
                         </a>
                     </article>
 
-                    <!-- Nexapa Publisher -->
-                    <article class="nx-pricing-card is-publisher is-featured">
-
+                    <article
+                        class="nx-pricing-card is-publisher is-featured"
+                        data-plan="pro"
+                    >
                         <div class="nx-pricing-popular">
-                            Produk Aktif
+                            Paling Populer
                         </div>
 
                         <div class="nx-pricing-card-head">
                             <div class="nx-pricing-icon">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
                                     <rect
                                         x="3"
                                         y="4"
@@ -136,62 +168,75 @@
                                         height="16"
                                         rx="3"
                                     />
-
                                     <path d="M3 9h18"/>
                                     <path d="M8 14h8M8 17h5"/>
                                 </svg>
                             </div>
 
                             <span class="nx-pricing-status is-active">
-                                Aktif
+                                Pro
                             </span>
                         </div>
 
                         <span class="nx-pricing-category">
-                            Social Publishing
+                            Bertumbuh Lebih Cepat
                         </span>
 
-                        <h2>Nexapa Publisher</h2>
+                        <h2>Pro</h2>
 
                         <p class="nx-pricing-description">
-                            Hubungkan akun media sosial, kelola media,
-                            susun jadwal, dan jalankan publikasi melalui
-                            satu workspace.
+                            Untuk bisnis berkembang yang membutuhkan
+                            kolaborasi tim, automasi, broadcast, dan
+                            kapasitas AI lebih besar.
                         </p>
 
                         <div class="nx-pricing-price">
-                            <small>Harga layanan</small>
-                            <strong>Penawaran Khusus</strong>
-                            <span>
-                                Disesuaikan dengan jumlah akun,
-                                platform, dan kapasitas publikasi.
+                            <small>Mulai dari</small>
+
+                            <strong
+                                data-monthly="Rp75.000"
+                                data-yearly="Rp750.000"
+                            >
+                                Rp75.000
+                            </strong>
+
+                            <span
+                                data-monthly="/bulan"
+                                data-yearly="/tahun"
+                            >
+                                /bulan
                             </span>
+
+                            <em>Hemat Rp150.000 per tahun</em>
                         </div>
 
                         <ul>
-                            <li>Connected social accounts</li>
-                            <li>Media library terpusat</li>
-                            <li>Penjadwalan konten</li>
-                            <li>Riwayat dan status publikasi</li>
-                            <li>Workspace operasional</li>
+                            <li>5 pengguna</li>
+                            <li>10 akun media sosial</li>
+                            <li>1 nomor WhatsApp Business</li>
+                            <li>5.000 kontak CRM</li>
+                            <li>300 penggunaan AI per bulan</li>
+                            <li>Broadcast dan automasi CRM</li>
+                            <li>Analisis konten dan laporan</li>
                         </ul>
 
                         <a
                             class="nx-pricing-button"
-                            href="contact.html?service=nexapa-publisher"
+                            href="https://app.nexapa.app/register?plan=pro&billing=monthly"
+                            data-base-url="https://app.nexapa.app/register?plan=pro"
                         >
-                            Minta Penawaran
-
-                            <span>↗</span>
+                            Pilih Pro
+                            <span>→</span>
                         </a>
                     </article>
 
-                    <!-- Custom Solution -->
-                    <article class="nx-pricing-card is-custom">
-
+                    <article
+                        class="nx-pricing-card is-custom"
+                        data-plan="business"
+                    >
                         <div class="nx-pricing-card-head">
                             <div class="nx-pricing-icon">
-                                <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <svg viewBox="0 0 24 24">
                                     <path d="M4 7h16M4 17h16"/>
                                     <circle cx="9" cy="7" r="2"/>
                                     <circle cx="15" cy="17" r="2"/>
@@ -200,91 +245,182 @@
                             </div>
 
                             <span class="nx-pricing-status is-custom">
-                                Kustom
+                                Business
                             </span>
                         </div>
 
                         <span class="nx-pricing-category">
-                            Software &amp; Automation
+                            Operasional Lengkap
                         </span>
 
-                        <h2>Solusi Kustom</h2>
+                        <h2>Business</h2>
 
                         <p class="nx-pricing-description">
-                            Pengembangan software, integrasi API,
-                            workflow automation, data operations,
-                            dan penerapan AI sesuai kebutuhan.
+                            Untuk bisnis dengan tim dan volume
+                            pelanggan lebih besar yang membutuhkan
+                            AI Agent serta automasi lanjutan.
                         </p>
 
                         <div class="nx-pricing-price">
-                            <small>Harga proyek</small>
-                            <strong>Sesuai Kebutuhan</strong>
-                            <span>
-                                Berdasarkan ruang lingkup, kompleksitas,
-                                teknologi, dan jadwal pengerjaan.
+                            <small>Mulai dari</small>
+
+                            <strong
+                                data-monthly="Rp100.000"
+                                data-yearly="Rp1.000.000"
+                            >
+                                Rp100.000
+                            </strong>
+
+                            <span
+                                data-monthly="/bulan"
+                                data-yearly="/tahun"
+                            >
+                                /bulan
                             </span>
+
+                            <em>Hemat Rp200.000 per tahun</em>
                         </div>
 
                         <ul>
-                            <li>Analisis kebutuhan bisnis</li>
-                            <li>Pengembangan software kustom</li>
-                            <li>Integrasi API dan aplikasi</li>
-                            <li>Workflow dan automasi proses</li>
-                            <li>Dukungan implementasi</li>
+                            <li>15 pengguna</li>
+                            <li>30 akun media sosial</li>
+                            <li>3 nomor WhatsApp Business</li>
+                            <li>25.000 kontak CRM</li>
+                            <li>1.000 penggunaan AI per bulan</li>
+                            <li>AI Agent dan automasi lanjutan</li>
+                            <li>Broadcast terjadwal</li>
+                            <li>Dukungan prioritas</li>
                         </ul>
 
                         <a
                             class="nx-pricing-button"
-                            href="contact.html?service=custom-solution"
+                            href="https://app.nexapa.app/register?plan=business&billing=monthly"
+                            data-base-url="https://app.nexapa.app/register?plan=business"
                         >
-                            Diskusikan Proyek
-
-                            <span>↗</span>
+                            Pilih Business
+                            <span>→</span>
                         </a>
                     </article>
-
                 </div>
+
+                <section class="nx-access-products">
+                    <span>Termasuk dalam setiap paket</span>
+
+                    <div>
+                        <a href="https://app.nexapa.app">
+                            <strong>Nexapa Publisher</strong>
+                            <small>Konten dan media sosial</small>
+                        </a>
+
+                        <a href="https://crm.nexapa.app">
+                            <strong>Nexapa CRM</strong>
+                            <small>WhatsApp dan pelanggan</small>
+                        </a>
+
+                        <article>
+                            <strong>Nexapa AI</strong>
+                            <small>Konten, respons, dan automasi</small>
+                        </article>
+                    </div>
+                </section>
 
                 <section class="nx-pricing-note">
                     <div>
-                        <span>Penawaran Transparan</span>
+                        <span>Satu Ekosistem Nexapa</span>
 
                         <h2>
-                            Biaya ditentukan berdasarkan
-                            kebutuhan nyata bisnis.
+                            Satu langganan untuk Publisher,
+                            CRM, WhatsApp, dan AI.
                         </h2>
 
                         <p>
-                            Tim Nexapa akan mempelajari kebutuhan,
-                            jumlah pengguna, fitur, integrasi, dan
-                            target implementasi sebelum memberikan
-                            penawaran resmi.
+                            Kuota diperbarui setiap bulan. Paket
+                            tahunan memberikan akses selama 12 bulan
+                            dengan harga setara 10 bulan.
                         </p>
                     </div>
 
-                    <a href="contact.html">
-                        Konsultasi dengan Nexapa
+                    <a href="contact.html?service=nexapa-subscription">
+                        Konsultasi Paket
                         <span>↗</span>
                     </a>
                 </section>
-
             </div>
         </section>
-
     </main>
 
     <!--# include virtual="/partials/global-footer.html" -->
 
     <script src="assets/js/jquery-3.7.1.min.js"></script>
-    <script src="assets/js/viewport.jquery.js"></script>
     <script src="assets/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/jquery.nice-select.min.js"></script>
-    <script src="assets/js/jquery.waypoints.js"></script>
-    <script src="assets/js/jquery.counterup.min.js"></script>
-    <script src="assets/js/swiper-bundle.min.js"></script>
     <script src="assets/js/jquery.meanmenu.min.js"></script>
-    <script src="assets/js/jquery.magnific-popup.min.js"></script>
-    <script src="assets/js/wow.min.js"></script>
     <script src="assets/js/main.js"></script>
+
+    <script>
+    (() => {
+        const buttons = document.querySelectorAll(
+            '.nx-billing-toggle button'
+        );
+
+        const prices = document.querySelectorAll(
+            '.nx-pricing-price [data-monthly]'
+        );
+
+        const links = document.querySelectorAll(
+            '.nx-pricing-button[data-base-url]'
+        );
+
+        function setBilling(period) {
+            buttons.forEach((button) => {
+                button.classList.toggle(
+                    'is-active',
+                    button.dataset.billing === period
+                );
+            });
+
+            prices.forEach((element) => {
+                element.textContent = element.dataset[period];
+            });
+
+            links.forEach((link) => {
+                link.href =
+                    link.dataset.baseUrl +
+                    '&billing=' +
+                    period;
+            });
+
+            try {
+                localStorage.setItem(
+                    'nexapa_billing_period',
+                    period
+                );
+            } catch (error) {
+                // Penyimpanan preferensi bersifat opsional.
+            }
+        }
+
+        buttons.forEach((button) => {
+            button.addEventListener('click', () => {
+                setBilling(button.dataset.billing);
+            });
+        });
+
+        let selected = 'monthly';
+
+        try {
+            const saved = localStorage.getItem(
+                'nexapa_billing_period'
+            );
+
+            if (saved === 'yearly') {
+                selected = saved;
+            }
+        } catch (error) {
+            // Gunakan periode bulanan.
+        }
+
+        setBilling(selected);
+    })();
+    </script>
 </body>
 </html>

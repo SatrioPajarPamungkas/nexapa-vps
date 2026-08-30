@@ -17,6 +17,8 @@ class CrmUserDirectoryService
 {
     private const CACHE_VERSION_KEY = 'crm_user_directory:version';
 
+    private const CACHE_SCHEMA_VERSION = 2;
+
     public function isConfigured(): bool
     {
         return filled($this->url()) && filled($this->serviceRoleKey());
@@ -33,7 +35,7 @@ class CrmUserDirectoryService
         $perPage = min(max(10, $perPage), 100);
         $cacheKey = $this->cacheKey('list', [$page, $perPage, $filters, $sortColumn, $sortDirection]);
 
-        return $this->remember($cacheKey, function () use ($page, $perPage, $filters, $sortColumn, $sortDirection): array {
+        $result = $this->remember($cacheKey, function () use ($page, $perPage, $filters, $sortColumn, $sortDirection): array {
             $response = $this->get('/auth/v1/admin/users', [
                 'page' => $page,
                 'per_page' => $perPage,
@@ -56,12 +58,26 @@ class CrmUserDirectoryService
             $total = (int) ($payload['total'] ?? $response->header('X-Total-Count') ?? count($users));
 
             return [
-                'users' => array_values($users),
+                'users' => array_map(
+                    fn (CrmUserData $user): array => $user->toArray(),
+                    array_values($users),
+                ),
                 'total' => $this->hasActiveFilters($filters) ? count($users) : max($total, count($users)),
                 'page' => $page,
                 'per_page' => $perPage,
             ];
         });
+
+        if (! is_array($result) || ! is_array($result['users'] ?? null)) {
+            throw CrmIntegrationException::invalidResponse();
+        }
+
+        $result['users'] = array_map(
+            fn (array $user): CrmUserData => CrmUserData::fromArray($user),
+            array_values(array_filter($result['users'], 'is_array')),
+        );
+
+        return $result;
     }
 
     public function findUser(string $userId): CrmUserData
@@ -72,7 +88,7 @@ class CrmUserDirectoryService
             throw CrmIntegrationException::invalidResponse();
         }
 
-        return $this->remember($this->cacheKey('detail', [$userId]), function () use ($userId): CrmUserData {
+        $user = $this->remember($this->cacheKey('detail', [$userId]), function () use ($userId): array {
             $authUser = $this->jsonObject($this->get('/auth/v1/admin/users/'.$userId));
 
             if (($authUser['id'] ?? null) !== $userId) {
@@ -81,8 +97,14 @@ class CrmUserDirectoryService
 
             $enrichment = $this->enrichmentForUserIds([$userId], includeCounts: true);
 
-            return $this->mapUser($authUser, $enrichment);
+            return $this->mapUser($authUser, $enrichment)->toArray();
         });
+
+        if (! is_array($user)) {
+            throw CrmIntegrationException::invalidResponse();
+        }
+
+        return CrmUserData::fromArray($user);
     }
 
     /** @return array<string, string> */
@@ -437,7 +459,7 @@ class CrmUserDirectoryService
 
     private function cacheKey(string $type, array $context = []): string
     {
-        return 'crm_user_directory:v'.$this->cacheVersion().':'.$type.':'.hash('sha256', serialize($context));
+        return 'crm_user_directory:s'.self::CACHE_SCHEMA_VERSION.':v'.$this->cacheVersion().':'.$type.':'.hash('sha256', serialize($context));
     }
 
     private function remember(string $key, callable $callback): mixed

@@ -16,6 +16,7 @@ import { ContactSidebar } from "@/components/inbox/contact-sidebar";
 import { toast } from "sonner";
 import { WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 // Remembers the agent's show/hide choice for the desktop contact panel
 // across reloads and sessions (device-scoped, like the theme prefs).
@@ -33,6 +34,8 @@ export default function InboxPage() {
 }
 
 function InboxPageInner() {
+  const { profile } = useAuth();
+  const accountId = profile?.account_id ?? null;
   const t = useTranslations("Inbox.page");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -137,6 +140,7 @@ function InboxPageInner() {
         .from("conversations")
         .select(CONVERSATION_SELECT)
         .eq("id", convId)
+        .eq("account_id", accountId)
         .maybeSingle();
       if (error) {
         // Supabase errors have non-enumerable properties — log fields
@@ -170,7 +174,7 @@ function InboxPageInner() {
     } finally {
       hydratingConvIdsRef.current.delete(convId);
     }
-  }, []);
+  }, [accountId]);
 
   // Check WhatsApp connection status on mount
   useEffect(() => {
@@ -218,6 +222,10 @@ function InboxPageInner() {
       const newMsg = event.new;
 
       if (event.eventType === "INSERT") {
+        // Message rows do not carry account_id. Only accept events for a
+        // conversation already admitted by the account-scoped list/channel.
+        // The filtered conversation INSERT will hydrate a brand-new thread.
+        if (!knownConvIdsRef.current.has(newMsg.conversation_id)) return;
         // Add to messages if it belongs to active conversation
         if (
           activeConversation &&
@@ -274,13 +282,6 @@ function InboxPageInner() {
                 : c,
             ),
           );
-        } else {
-          // First time we're seeing this conv: the conv-INSERT event
-          // hasn't landed yet, or was missed. Hydrate from the DB so
-          // the row surfaces with its `contact` joined; the conv-UPDATE
-          // event the webhook emits right after the message INSERT will
-          // converge state when it arrives.
-          hydrateConversation(newMsg.conversation_id);
         }
       }
 
@@ -362,6 +363,7 @@ function InboxPageInner() {
   // throttle) are simply lost. We need a way to catch up.
   const { isConnected } = useRealtime({
     channelName: "inbox-realtime",
+    accountId,
     onMessageEvent: handleMessageEvent,
     onConversationEvent: handleConversationEvent,
     enabled: true,
@@ -604,6 +606,7 @@ function InboxPageInner() {
           )}
         >
           <ConversationList
+            accountId={accountId}
             activeConversationId={activeConversation?.id ?? null}
             onSelect={handleSelectConversation}
             conversations={conversations}

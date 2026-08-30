@@ -22,7 +22,7 @@ import type { TemplateButton, TemplateSampleValues } from '@/types'
  * they remain visible so the user can notice drift and clean up.
  */
 
-const META_API_VERSION = 'v21.0'
+const META_API_VERSION = process.env.META_GRAPH_API_VERSION?.trim() || 'v26.0'
 const META_API_BASE = `https://graph.facebook.com/${META_API_VERSION}`
 
 interface MetaButton {
@@ -286,13 +286,71 @@ export async function POST() {
       }
     }
 
+    // Reconcile local Meta-backed templates against the current WABA.
+    // Rows that have a meta_template_id but are no longer returned by Meta
+    // are stale and must not remain available in Settings / Inbox.
+    //
+    // Local-only rows (meta_template_id = null) are intentionally preserved.
+    // Never prune if we hit the pagination cap because the Meta result set
+    // may be incomplete.
+    let deleted = 0
+    const truncated = pageCount >= PAGE_CAP && nextUrl !== null
+
+    if (!truncated) {
+      const metaTemplateIds = new Set(
+        metaTemplates.map((template) => template.id),
+      )
+
+      const { data: localMetaTemplates, error: staleLookupError } =
+        await supabase
+          .from('message_templates')
+          .select('id, meta_template_id, name, language')
+          .eq('account_id', accountId)
+          .not('meta_template_id', 'is', null)
+
+      if (staleLookupError) {
+        errors.push({
+          name: '*',
+          language: '*',
+          message: `Could not reconcile stale templates: ${staleLookupError.message}`,
+        })
+      } else {
+        const staleIds = (localMetaTemplates ?? [])
+          .filter(
+            (template) =>
+              template.meta_template_id &&
+              !metaTemplateIds.has(template.meta_template_id),
+          )
+          .map((template) => template.id)
+
+        if (staleIds.length > 0) {
+          const { error: deleteError } = await supabase
+            .from('message_templates')
+            .delete()
+            .eq('account_id', accountId)
+            .in('id', staleIds)
+
+          if (deleteError) {
+            errors.push({
+              name: '*',
+              language: '*',
+              message: `Could not delete stale templates: ${deleteError.message}`,
+            })
+          } else {
+            deleted = staleIds.length
+          }
+        }
+      }
+    }
+
     return NextResponse.json({
       success: errors.length === 0,
       total: metaTemplates.length,
       inserted,
       updated,
+      deleted,
       errors,
-      truncated: pageCount >= PAGE_CAP && nextUrl !== null,
+      truncated,
     })
   } catch (error) {
     // Auth failures map to 401/403 rather than being folded into the

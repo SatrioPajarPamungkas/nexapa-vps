@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Pages\Page;
+use Illuminate\Support\Carbon;
 
 class CrmUserDetails extends Page
 {
@@ -62,9 +63,8 @@ class CrmUserDetails extends Page
                         Infolists\Components\TextEntry::make('provider')->label('Provider login')->badge()->placeholder('Belum tersedia'),
                         Infolists\Components\TextEntry::make('email_confirmed_at')
                             ->label('Verifikasi Email')
-                            ->dateTime('d M Y H:i')
                             ->placeholder('Belum terverifikasi')
-                            ->formatStateUsing(fn ($state): string => $state ? 'Terverifikasi pada ' . $state->format('d M Y H:i') : 'Belum terverifikasi')
+                            ->formatStateUsing(fn ($state): string => $state ? 'Terverifikasi pada '.Carbon::parse($state)->format('d M Y H:i') : 'Belum terverifikasi')
                             ->badge()
                             ->color(fn ($state): string => $state ? 'success' : 'warning'),
                         Infolists\Components\TextEntry::make('last_sign_in_at')

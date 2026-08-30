@@ -3,8 +3,16 @@
 namespace App\Filament\Pages;
 
 use App\Models\UnifiedUserRecord;
+use App\Models\Subscription;
+use App\Models\SubscriptionPlan;
+use App\Services\SubscriptionService;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Illuminate\Support\Carbon;
 use App\Services\Crm\CrmUserDirectoryService;
 use App\Services\UnifiedUserDirectoryService;
+use App\Services\UserLifecycleService;
+use Throwable;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -14,6 +22,7 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class AllUsers extends Page implements HasTable
@@ -78,6 +87,22 @@ class AllUsers extends Page implements HasTable
                     ->color('warning')
                     ->placeholder('—')
                     ->wrap(),
+                Tables\Columns\TextColumn::make('lifecycle_status')
+                    ->label('Status akun')
+                    ->state(fn (UnifiedUserRecord $record): string =>
+                        $record->lifecycle_status ?? 'active'
+                    )
+                    ->formatStateUsing(fn (string $state): string =>
+                        match ($state) {
+                            'suspended' => 'Disuspend',
+                            default => 'Aktif',
+                        }
+                    )
+                    ->badge()
+                    ->color(fn (string $state): string =>
+                        $state === 'suspended' ? 'danger' : 'success'
+                    ),
+
                 Tables\Columns\TextColumn::make('registered_at')
                     ->label('Terdaftar')
                     ->dateTime('d M Y H:i'),
@@ -94,7 +119,243 @@ class AllUsers extends Page implements HasTable
             ])
             ->recordUrl(fn (UnifiedUserRecord $record): string => UnifiedUserDetails::getUrl(['record' => $record->getKey()]))
             ->actions([
-                Tables\Actions\Action::make('view')->label('Lihat detail')->icon('heroicon-o-eye')->url(fn (UnifiedUserRecord $record): string => UnifiedUserDetails::getUrl(['record' => $record->getKey()])),
+                Tables\Actions\Action::make('view')
+                    ->label('Lihat detail')
+                    ->icon('heroicon-o-eye')
+                    ->url(fn (UnifiedUserRecord $record): string =>
+                        UnifiedUserDetails::getUrl([
+                            'record' => $record->getKey(),
+                        ])
+                    ),
+
+                Tables\Actions\Action::make('manageSubscription')
+                    ->label('Kelola Paket')
+                    ->icon('heroicon-o-credit-card')
+                    ->color('primary')
+                    ->visible(
+                        fn (
+                            UnifiedUserRecord $record
+                        ): bool =>
+                            ! $this->isProtected($record)
+                            && filled(
+                                $record->publisher_user_id
+                            )
+                    )
+                    ->modalHeading('Kelola paket pengguna')
+                    ->modalDescription(
+                        'Perubahan langsung menentukan akses '
+                        .'WhatsApp API pada akun ini.'
+                    )
+                    ->modalSubmitActionLabel('Simpan paket')
+                    ->fillForm(
+                        function (
+                            UnifiedUserRecord $record
+                        ): array {
+                            $subscription =
+                                Subscription::query()
+                                    ->where(
+                                        'publisher_user_id',
+                                        (int) $record
+                                            ->publisher_user_id
+                                    )
+                                    ->latest('id')
+                                    ->first();
+
+                            return [
+                                'plan_code' =>
+                                    $subscription
+                                        ?->plan_code
+                                        ?? 'starter',
+                                'billing_cycle' =>
+                                    $subscription
+                                        ?->billing_cycle
+                                        ?? 'monthly',
+                                'status' =>
+                                    $subscription
+                                        ?->status
+                                        ?? 'active',
+                                'starts_at' =>
+                                    $subscription
+                                        ?->starts_at
+                                        ?? now(),
+                                'expires_at' =>
+                                    $subscription
+                                        ?->expires_at
+                                        ?? now()
+                                            ->addMonthNoOverflow(),
+                            ];
+                        }
+                    )
+                    ->form([
+                        Select::make('plan_code')
+                            ->label('Paket')
+                            ->options(
+                                fn (): array =>
+                                    SubscriptionPlan::query()
+                                        ->where(
+                                            'is_active',
+                                            true
+                                        )
+                                        ->orderBy('sort_order')
+                                        ->pluck(
+                                            'name',
+                                            'code'
+                                        )
+                                        ->all()
+                            )
+                            ->required()
+                            ->native(false),
+
+                        Select::make('billing_cycle')
+                            ->label('Periode')
+                            ->options([
+                                'monthly' => 'Bulanan',
+                                'yearly' => 'Tahunan',
+                            ])
+                            ->required()
+                            ->native(false),
+
+                        Select::make('status')
+                            ->label('Status paket')
+                            ->options([
+                                'active' => 'Aktif',
+                                'expired' => 'Kedaluwarsa',
+                                'suspended' => 'Disuspend',
+                                'cancelled' => 'Dibatalkan',
+                            ])
+                            ->required()
+                            ->native(false),
+
+                        DateTimePicker::make('starts_at')
+                            ->label('Mulai aktif')
+                            ->seconds(false)
+                            ->required(),
+
+                        DateTimePicker::make('expires_at')
+                            ->label('Berakhir pada')
+                            ->seconds(false)
+                            ->required()
+                            ->after('starts_at'),
+                    ])
+                    ->action(
+                        function (
+                            UnifiedUserRecord $record,
+                            array $data
+                        ): void {
+                            try {
+                                $subscription = app(
+                                    SubscriptionService::class
+                                )->updateForPublisherUser(
+                                    publisherUserId:
+                                        (int) $record
+                                            ->publisher_user_id,
+                                    planCode:
+                                        $data['plan_code'],
+                                    billingCycle:
+                                        $data['billing_cycle'],
+                                    status:
+                                        $data['status'],
+                                    startsAt:
+                                        Carbon::parse(
+                                            $data['starts_at']
+                                        ),
+                                    expiresAt:
+                                        Carbon::parse(
+                                            $data['expires_at']
+                                        ),
+                                    adminUserId:
+                                        (int) auth()->id(),
+                                );
+
+                                $this->resetTable();
+
+                                Notification::make()
+                                    ->success()
+                                    ->title(
+                                        'Paket berhasil diperbarui'
+                                    )
+                                    ->body(
+                                        $subscription
+                                            ->plan_name
+                                        .' · '
+                                        .ucfirst(
+                                            $subscription
+                                                ->status
+                                        )
+                                        .' · berakhir '
+                                        .$subscription
+                                            ->expires_at
+                                            ->format(
+                                                'd M Y H:i'
+                                            )
+                                    )
+                                    ->send();
+                            } catch (Throwable $exception) {
+                                report($exception);
+
+                                Notification::make()
+                                    ->danger()
+                                    ->title(
+                                        'Paket gagal diperbarui'
+                                    )
+                                    ->body(
+                                        $exception
+                                            ->getMessage()
+                                    )
+                                    ->send();
+                            }
+                        }
+                    ),
+
+                Tables\Actions\Action::make('suspend')
+                    ->label('Suspend')
+                    ->icon('heroicon-o-no-symbol')
+                    ->color('warning')
+                    ->visible(fn (UnifiedUserRecord $record): bool =>
+                        ! $this->isProtected($record)
+                        && ($record->lifecycle_status ?? 'active')
+                            === 'active'
+                    )
+                    ->requiresConfirmation()
+                    ->modalHeading('Suspend akun pengguna?')
+                    ->modalDescription(
+                        'Pengguna akan dikeluarkan dan tidak dapat login.'
+                    )
+                    ->action(fn (UnifiedUserRecord $record) =>
+                        $this->runLifecycle('suspend', $record)
+                    ),
+
+                Tables\Actions\Action::make('activate')
+                    ->label('Aktifkan')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn (UnifiedUserRecord $record): bool =>
+                        ! $this->isProtected($record)
+                        && ($record->lifecycle_status ?? 'active')
+                            === 'suspended'
+                    )
+                    ->requiresConfirmation()
+                    ->action(fn (UnifiedUserRecord $record) =>
+                        $this->runLifecycle('activate', $record)
+                    ),
+
+                Tables\Actions\Action::make('archive')
+                    ->label('Hapus')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->visible(fn (UnifiedUserRecord $record): bool =>
+                        ! $this->isProtected($record)
+                    )
+                    ->requiresConfirmation()
+                    ->modalHeading('Hapus akun dari panel?')
+                    ->modalDescription(
+                        'Akun akan diarsipkan dan akses login diblokir. '
+                        .'Data CRM tetap disimpan agar dapat dipulihkan.'
+                    )
+                    ->modalSubmitActionLabel('Ya, hapus akun')
+                    ->action(fn (UnifiedUserRecord $record) =>
+                        $this->runLifecycle('archive', $record)
+                    ),
             ])
             ->bulkActions([])
             ->paginationPageOptions([10, 20, 50])
@@ -132,9 +393,88 @@ class AllUsers extends Page implements HasTable
         ))->onEachSide(0);
     }
 
+    private function isProtected(
+        UnifiedUserRecord $record
+    ): bool {
+        if (
+            strtolower(trim((string) $record->email))
+            === 'lubelicorporation@gmail.com'
+        ) {
+            return true;
+        }
+
+        if (blank($record->publisher_user_id)) {
+            return false;
+        }
+
+        $publisher = \App\Models\User::withTrashed()
+            ->find((int) $record->publisher_user_id);
+
+        return $publisher?->is_admin === true
+            || (int) $record->publisher_user_id
+                === (int) auth()->id();
+    }
+
+    private function runLifecycle(
+        string $operation,
+        UnifiedUserRecord $record
+    ): void {
+        try {
+            $service = app(UserLifecycleService::class);
+
+            match ($operation) {
+                'suspend' => $service->suspend($record),
+                'activate' => $service->activate($record),
+                'archive' => $service->archive($record),
+                default => throw new \RuntimeException(
+                    'Operasi tidak dikenal.'
+                ),
+            };
+
+            $this->resetTable();
+
+            Notification::make()
+                ->success()
+                ->title(match ($operation) {
+                    'suspend' => 'Akun berhasil disuspend',
+                    'activate' => 'Akun berhasil diaktifkan',
+                    default => 'Akun berhasil dihapus dari panel',
+                })
+                ->send();
+        } catch (Throwable $exception) {
+            report($exception);
+
+            Notification::make()
+                ->danger()
+                ->title('Tindakan gagal')
+                ->body($exception->getMessage())
+                ->send();
+        }
+    }
+
+    protected function resolveTableRecord(
+        ?string $key
+    ): ?Model {
+        if ($key === null || $key === '') {
+            return null;
+        }
+
+        return $this->getTableRecords()->first(
+            fn (Model $record): bool =>
+                (string) $record->getKey() === (string) $key
+        );
+    }
+
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('createAccount')
+                ->label('Tambah Pengguna')
+                ->icon('heroicon-o-user-plus')
+                ->color('primary')
+                ->url(fn (): string => route(
+                    'admin.user-provisioning.create'
+                )),
             Action::make('refresh')->label('Refresh data')->icon('heroicon-o-arrow-path')->action(function (): void {
                 app(CrmUserDirectoryService::class)->flushCache();
                 $this->resetTable();

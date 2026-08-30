@@ -188,12 +188,15 @@ export function TemplateManager() {
   }, [authLoading, user?.id]);
 
   async function fetchTemplates(userId: string) {
+    void userId;
     try {
       setLoading(true);
+      // message_templates is account/workspace scoped by RLS.
+      // Settings is the source of truth and shows every template status.
+      // Inbox reads from this same dataset, filtered to APPROVED only.
       const { data, error } = await supabase
         .from('message_templates')
         .select('*')
-        .eq('user_id', userId)
         .order('created_at', { ascending: false });
       if (error) throw error;
       setTemplates(data || []);

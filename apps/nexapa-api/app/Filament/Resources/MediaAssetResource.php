@@ -29,7 +29,7 @@ class MediaAssetResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Media Assets';
 
-    protected static ?string $navigationGroup = 'Media';
+    protected static ?string $navigationGroup = 'Konten & Website';
 
     public static function shouldRegisterNavigation(): bool
     {

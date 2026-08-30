@@ -28,6 +28,34 @@ final readonly class CrmUserData
         public array $summary = [],
     ) {}
 
+    /** @param array<string, mixed> $data */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            id: (string) ($data['id'] ?? ''),
+            name: (string) ($data['name'] ?? 'User CRM'),
+            email: (string) ($data['email'] ?? ''),
+            avatarUrl: self::nullableString($data['avatar_url'] ?? null),
+            provider: self::nullableString($data['provider'] ?? null),
+            emailConfirmedAt: self::nullableString($data['email_confirmed_at'] ?? null),
+            lastSignInAt: self::nullableString($data['last_sign_in_at'] ?? null),
+            createdAt: self::nullableString($data['created_at'] ?? null),
+            updatedAt: self::nullableString($data['updated_at'] ?? null),
+            accountId: self::nullableString($data['account_id'] ?? null),
+            accountName: self::nullableString($data['account_name'] ?? null),
+            accountRole: self::nullableString($data['account_role'] ?? null),
+            accountOwnerUserId: self::nullableString($data['account_owner_user_id'] ?? null),
+            memberCount: is_numeric($data['member_count'] ?? null) ? (int) $data['member_count'] : null,
+            presenceLastSeenAt: self::nullableString($data['presence_last_seen_at'] ?? null),
+            whatsappPhoneNumberId: self::nullableString($data['whatsapp_phone_number_id'] ?? null),
+            whatsappWabaId: self::nullableString($data['whatsapp_waba_id'] ?? null),
+            whatsappStatus: self::nullableString($data['whatsapp_status'] ?? null),
+            whatsappConnectedAt: self::nullableString($data['whatsapp_connected_at'] ?? null),
+            whatsappRegisteredAt: self::nullableString($data['whatsapp_registered_at'] ?? null),
+            summary: is_array($data['summary'] ?? null) ? $data['summary'] : [],
+        );
+    }
+
     public function toArray(): array
     {
         return [
@@ -57,5 +85,10 @@ final readonly class CrmUserData
             'summary' => $this->summary,
             'product' => 'CRM',
         ];
+    }
+
+    private static function nullableString(mixed $value): ?string
+    {
+        return is_string($value) && trim($value) !== '' ? trim($value) : null;
     }
 }

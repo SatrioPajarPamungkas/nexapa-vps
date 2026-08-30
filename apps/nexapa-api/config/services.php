@@ -35,6 +35,9 @@ return [
         ],
     ],
 
+    'google_auth_enabled' =>
+        env('GOOGLE_AUTH_ENABLED', false),
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
@@ -46,6 +49,15 @@ return [
         'service_role_key' => env('CRM_SUPABASE_SERVICE_ROLE_KEY'),
         'timeout' => (int) env('CRM_SUPABASE_TIMEOUT', 10),
         'cache_ttl' => (int) env('CRM_SUPABASE_CACHE_TTL', 45),
+    ],
+
+    'nexapa_internal' => [
+        'entitlement_key' =>
+            env('NEXAPA_ENTITLEMENT_KEY'),
+        'crm_auth_key' =>
+            env('NEXAPA_CRM_AUTH_KEY'),
+        'owner_crm_user_id' =>
+            env('NEXAPA_OWNER_CRM_USER_ID'),
     ],
 
 ];

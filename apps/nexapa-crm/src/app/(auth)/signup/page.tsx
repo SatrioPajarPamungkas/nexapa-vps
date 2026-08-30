@@ -3,21 +3,16 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { MessageSquare, CheckCircle, UsersRound } from "lucide-react";
+  CheckCircle,
+  Eye,
+  EyeOff,
+  Info,
+  Lock,
+  Mail,
+  User,
+} from "lucide-react";
 
-// `useSearchParams` opts the component out of static prerendering
-// unless wrapped in Suspense — same pattern as /login.
 export default function SignupPage() {
   return (
     <Suspense fallback={null}>
@@ -28,24 +23,38 @@ export default function SignupPage() {
 
 function SignupPageInner() {
   const searchParams = useSearchParams();
-  // When the user lands here from `/join/<token>` we carry the
-  // invite token in the query so it survives the signup → email
-  // verification → redirect round-trip. `emailRedirectTo` below
-  // points back at /join/<token> so the user lands on the redeem
-  // step after verifying instead of being dropped on /dashboard.
   const inviteToken = searchParams.get("invite");
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const supabase = createClient();
+  const [
+    confirmPassword,
+    setConfirmPassword,
+  ] = useState("");
+  const [
+    showPassword,
+    setShowPassword,
+  ] = useState(false);
+  const [
+    showConfirmPassword,
+    setShowConfirmPassword,
+  ] = useState(false);
+  const [termsAccepted, setTermsAccepted] =
+    useState(false);
+  const [remember, setRemember] =
+    useState(false);
+  const [error, setError] =
+    useState<string | null>(null);
+  const [loading, setLoading] =
+    useState(false);
+  const [success, setSuccess] =
+    useState(false);
 
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSignup = async (
+    event: React.FormEvent,
+  ) => {
+    event.preventDefault();
     setError(null);
 
     if (password !== confirmPassword) {
@@ -53,192 +62,370 @@ function SignupPageInner() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
+    if (password.length < 8) {
+      setError(
+        "Password must be at least 8 characters",
+      );
+      return;
+    }
+
+    if (!termsAccepted) {
+      setError(
+        "You must accept the Terms and Privacy Policy",
+      );
       return;
     }
 
     setLoading(true);
 
-    // If we have an invite token, point Supabase's verification
-    // email back at the join page so the user can accept after
-    // verifying. Without a token, Supabase uses its default
-    // redirect (the app root).
-    const emailRedirectTo = inviteToken
-      ? `${window.location.origin}/join/${encodeURIComponent(inviteToken)}`
-      : undefined;
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
+    try {
+      const response = await fetch(
+        "/api/auth/nexapa-register",
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: fullName,
+            email,
+            password,
+            password_confirmation:
+              confirmPassword,
+            terms_accepted: termsAccepted,
+            remember,
+          }),
         },
-        ...(emailRedirectTo ? { emailRedirectTo } : {}),
-      },
-    });
+      );
 
-    if (error) {
-      setError(error.message);
+      const result = await response.json().catch(
+        () => ({
+          success: false,
+          message:
+            "Respons registrasi tidak valid.",
+        }),
+      );
+
+      if (!response.ok || !result.success) {
+        setError(
+          result.message ??
+            "Registrasi akun gagal.",
+        );
+        return;
+      }
+
+      setSuccess(true);
+    } catch {
+      setError(
+        "Layanan registrasi tidak dapat dihubungi. Silakan coba lagi.",
+      );
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setSuccess(true);
-    setLoading(false);
   };
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md border-border bg-card">
-          <CardHeader className="items-center text-center">
-            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-              <CheckCircle className="h-6 w-6 text-primary" />
-            </div>
-            <CardTitle className="text-xl text-foreground">
-              Check your email
-            </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              We&apos;ve sent a confirmation link to{" "}
-              <span className="text-foreground">{email}</span>. Please check your
-              inbox and click the link to verify your account.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link
-              href={
-                inviteToken
-                  ? `/login?invite=${encodeURIComponent(inviteToken)}`
-                  : "/login"
-              }
-            >
-              <Button
-                variant="outline"
-                className="w-full border-border text-muted-foreground hover:bg-muted hover:text-foreground"
-              >
-                Back to sign in
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+      <div className="w-full max-w-[420px]">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+            <CheckCircle className="h-6 w-6" />
+          </div>
+
+          <h1 className="mt-5 text-[22px] font-semibold tracking-tight text-slate-900">
+            Check your email
+          </h1>
+
+          <p className="mt-2 text-[13px] leading-6 text-slate-500">
+            Nexapa telah mengirim tautan verifikasi ke{" "}
+            <span className="font-medium text-slate-800">
+              {email}
+            </span>
+            . Verifikasi email sebelum login.
+          </p>
+
+          <Link
+            href={
+              inviteToken
+                ? `/login?invite=${encodeURIComponent(inviteToken)}`
+                : "/login"
+            }
+            className="mt-6 inline-flex h-10 w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-medium text-slate-700 transition hover:bg-slate-50"
+          >
+            Back to sign in
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md border-border bg-card">
-        <CardHeader className="items-center text-center">
-          <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            {inviteToken ? (
-              <UsersRound className="h-6 w-6 text-primary" />
-            ) : (
-              <MessageSquare className="h-6 w-6 text-primary" />
-            )}
-          </div>
-          <CardTitle className="text-xl text-foreground">
-            {inviteToken ? "Create account & join" : "Create account"}
-          </CardTitle>
-          <CardDescription className="text-muted-foreground">
+    <div className="w-full max-w-[420px]">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+        <div className="mb-6">
+          <h1 className="text-[22px] font-semibold tracking-tight text-slate-900">
             {inviteToken
-              ? "Verify your email, then accept the invitation to join your team."
-              : "Get started with CRM Template for WhatsApp"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignup} className="flex flex-col gap-4">
-            {error && (
-              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-                {error}
-              </div>
-            )}
+              ? "Create account & join"
+              : "Create an account"}
+          </h1>
+        </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="fullName" className="text-muted-foreground">
-                Full name
-              </Label>
-              <Input
+        <form
+          onSubmit={handleSignup}
+          className="space-y-4"
+          noValidate
+        >
+          {error && (
+            <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-[13px] leading-5 text-red-900">
+              <Info
+                className="mt-0.5 h-4 w-4 shrink-0"
+                aria-hidden="true"
+              />
+              <div>{error}</div>
+            </div>
+          )}
+
+          <div>
+            <label
+              htmlFor="fullName"
+              className="mb-1.5 block text-[12px] font-medium text-slate-700"
+            >
+              Full Name
+            </label>
+
+            <div className="relative">
+              <User
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                aria-hidden="true"
+              />
+
+              <input
                 id="fullName"
                 type="text"
+                autoComplete="name"
                 placeholder="John Doe"
                 value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
+                onChange={(event) =>
+                  setFullName(event.target.value)
+                }
                 required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
+                className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-[14px] text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
+          </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-muted-foreground">
-                Email
-              </Label>
-              <Input
+          <div>
+            <label
+              htmlFor="email"
+              className="mb-1.5 block text-[12px] font-medium text-slate-700"
+            >
+              Email
+            </label>
+
+            <div className="relative">
+              <Mail
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                aria-hidden="true"
+              />
+
+              <input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="you@workspace.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) =>
+                  setEmail(event.target.value)
+                }
                 required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
+                className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-[14px] text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
+          </div>
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password" className="text-muted-foreground">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="At least 6 characters"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+          <PasswordInput
+            id="password"
+            label="Password"
+            value={password}
+            visible={showPassword}
+            onChange={setPassword}
+            onToggle={() =>
+              setShowPassword((value) => !value)
+            }
+          />
 
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="confirmPassword" className="text-muted-foreground">
-                Confirm password
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Repeat your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
-              />
-            </div>
+          <PasswordInput
+            id="confirmPassword"
+            label="Confirm Password"
+            value={confirmPassword}
+            visible={showConfirmPassword}
+            onChange={setConfirmPassword}
+            onToggle={() =>
+              setShowConfirmPassword(
+                (value) => !value,
+              )
+            }
+          />
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="mt-2 h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-            >
-              {loading ? "Creating account..." : "Create account"}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link
-              href={
-                inviteToken
-                  ? `/login?invite=${encodeURIComponent(inviteToken)}`
-                  : "/login"
+          <div className="flex items-start gap-2">
+            <input
+              id="terms"
+              type="checkbox"
+              checked={termsAccepted}
+              onChange={(event) =>
+                setTermsAccepted(
+                  event.target.checked,
+                )
               }
-              className="text-primary hover:text-primary/80"
+              style={{
+                colorScheme: "light",
+                accentColor: "#2563eb",
+              }}
+              className="mt-0.5 h-4 w-4 rounded border border-slate-300 bg-white text-blue-600 focus:ring-2 focus:ring-blue-600/20"
+            />
+
+            <label
+              htmlFor="terms"
+              className="text-[13px] text-slate-600"
             >
-              Sign in
-            </Link>
-          </p>
-        </CardContent>
-      </Card>
+              I agree to the{" "}
+              <a
+                href="#"
+                className="text-blue-600 hover:underline"
+              >
+                Terms of Service
+              </a>{" "}
+              and{" "}
+              <a
+                href="#"
+                className="text-blue-600 hover:underline"
+              >
+                Privacy Policy
+              </a>
+            </label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input
+              id="remember"
+              type="checkbox"
+              checked={remember}
+              onChange={(event) =>
+                setRemember(event.target.checked)
+              }
+              style={{
+                colorScheme: "light",
+                accentColor: "#2563eb",
+              }}
+              className="h-4 w-4 rounded border border-slate-300 bg-white text-blue-600 focus:ring-2 focus:ring-blue-600/20"
+            />
+
+            <label
+              htmlFor="remember"
+              className="text-[13px] text-slate-600"
+            >
+              Remember me on this device
+            </label>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-slate-900 px-4 text-[13px] font-medium text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading
+              ? "Creating Account..."
+              : "Create Account"}
+          </button>
+        </form>
+
+        <div className="mt-6 text-center text-[13px] text-slate-600">
+          Already have an account?{" "}
+          <Link
+            href={
+              inviteToken
+                ? `/login?invite=${encodeURIComponent(inviteToken)}`
+                : "/login"
+            }
+            className="font-medium text-blue-600 hover:underline"
+          >
+            Sign in
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PasswordInput({
+  id,
+  label,
+  value,
+  visible,
+  onChange,
+  onToggle,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  visible: boolean;
+  onChange: (value: string) => void;
+  onToggle: () => void;
+}) {
+  return (
+    <div>
+      <label
+        htmlFor={id}
+        className="mb-1.5 block text-[12px] font-medium text-slate-700"
+      >
+        {label}
+      </label>
+
+      <div className="relative">
+        <Lock
+          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+          aria-hidden="true"
+        />
+
+        <input
+          id={id}
+          type={visible ? "text" : "password"}
+          autoComplete="new-password"
+          placeholder="••••••••"
+          value={value}
+          onChange={(event) =>
+            onChange(event.target.value)
+          }
+          required
+          minLength={8}
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-10 text-[14px] text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+        />
+
+        <button
+          type="button"
+          aria-label={
+            visible
+              ? "Hide password"
+              : "Show password"
+          }
+          onClick={onToggle}
+          className="absolute right-2 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+        >
+          {visible ? (
+            <EyeOff
+              className="h-4 w-4"
+              aria-hidden="true"
+            />
+          ) : (
+            <Eye
+              className="h-4 w-4"
+              aria-hidden="true"
+            />
+          )}
+        </button>
+      </div>
     </div>
   );
 }

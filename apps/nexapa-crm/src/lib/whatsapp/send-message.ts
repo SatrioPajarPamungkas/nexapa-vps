@@ -230,16 +230,25 @@ export async function sendMessageToConversation(
   }
 
   const contact = conversation.contact;
-  if (!contact?.phone) {
+
+  // Meta's `to` accepts either a phone number or a WhatsApp
+  // Business-Scoped User ID. Prefer phone while available so the
+  // existing phone-variant recovery remains intact; fall back to BSUID
+  // for username users whose number is hidden.
+  const hasPhone = !!contact?.phone;
+  const recipient = hasPhone
+    ? sanitizePhoneForMeta(contact.phone)
+    : contact?.whatsapp_user_id?.trim();
+
+  if (!recipient) {
     throw new SendMessageError(
       'bad_request',
-      'Contact phone number not found',
+      'Contact has neither a phone number nor WhatsApp user ID',
       400
     );
   }
 
-  const sanitizedPhone = sanitizePhoneForMeta(contact.phone);
-  if (!isValidE164(sanitizedPhone)) {
+  if (hasPhone && !isValidE164(recipient)) {
     throw new SendMessageError(
       'bad_request',
       'Invalid phone number format',
@@ -329,12 +338,12 @@ export async function sendMessageToConversation(
     templateRow = data ?? null;
   }
 
-  const attempt = async (phone: string): Promise<string> => {
+  const attempt = async (recipient: string): Promise<string> => {
     if (messageType === 'template') {
       const result = await sendTemplateMessage({
         phoneNumberId: config.phone_number_id,
         accessToken,
-        to: phone,
+        to: recipient,
         templateName: templateName!,
         language: templateLanguage || 'en_US',
         template: templateRow ?? undefined,
@@ -348,7 +357,7 @@ export async function sendMessageToConversation(
       const result = await sendMediaMessage({
         phoneNumberId: config.phone_number_id,
         accessToken,
-        to: phone,
+        to: recipient,
         kind: messageType as MediaKind,
         link: mediaUrl!,
         caption: contentText || undefined,
@@ -363,7 +372,7 @@ export async function sendMessageToConversation(
         const result = await sendInteractiveButtons({
           phoneNumberId: config.phone_number_id,
           accessToken,
-          to: phone,
+          to: recipient,
           bodyText: p.body,
           headerText: p.header || undefined,
           footerText: p.footer || undefined,
@@ -375,7 +384,7 @@ export async function sendMessageToConversation(
       const result = await sendInteractiveList({
         phoneNumberId: config.phone_number_id,
         accessToken,
-        to: phone,
+        to: recipient,
         bodyText: p.body,
         buttonLabel: p.button_label,
         headerText: p.header || undefined,
@@ -388,56 +397,69 @@ export async function sendMessageToConversation(
     const result = await sendTextMessage({
       phoneNumberId: config.phone_number_id,
       accessToken,
-      to: phone,
+      to: recipient,
       text: contentText!,
       contextMessageId,
     });
     return result.messageId;
   };
 
-  // Send via Meta — retry across phone-number variants if Meta rejects
-  // with "recipient not in allowed list"; persist a working variant
-  // back to the contact so the next send goes straight through.
+  // Send via Meta. Phone recipients keep the existing variant-retry
+  // behaviour. BSUID recipients must be sent exactly as provided and
+  // must never be passed through phone normalization/variant logic.
   let waMessageId = '';
-  let workingPhone = sanitizedPhone;
+
   try {
-    const variants = phoneVariants(sanitizedPhone);
-    let lastError: unknown = null;
+    if (hasPhone) {
+      let workingPhone = recipient;
+      const variants = phoneVariants(recipient);
+      let lastError: unknown = null;
 
-    for (const variant of variants) {
-      try {
-        waMessageId = await attempt(variant);
-        workingPhone = variant;
-        lastError = null;
-        break;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        if (!isRecipientNotAllowedError(message)) {
-          throw err;
+      for (const variant of variants) {
+        try {
+          waMessageId = await attempt(variant);
+          workingPhone = variant;
+          lastError = null;
+          break;
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          if (!isRecipientNotAllowedError(message)) {
+            throw err;
+          }
+          lastError = err;
+          console.warn(
+            `[send-message] variant "${variant}" rejected by Meta, trying next…`
+          );
         }
-        lastError = err;
-        console.warn(
-          `[send-message] variant "${variant}" rejected by Meta, trying next…`
-        );
       }
-    }
 
-    if (lastError) throw lastError;
+      if (lastError) throw lastError;
+
+      if (workingPhone !== recipient) {
+        console.log(
+          `[send-message] Auto-corrected contact phone: ${recipient} → ${workingPhone}`
+        );
+
+        await db
+          .from('contacts')
+          .update({ phone: workingPhone })
+          .eq('id', contact.id);
+      }
+    } else {
+      // Username-only WhatsApp contact: recipient is the BSUID.
+      waMessageId = await attempt(recipient);
+    }
   } catch (err) {
     const message =
       err instanceof Error ? err.message : 'Unknown Meta API error';
-    console.error('[send-message] Meta send failed for all variants:', message);
-    throw new SendMessageError('meta_error', `Meta API error: ${message}`, 502);
-  }
 
-  if (workingPhone !== sanitizedPhone) {
-    console.log(
-      `[send-message] Auto-corrected contact phone: ${sanitizedPhone} → ${workingPhone}`
+    console.error('[send-message] Meta send failed:', message);
+
+    throw new SendMessageError(
+      'meta_error',
+      `Meta API error: ${message}`,
+      502
     );
-    await db
-      .from('contacts')
-      .update({ phone: workingPhone })
-      .eq('id', contact.id);
   }
 
   // Persist the sent message. Field names MUST match the messages

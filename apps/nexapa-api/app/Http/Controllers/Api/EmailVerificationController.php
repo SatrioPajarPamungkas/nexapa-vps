@@ -11,45 +11,35 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EmailVerificationController extends Controller
 {
-    public function verify(Request $request, $id, $hash): JsonResponse
-    {
-        $signature = $request->query('signature');
-        
-        if (!$signature) {
-            \Log::debug('Verification failed: no signature');
+    public function verify(
+        Request $request,
+        $id,
+        $hash
+    ): JsonResponse {
+        if (! $request->hasValidSignature()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid or expired verification link.',
+                'message' =>
+                    'Invalid or expired verification link.',
             ], Response::HTTP_FORBIDDEN);
         }
 
         $user = User::find($id);
 
-        if (!$user) {
-            \Log::debug("Verification failed: user $id not found");
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'User not found.',
             ], Response::HTTP_NOT_FOUND);
         }
 
-        if (sha1($user->getEmailForVerification()) !== $hash) {
-            \Log::debug("Verification failed: hash mismatch for user $id");
+        if (! hash_equals(
+            sha1($user->getEmailForVerification()),
+            (string) $hash
+        )) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid verification hash.',
-            ], Response::HTTP_FORBIDDEN);
-        }
-
-        // Validate signature manually
-        $expectedSignature = hash_hmac('sha256', "{$id}|{$hash}", config('app.key'));
-        
-        \Log::debug("Verification attempt: id=$id, hash=$hash, signature=$signature, expected=$expectedSignature, match=" . (hash_equals($expectedSignature, $signature) ? 'yes' : 'no'));
-        
-        if (!hash_equals($expectedSignature, $signature)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid or expired verification link.',
             ], Response::HTTP_FORBIDDEN);
         }
 

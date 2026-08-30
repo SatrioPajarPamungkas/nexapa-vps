@@ -21,7 +21,7 @@ class ConnectedAccountResource extends Resource
 
     protected static ?string $navigationLabel = 'Connected Accounts';
 
-    protected static ?string $navigationGroup = 'Accounts';
+    protected static ?string $navigationGroup = 'Publisher';
 
     protected static ?int $navigationSort = 3;
 

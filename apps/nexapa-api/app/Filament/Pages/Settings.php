@@ -29,13 +29,13 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
 
     protected static string $view = 'filament.pages.settings';
 
-    protected static ?string $navigationLabel = 'Settings';
+    protected static ?string $navigationLabel = 'Pengaturan';
 
     protected static ?int $navigationSort = 8;
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static ?string $navigationGroup = 'Operasional Sistem';
 
-    protected static ?string $title = 'Settings';
+    protected static ?string $title = 'Pengaturan Nexapa';
 
     public ?array $data = [];
 
@@ -57,12 +57,12 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
 
         return $form
             ->schema([
-                Tabs::make('Settings')
+                Tabs::make('Pengaturan')
                     ->tabs([
-                        Tabs\Tab::make('General')
+                        Tabs\Tab::make('Umum')
                             ->icon('heroicon-o-globe-alt')
                             ->schema([
-                                Section::make('Application Settings')
+                                Section::make('Informasi Aplikasi')
                                     ->schema([
                                         TextInput::make('app_name')
                                             ->label('Application Name')
@@ -87,7 +87,7 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
                                     ])->columns(2),
                                 Section::make('Support')
                                     ->schema([
-                                        TextInput::make('support_email')
+                                        TextInput::make('configured_support_email')
                                             ->label('Support Email')
                                             ->email()
                                             ->default(config('mail.from.address'))
@@ -96,7 +96,7 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
                                     ]),
                             ]),
 
-                        Tabs\Tab::make('Publishing Limits')
+                        Tabs\Tab::make('Batas Publisher')
                             ->icon('heroicon-o-clock')
                             ->schema([
                                 Section::make('Upload Limits')
@@ -230,7 +230,7 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
                                     ]),
                             ]),
 
-                        Tabs\Tab::make('Other Platforms')
+                        Tabs\Tab::make('Platform Lain')
                             ->icon('heroicon-o-globe-alt')
                             ->schema([
                                 Section::make('YouTube')
@@ -247,7 +247,7 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
                                     ]),
                             ]),
 
-                        Tabs\Tab::make('Storage & Media')
+                        Tabs\Tab::make('Penyimpanan & Media')
                             ->icon('heroicon-o-photo')
                             ->schema([
                                 Section::make('Storage Configuration')
@@ -259,7 +259,7 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
                                             ->helperText('From config/filesystems.php'),
                                         TextInput::make('allowed_storage_disks')
                                             ->label('Allowed Storage Disks')
-                                            ->default(implode(', ', config('nexapa.allowed_storage_disks')))
+                                            ->default(implode(', ', \Illuminate\Support\Arr::wrap(config('nexapa.allowed_storage_disks'))))
                                             ->disabled()
                                             ->helperText('From config/nexapa.php'),
                                         TextInput::make('php_upload_max_filesize')
@@ -282,7 +282,7 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
                                     ])->columns(2),
                             ]),
 
-                        Tabs\Tab::make('Queue & Scheduler')
+                        Tabs\Tab::make('Worker & Jadwal')
                             ->icon('heroicon-o-queue-list')
                             ->schema([
                                 Section::make('Queue Configuration (Read-only)')
@@ -326,7 +326,7 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
                                     ]),
                             ]),
 
-                        Tabs\Tab::make('Security')
+                        Tabs\Tab::make('Keamanan')
                             ->icon('heroicon-o-shield-check')
                             ->schema([
                                 Section::make('Application Security')

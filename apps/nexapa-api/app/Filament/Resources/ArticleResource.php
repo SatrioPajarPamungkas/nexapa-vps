@@ -21,7 +21,7 @@ class ArticleResource extends Resource
         'heroicon-o-newspaper';
 
     protected static ?string $navigationGroup =
-        'Konten Website';
+        'Konten & Website';
 
     protected static ?string $navigationLabel =
         'Artikel';

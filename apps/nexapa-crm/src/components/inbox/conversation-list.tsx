@@ -23,6 +23,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ConversationListProps {
+  accountId: string | null;
   activeConversationId: string | null;
   onSelect: (conversation: Conversation) => void;
   conversations: Conversation[];
@@ -47,6 +48,7 @@ const STATUS_COLORS: Record<ConversationStatus, string> = {
 type InboxFilter = ConversationStatus | "all" | "unread";
 
 export function ConversationList({
+  accountId,
   activeConversationId,
   onSelect,
   conversations,
@@ -91,6 +93,11 @@ export function ConversationList({
   });
 
   useEffect(() => {
+    if (!accountId) {
+      setLoading(false);
+      onConversationsLoadedRef.current([]);
+      return;
+    }
     const supabase = createClient();
     let cancelled = false;
 
@@ -98,6 +105,7 @@ export function ConversationList({
       const { data, error } = await supabase
         .from("conversations")
         .select(CONVERSATION_SELECT)
+        .eq("account_id", accountId)
         .order("last_message_at", { ascending: false });
 
       if (cancelled) return;
@@ -124,7 +132,7 @@ export function ConversationList({
     // `resyncToken` is included so the parent can force a refetch when
     // the realtime channel reconnects or the tab regains focus — catches
     // up on any events sent while the WS was disconnected or throttled.
-  }, [resyncToken]);
+  }, [accountId, resyncToken]);
 
   // Tag definitions for the filter picker — loaded once so labels/colours
   // stay stable regardless of which conversations happen to be loaded.

@@ -25,7 +25,7 @@ class AdminActivityLogResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Activity Logs';
 
-    protected static ?string $navigationGroup = 'System';
+    protected static ?string $navigationGroup = 'Operasional Sistem';
 
     protected static ?string $recordTitleAttribute = 'title';
 

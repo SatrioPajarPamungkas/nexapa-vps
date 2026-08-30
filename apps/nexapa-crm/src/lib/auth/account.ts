@@ -87,8 +87,8 @@ export interface AccountContext {
   accountId: string;
   /** Caller's role within their account. */
   role: AccountRole;
-  /** Lightweight account meta — id + name. */
-  account: { id: string; name: string };
+  /** Lightweight account meta plus the platform-level access state. */
+  account: { id: string; name: string; platformStatus: "active" | "suspended" };
 }
 
 /**
@@ -149,7 +149,7 @@ export async function getCurrentAccount(): Promise<AccountContext> {
   // RLS, so it stays robust against cache staleness and older schemas.
   const { data: account, error: accountErr } = await supabase
     .from("accounts")
-    .select("id, name")
+    .select("id, name, platform_status")
     .eq("id", data.account_id)
     .maybeSingle();
 
@@ -162,13 +162,16 @@ export async function getCurrentAccount(): Promise<AccountContext> {
     // or an RLS gap. Same "can't scope this user" outcome as above.
     throw new ForbiddenError("Profile is not linked to an account");
   }
+  if (account.platform_status === "suspended") {
+    throw new ForbiddenError("This workspace has been suspended by Nexapa");
+  }
 
   return {
     supabase,
     userId: user.id,
     accountId: data.account_id,
     role: data.account_role,
-    account: { id: account.id, name: account.name },
+    account: { id: account.id, name: account.name, platformStatus: account.platform_status },
   };
 }
 

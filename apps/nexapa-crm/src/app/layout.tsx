@@ -22,16 +22,17 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "wacrm",
-    template: "%s — wacrm",
+    default: "Nexapa CRM",
+    template: "%s — Nexapa CRM",
   },
-  description: "Self-hostable CRM template for WhatsApp.",
+  description: "Nexapa CRM for WhatsApp customer communication.",
   robots: {
     index: false,
     follow: false,
   },
   icons: {
-    icon: [{ url: "/icon" }],
+    icon: [{ url: "/nexapa-favicon.svg?v=3", type: "image/svg+xml" }],
+    shortcut: ["/nexapa-favicon.svg?v=3"],
   },
   formatDetection: {
     email: false,

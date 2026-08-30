@@ -17,11 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'worker.token' => \App\Http\Middleware\EnsureWorkerToken::class,
             'guest.api' => \App\Http\Middleware\EnsureGuestApiAccess::class,
             'admin' => \App\Http\Middleware\EnsureAdminAccess::class,
+            'subscription.active' =>
+                \App\Http\Middleware\EnsureActiveSubscription::class,
         ]);
         $middleware->statefulApi();
 
         $middleware->redirectGuestsTo(
-            fn (Request $request): string => 'https://app.nexapa.me/login'
+            fn (Request $request): string => 'https://app.nexapa.app/login'
         );
     })
     ->withExceptions(function (Exceptions $exceptions): void {

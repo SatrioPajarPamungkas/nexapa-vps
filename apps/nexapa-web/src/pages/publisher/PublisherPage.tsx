@@ -7,6 +7,7 @@ import { PlatformSelector } from "@/features/publisher/components/PlatformSelect
 import { PublisherComingSoon } from "@/features/publisher/components/PublisherComingSoon";
 import { SaveDraftDialog } from "@/features/publisher/components/SaveDraftDialog";
 import { TikTokPublisherComposer } from "@/features/publisher/components/TikTokPublisherComposer";
+import { ShopeePublisherComposer } from "@/features/publisher/components/ShopeePublisherComposer";
 import { usePublisherWorkspaceWithBackend } from "@/features/publisher/hooks/usePublisherWorkspaceWithBackend";
 import { readMediaLibrarySelection, clearMediaLibrarySelectionIfMatches, type MediaLibraryTransferState } from "@/lib/media-library-transfer";
 import type { PublisherPlatform } from "@/features/publisher/publisher.types";
@@ -16,7 +17,16 @@ const platformNames: Record<PublisherPlatform, string> = { facebook: "Facebook",
 export function PublisherPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activePlatform, setActivePlatform] = useState<PublisherPlatform>("facebook");
+  const requestedPlatform = new URLSearchParams(location.search).get("platform");
+  const initialPlatform: PublisherPlatform =
+    requestedPlatform === "shopee" ||
+    requestedPlatform === "tiktok" ||
+    requestedPlatform === "youtube" ||
+    requestedPlatform === "facebook"
+      ? requestedPlatform
+      : "facebook";
+  const [activePlatform, setActivePlatform] =
+    useState<PublisherPlatform>(initialPlatform);
   const [pendingPlatform, setPendingPlatform] = useState<PublisherPlatform | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
@@ -74,6 +84,10 @@ export function PublisherPage() {
   }, [ws]);
 
   const requestPlatformChange = useCallback((platform: PublisherPlatform) => {
+    if (platform === "shopee") {
+      navigate("/shopee/videos/new");
+      return;
+    }
     if (platform === activePlatform) return;
     if (hasSwitchSensitiveContent) setPendingPlatform(platform);
     else switchPlatform(platform);
@@ -136,7 +150,7 @@ export function PublisherPage() {
       {activePlatform === "facebook" && <FacebookPublisherComposer workspace={ws} onOpenLibrary={() => navigate("/library")} onOpenAccounts={() => navigate("/accounts")} onSaveDraft={() => setShowSaveDialog(true)} pendingMediaLibraryTransfer={pendingMediaLibraryTransfer} onMediaLibraryTransferHydrated={handleMediaLibraryTransferHydrated} />}
       {activePlatform === "tiktok" && <TikTokPublisherComposer workspace={ws} onOpenLibrary={() => navigate("/library")} onOpenAccounts={() => navigate("/accounts")} onSaveDraft={() => setShowSaveDialog(true)} />}
       {activePlatform === "youtube" && <PublisherComingSoon platform="youtube" />}
-      {activePlatform === "shopee" && <PublisherComingSoon platform="shopee" />}
+      {activePlatform === "shopee" && <ShopeePublisherComposer />}
 
       <SaveDraftDialog open={showSaveDialog} onClose={() => setShowSaveDialog(false)} onSave={(name) => { ws.saveLocalDraft(name); setShowSaveDialog(false); }} initialName="" />
 

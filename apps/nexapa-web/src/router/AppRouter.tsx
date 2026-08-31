@@ -61,6 +61,12 @@ const SchedulerPage = lazy(() =>
   ),
 );
 
+const ShopeeWorkspacePage = lazy(() =>
+  import("@/pages/shopee/ShopeeWorkspacePage").then(
+    (module) => ({ default: module.ShopeeWorkspacePage }),
+  ),
+);
+
 const AffiliatePage = lazy(() =>
   import("@/pages/affiliate/AffiliatePage").then(
     (module) => ({ default: module.AffiliatePage }),
@@ -150,6 +156,14 @@ export function AppRouter() {
         />
         <Route path="/publisher" element={<PublisherPage />} />
         <Route path="/scheduler" element={<SchedulerPage />} />
+        <Route path="/shopee" element={<ShopeeWorkspacePage />} />
+        <Route path="/shopee/videos" element={<ShopeeWorkspacePage />} />
+        <Route path="/shopee/videos/new" element={<ShopeeWorkspacePage />} />
+        <Route path="/shopee/products" element={<ShopeeWorkspacePage />} />
+        <Route path="/shopee/drafts" element={<ShopeeWorkspacePage />} />
+        <Route path="/shopee/scheduled" element={<ShopeeWorkspacePage />} />
+        <Route path="/shopee/analytics" element={<ShopeeWorkspacePage />} />
+        <Route path="/shopee/settings" element={<ShopeeWorkspacePage />} />
         <Route path="/affiliate" element={<AffiliatePage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/settings" element={<SettingsPage />} />

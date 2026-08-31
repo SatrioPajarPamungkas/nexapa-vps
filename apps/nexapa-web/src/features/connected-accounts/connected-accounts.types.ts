@@ -1,6 +1,6 @@
-export type AccountPlatform = "tiktok" | "facebook";
+export type AccountPlatform = "tiktok" | "facebook" | "shopee";
 
-export type UiPlatform = AccountPlatform | "instagram" | "youtube" | "pinterest" | "shopee";
+export type UiPlatform = AccountPlatform | "instagram" | "youtube" | "pinterest";
 
 export type AccountStatus = "connected" | "expired" | "error" | "disconnected";
 
@@ -109,9 +109,11 @@ export const PLATFORM_DISPLAY: Record<UiPlatform, string> = {
 export const PLATFORM_COLOR: Record<AccountPlatform, string> = {
   tiktok: "bg-slate-900 text-white",
   facebook: "bg-blue-600 text-white",
+  shopee: "bg-orange-500 text-white",
 };
 
 export const PLATFORM_CONNECT_LABEL: Record<AccountPlatform, string> = {
   tiktok: "Connect TikTok",
   facebook: "Connect Facebook",
+  shopee: "Connect Shopee",
 };

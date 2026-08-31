@@ -9,6 +9,7 @@ import {
   Clock3,
   Settings,
   Code2,
+  ShoppingBag,
 } from "lucide-react";
 import type { NavGroup } from "@/types/navigation";
 
@@ -68,6 +69,12 @@ export const navigationGroups: NavGroup[] = [
         icon: BadgePercent,
         description: "Affiliate catalog & links",
       },
+      {
+        label: "Shopee",
+        href: "/shopee",
+        icon: ShoppingBag,
+        description: "Shopee Video & affiliate workspace",
+      },
     ],
   },
   {
@@ -106,6 +113,7 @@ export const routeLabels: Record<string, string> = {
   "/publisher": "Publisher",
   "/scheduler": "Scheduler",
   "/affiliate": "Affiliate",
+  "/shopee": "Shopee",
   "/history": "History",
   "/settings": "Settings",
   "/settings/appearance": "Appearance",

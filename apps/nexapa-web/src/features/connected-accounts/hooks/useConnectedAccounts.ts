@@ -244,17 +244,24 @@ export function useConnectedAccounts() {
     [accounts]
   );
 
+  const shopeeAccounts = useMemo(
+    () => accounts.filter((a) => a.platform === "shopee"),
+    [accounts]
+  );
+
   const counts = useMemo(() => ({
     tiktok: tiktokAccounts.length,
     facebook: facebookAccounts.length,
+    shopee: shopeeAccounts.length,
     total: accounts.length,
     defaults: accounts.filter((a) => a.is_default).length,
-  }), [tiktokAccounts, facebookAccounts, accounts]);
+  }), [tiktokAccounts, facebookAccounts, shopeeAccounts, accounts]);
 
   return {
     accounts,
     tiktokAccounts,
     facebookAccounts,
+    shopeeAccounts,
     counts,
     loading,
     feedback,

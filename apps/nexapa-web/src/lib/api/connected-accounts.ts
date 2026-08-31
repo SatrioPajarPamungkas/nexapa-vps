@@ -3,7 +3,7 @@
 
 import { apiFetch, initCsrf } from "@/lib/api/client";
 
-export type AccountPlatform = "tiktok" | "facebook";
+export type AccountPlatform = "tiktok" | "facebook" | "shopee";
 
 export type AccountStatus = "connected" | "expired" | "error" | "disconnected";
 

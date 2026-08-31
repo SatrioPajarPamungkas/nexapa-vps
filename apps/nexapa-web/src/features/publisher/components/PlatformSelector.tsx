@@ -31,7 +31,7 @@ const PLATFORM_OPTIONS: Array<{
   {
     value: "shopee",
     label: "Shopee",
-    description: "Post ke Shopee (coming soon)",
+    description: "Open dedicated Shopee workspace",
   },
 ];
 
@@ -126,9 +126,7 @@ export function PlatformSelector({
                 <div className="space-y-2">
                   {PLATFORM_OPTIONS.map((option) => {
                     const isActive = activePlatform === option.value;
-                    const isComingSoon =
-                      option.value === "youtube" ||
-                      option.value === "shopee";
+                    const isComingSoon = option.value === "youtube";
 
                     return (
                       <button

@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { Settings } from "lucide-react";
+import { Settings, ShieldCheck, Video, Package, ArrowRight } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { PageHeader } from "@/components/common/PageHeader";
 import { useConnectedAccounts } from "@/features/connected-accounts/hooks/useConnectedAccounts";
@@ -7,7 +7,7 @@ import { PlatformGrid } from "@/features/connected-accounts/components/PlatformG
 import { ConnectAccountDialog } from "@/features/connected-accounts/components/ConnectAccountDialog";
 import { ConnectedAccountsTable } from "@/features/connected-accounts/components/ConnectedAccountsTable";
 
-type AccountPlatformFilter = "all" | "tiktok" | "facebook";
+type AccountPlatformFilter = "all" | "tiktok" | "facebook" | "shopee";
 
 export function ConnectedAccountsPage() {
   const hook = useConnectedAccounts();
@@ -21,8 +21,8 @@ export function ConnectedAccountsPage() {
     const synced = searchParams.get("synced");
     const oauthError = searchParams.get("oauth_error");
 
-    const hasConnected = connected === "tiktok" || connected === "facebook";
-    const hasReconnected = reconnected === "tiktok" || reconnected === "facebook";
+    const hasConnected = connected === "tiktok" || connected === "facebook" || connected === "shopee";
+    const hasReconnected = reconnected === "tiktok" || reconnected === "facebook" || reconnected === "shopee";
     const hasSynced = synced === "facebook";
     const hasError = !!oauthError;
 
@@ -158,26 +158,30 @@ export function ConnectedAccountsPage() {
                 onPlatformSelect={setSelectedPlatform}
                 counts={hook.counts}
               />
-              <ConnectedAccountsTable
-                filteredAccounts={
-                  selectedPlatform === "all"
-                    ? hook.accounts
-                    : hook.accounts.filter((a) => a.platform === selectedPlatform)
-                }
-                selectedPlatform={selectedPlatform}
-                onRefresh={hook.handleRefresh}
-                onSetDefault={hook.handleSetDefault}
-                onRemove={hook.handleRemove}
-                onReconnect={hook.handleReconnect}
-                actionLoading={{
-                  reconnectingId: hook.loading.reconnectingId,
-                  refreshingId: hook.loading.refreshingId,
-                  settingDefaultId: hook.loading.settingDefaultId,
-                  removingId: hook.loading.removingId,
-                }}
-                onConnect={hook.openConnectDialog}
-                onConnectPlatform={hook.handleConnectPlatform}
-              />
+              {selectedPlatform === "shopee" ? (
+                <ShopeeApprovalPanel />
+              ) : (
+                <ConnectedAccountsTable
+                  filteredAccounts={
+                    selectedPlatform === "all"
+                      ? hook.accounts
+                      : hook.accounts.filter((a) => a.platform === selectedPlatform)
+                  }
+                  selectedPlatform={selectedPlatform}
+                  onRefresh={hook.handleRefresh}
+                  onSetDefault={hook.handleSetDefault}
+                  onRemove={hook.handleRemove}
+                  onReconnect={hook.handleReconnect}
+                  actionLoading={{
+                    reconnectingId: hook.loading.reconnectingId,
+                    refreshingId: hook.loading.refreshingId,
+                    settingDefaultId: hook.loading.settingDefaultId,
+                    removingId: hook.loading.removingId,
+                  }}
+                  onConnect={hook.openConnectDialog}
+                  onConnectPlatform={hook.handleConnectPlatform}
+                />
+              )}
             </div>
           </div>
         )}
@@ -196,5 +200,45 @@ export function ConnectedAccountsPage() {
         {hook.feedback?.message}
       </div>
     </div>
+  );
+}
+
+
+function ShopeeApprovalPanel() {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-orange-300/30 bg-white/12 shadow-card backdrop-blur-2xl">
+      <div className="border-b border-white/15 bg-gradient-to-r from-orange-500/12 via-white/5 to-amber-400/10 px-5 py-5 sm:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-sm"><ShieldCheck className="h-5 w-5" /></div>
+            <div><h2 className="text-[15px] font-semibold text-slate-950">Shopee Affiliate & Video</h2><p className="mt-1 text-[12px] text-slate-600">Workspace UI is ready. OAuth activation is waiting for Shopee Open Platform approval.</p></div>
+          </div>
+          <span className="w-fit rounded-full border border-amber-400/30 bg-amber-400/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-900">Approval pending</span>
+        </div>
+      </div>
+      <div className="grid gap-3 p-5 sm:grid-cols-3 sm:p-6">
+        {[{icon: Video,title:"Shopee Video",text:"Prepare videos and captions."},{icon: Package,title:"Affiliate products",text:"Prepare product links for attachment."},{icon: ShieldCheck,title:"Secure authorization",text:"Tokens will remain on the Nexapa API."}].map(({icon: Icon,title,text}) => <div key={title} className="rounded-xl border border-white/20 bg-white/10 p-4"><Icon className="h-5 w-5 text-orange-600"/><h3 className="mt-3 text-[12px] font-semibold text-slate-900">{title}</h3><p className="mt-1 text-[11px] leading-4 text-slate-600">{text}</p></div>)}
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/15 px-5 py-4 sm:px-6">
+        <p className="text-[11px] text-slate-600">Connect becomes available automatically after backend credentials and User-type API access are configured.</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            disabled
+            title="Tersedia setelah profil developer Shopee disetujui"
+            className="inline-flex h-9 cursor-not-allowed items-center gap-2 rounded-xl border border-orange-300/30 bg-orange-500/10 px-4 text-[12px] font-semibold text-orange-800 opacity-70"
+          >
+            Connect Shopee
+          </button>
+          <Link
+            to="/shopee"
+            className="inline-flex h-9 items-center gap-2 rounded-xl bg-orange-500 px-4 text-[12px] font-semibold text-white shadow-sm transition hover:bg-orange-600"
+          >
+            Open Shopee workspace
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }

@@ -6,6 +6,7 @@ type AccountPlatformFilter = "all" | AccountPlatform;
 type PlatformCounts = {
   tiktok: number;
   facebook: number;
+  shopee: number;
 };
 
 type UiPlatformId = "tiktok" | "facebook" | "instagram" | "youtube" | "pinterest" | "shopee";
@@ -20,10 +21,10 @@ export function PlatformGrid({ selectedPlatform, onPlatformSelect, counts }: Pro
   const platforms: Array<{ id: UiPlatformId; coming?: boolean }> = [
     { id: "tiktok" },
     { id: "facebook" },
+    { id: "shopee" },
     { id: "instagram", coming: true },
     { id: "youtube", coming: true },
     { id: "pinterest", coming: true },
-    { id: "shopee", coming: true },
   ];
 
   return (
@@ -44,7 +45,7 @@ export function PlatformGrid({ selectedPlatform, onPlatformSelect, counts }: Pro
       </div>
       <div className="grid grid-cols-2 gap-3 bg-transparent sm:grid-cols-3 lg:grid-cols-6">
         {platforms.map((p) => {
-          const count = (p.id === "tiktok" || p.id === "facebook") ? counts[p.id] : 0;
+          const count = (p.id === "tiktok" || p.id === "facebook" || p.id === "shopee") ? counts[p.id] : 0;
           const isSelected = selectedPlatform === p.id;
           return (
             <PlatformCard

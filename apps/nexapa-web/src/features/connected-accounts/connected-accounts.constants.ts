@@ -20,6 +20,7 @@ export const PLATFORM_CONNECTION_METHOD: Record<UiPlatform, string> = {
 export const PLATFORM_CAPABILITIES: Record<AccountPlatform, AccountCapability[]> = {
   tiktok: ["publishing", "scheduling", "media-access"],
   facebook: ["publishing", "scheduling", "affiliate", "media-access"],
+  shopee: ["publishing", "scheduling", "affiliate", "media-access"],
 };
 
 export const PLATFORM_CAPABILITY_LABELS: Record<AccountCapability, string> = {

@@ -23,15 +23,38 @@ export function usePublisherDestinations(activePlatform: PublisherPlatform) {
       let accounts: Awaited<ReturnType<typeof getConnectedAccountsPaginated>>["data"];
 
       if (activePlatform === "facebook") {
-        const response = await getConnectedAccountsPaginated({
-          platform: "facebook",
-          account_type: "facebook_page",
-          status: "connected",
-          page: 1,
-          per_page: 100,
-          signal,
-        });
-        accounts = response.data;
+        const firstResponse =
+          await getConnectedAccountsPaginated({
+            platform: "facebook",
+            account_type: "facebook_page",
+            status: "connected",
+            page: 1,
+            per_page: 100,
+            signal,
+          });
+
+        accounts = [...(firstResponse.data ?? [])];
+
+        const lastPage =
+          firstResponse.pagination?.last_page ?? 1;
+
+        for (
+          let currentPage = 2;
+          currentPage <= lastPage;
+          currentPage++
+        ) {
+          const nextResponse =
+            await getConnectedAccountsPaginated({
+              platform: "facebook",
+              account_type: "facebook_page",
+              status: "connected",
+              page: currentPage,
+              per_page: 100,
+              signal,
+            });
+
+          accounts.push(...(nextResponse.data ?? []));
+        }
       } else {
         const response = await getConnectedAccountsPaginated({
           platform: activePlatform,
@@ -59,6 +82,7 @@ export function usePublisherDestinations(activePlatform: PublisherPlatform) {
           id: acc.id,
           platform: acc.platform as PublishPlatform,
           accountType: acc.account_type,
+          parentConnectedAccountId: acc.parent_connected_account_id,
           label: acc.display_name,
           identifier: acc.username ?? acc.external_account_id ?? acc.id,
           avatarUrl: acc.avatar_url ?? null,

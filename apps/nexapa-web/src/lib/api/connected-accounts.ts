@@ -204,3 +204,59 @@ export async function reconnectAccount(
   );
   return resp.data;
 }
+
+export type FacebookInsightPoint = {
+  date: string;
+  views: number;
+  engagements: number;
+  followers: number;
+};
+
+export type FacebookPageInsights = {
+  page: {
+    id: string;
+    external_account_id: string;
+    display_name: string;
+    username: string | null;
+    avatar_url: string | null;
+    status: AccountStatus;
+  };
+  period: {
+    days: 7 | 28 | 90;
+    since: string;
+    until: string;
+  };
+  summary: {
+    views: number;
+    engagements: number;
+    followers: number;
+    posts: number;
+  };
+  series: FacebookInsightPoint[];
+  warnings: Array<{
+    metric: string;
+    message: string;
+  }>;
+};
+
+type FacebookPageInsightsResponse = {
+  success: boolean;
+  message: string;
+  data: FacebookPageInsights;
+};
+
+export async function getFacebookPageInsights(
+  accountId: string,
+  days: 7 | 28 | 90,
+  signal?: AbortSignal,
+): Promise<FacebookPageInsights> {
+  const response = await apiFetch<FacebookPageInsightsResponse>(
+    `/connected-accounts/${accountId}/facebook-insights?days=${days}`,
+    {
+      method: "GET",
+      signal,
+    },
+  );
+
+  return response.data;
+}

@@ -32,6 +32,7 @@ export type DestinationAccount = {
   id: string;
   platform: PublishPlatform;
   accountType?: string | null;
+  parentConnectedAccountId?: string | null;
   label: string;
   identifier: string;
   avatarUrl: string | null;

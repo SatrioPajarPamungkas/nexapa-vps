@@ -27,6 +27,7 @@ class FacebookOAuthService
             'public_profile',
             'pages_show_list',
             'pages_read_engagement',
+            'read_insights',
             'pages_manage_posts',
         ]);
     }

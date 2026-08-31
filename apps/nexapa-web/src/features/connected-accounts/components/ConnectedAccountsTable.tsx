@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { MoreVertical, RefreshCw, Star, Users } from "lucide-react";
 import { PlatformLogo } from "./PlatformLogo";
 import { getInitials, formatDateTime } from "../connected-accounts.utils";
@@ -74,6 +75,7 @@ export function ConnectedAccountsTable({
   onConnectPlatform,
 }: Props) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const navigate = useNavigate();
   const triggerRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const hierarchicalAccounts = buildHierarchicalAccounts(filteredAccounts);
@@ -175,7 +177,18 @@ export function ConnectedAccountsTable({
       return (
         <div key={account.id} className="space-y-3">
           {/* Admin parent - light glass identical to TikTok per new spec */}
-          <div className="glass-card group rounded-xl border border-white/20 p-4 shadow-card ring-1 ring-white/10 transition-all duration-200 hover:bg-white/15 hover:border-white/30">
+          <div
+            role="link"
+            tabIndex={0}
+            onClick={() => navigate(`/accounts/facebook/${account.id}/pages`)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                navigate(`/accounts/facebook/${account.id}/pages`);
+              }
+            }}
+            className="glass-card group cursor-pointer rounded-xl border border-white/20 p-4 shadow-card ring-1 ring-white/10 transition-all duration-200 hover:bg-white/15 hover:border-white/30"
+          >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/25 bg-white/20 shadow-sm backdrop-blur-xl">

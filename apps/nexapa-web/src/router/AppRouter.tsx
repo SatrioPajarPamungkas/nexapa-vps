@@ -35,6 +35,20 @@ const ConnectedAccountsPage = lazy(() =>
   ),
 );
 
+const FacebookPagesPage = lazy(() =>
+  import("@/pages/accounts/FacebookPagesPage").then(
+    (module) => ({ default: module.FacebookPagesPage }),
+  ),
+);
+
+const FacebookPageInsightsPage = lazy(() =>
+  import("@/pages/accounts/FacebookPageInsightsPage").then(
+    (module) => ({
+      default: module.FacebookPageInsightsPage,
+    }),
+  ),
+);
+
 const PublisherPage = lazy(() =>
   import("@/pages/publisher/PublisherPage").then(
     (module) => ({ default: module.PublisherPage }),
@@ -126,6 +140,14 @@ export function AppRouter() {
         <Route path="/downloader" element={<DownloaderPage />} />
         <Route path="/library" element={<MediaLibraryPage />} />
         <Route path="/accounts" element={<ConnectedAccountsPage />} />
+        <Route
+          path="/accounts/facebook/:accountId/pages"
+          element={<FacebookPagesPage />}
+        />
+        <Route
+          path="/accounts/facebook/:accountId/pages/:pageId/insights"
+          element={<FacebookPageInsightsPage />}
+        />
         <Route path="/publisher" element={<PublisherPage />} />
         <Route path="/scheduler" element={<SchedulerPage />} />
         <Route path="/affiliate" element={<AffiliatePage />} />

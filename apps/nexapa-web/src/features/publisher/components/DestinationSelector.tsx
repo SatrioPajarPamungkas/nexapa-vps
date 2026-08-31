@@ -1,6 +1,7 @@
 import { ExternalLink, RefreshCcw, Search, UsersRound } from "lucide-react";
 import type { DestinationAccount, PublisherPlatform } from "../publisher.types";
 import { DestinationAccountCard } from "./DestinationAccountCard";
+import { FacebookAdminPageSelector } from "./FacebookAdminPageSelector";
 
 type Props = {
   accounts: DestinationAccount[];
@@ -15,9 +16,26 @@ type Props = {
 };
 
 export function DestinationSelector({ accounts, selectedIds, search, activePlatform, onSearch, onToggle, onOpenConnectedAccounts, onRefresh, refreshLoading }: Props) {
+  if (activePlatform === "facebook") {
+    return (
+      <FacebookAdminPageSelector
+        pages={accounts}
+        selectedIds={selectedIds}
+        search={search}
+        onSearch={onSearch}
+        onToggle={onToggle}
+        onOpenConnectedAccounts={onOpenConnectedAccounts}
+        onRefresh={onRefresh}
+        refreshLoading={refreshLoading}
+      />
+    );
+  }
+
   const filtered = accounts.filter((account) => `${account.label} ${account.identifier}`.toLowerCase().includes(search.trim().toLowerCase()));
-  const isFacebook = activePlatform === "facebook";
-  const title = isFacebook ? "Facebook Pages" : "TikTok Accounts";
+  const title =
+    activePlatform === "tiktok"
+      ? "TikTok Accounts"
+      : `${activePlatform.charAt(0).toUpperCase()}${activePlatform.slice(1)} Accounts`;
 
   return (
     <section className="overflow-hidden rounded-2xl border border-white/20 bg-white/10 shadow-[0_18px_55px_rgba(2,6,23,0.16)] backdrop-blur-2xl ring-1 ring-white/10">
@@ -48,8 +66,8 @@ export function DestinationSelector({ accounts, selectedIds, search, activePlatf
         )}
         {filtered.length === 0 ? (
           <div className="rounded-xl border-2 border-dashed border-white/20 bg-white/8 p-6 text-center backdrop-blur-xl">
-            <p className="text-[13px] font-medium text-slate-800">{isFacebook ? "No Facebook Pages available" : "No TikTok accounts available"}</p>
-            <p className="mt-1 text-[11px] text-slate-600">{isFacebook ? "Connect or refresh to load Facebook Pages." : "Connect a TikTok account before publishing."}</p>
+            <p className="text-[13px] font-medium text-slate-800">{`No ${title.toLowerCase()} available`}</p>
+            <p className="mt-1 text-[11px] text-slate-600">{`Connect a ${activePlatform} account before publishing.`}</p>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
               {onRefresh ? (
                 <button type="button" onClick={onRefresh} disabled={refreshLoading} className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-3 py-1.5 text-[12px] font-medium text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50">
@@ -68,7 +86,7 @@ export function DestinationSelector({ accounts, selectedIds, search, activePlatf
           </div>
         ) : (
           <div className="space-y-1.5 bg-transparent">
-            {filtered.map((account) => <DestinationAccountCard key={account.id} account={account} selected={selectedIds.has(account.id)} onToggle={onToggle} singleSelect={isFacebook} />)}
+            {filtered.map((account) => <DestinationAccountCard key={account.id} account={account} selected={selectedIds.has(account.id)} onToggle={onToggle} />)}
           </div>
         )}
       </div>

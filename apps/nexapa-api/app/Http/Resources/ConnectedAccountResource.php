@@ -18,6 +18,7 @@ class ConnectedAccountResource extends JsonResource
             'id' => $this->id,
             'platform' => $this->platform,
             'account_type' => $this->account_type,
+            'parent_connected_account_id' => $this->parent_connected_account_id,
             'external_account_id' => $this->external_account_id,
             'display_name' => $this->display_name,
             'username' => $this->username,

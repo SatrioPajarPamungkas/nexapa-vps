@@ -20,7 +20,6 @@ export function PublisherPage() {
   const [pendingPlatform, setPendingPlatform] = useState<PublisherPlatform | null>(null);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
-  const [showDrafts, setShowDrafts] = useState(false);
   const [pendingMediaLibraryTransfer, setPendingMediaLibraryTransfer] = useState<MediaLibraryTransferState | null>(null);
   const ws = usePublisherWorkspaceWithBackend(activePlatform);
   const platformName = platformNames[activePlatform];
@@ -101,12 +100,38 @@ export function PublisherPage() {
         actions={<><PlatformSelector activePlatform={activePlatform} onPlatformChange={requestPlatformChange} /><div id="publisher-mode-selector" className="contents" /><button type="button" onClick={() => hasSwitchSensitiveContent ? setShowResetDialog(true) : resetComposer()} className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/20 bg-white/12 px-3 text-[13px] font-medium text-slate-700 shadow-sm backdrop-blur-xl transition hover:bg-white/20"><Plus className="h-4 w-4" /> New Post</button><button type="button" onClick={() => navigate("/library")} className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/20 bg-white/12 px-3 text-[13px] font-medium text-slate-700 shadow-sm backdrop-blur-xl transition hover:bg-white/20"><Library className="h-4 w-4" /> Media Library</button></>}
       />
 
-      <div className="border-b border-white/15 bg-white/8 backdrop-blur-xl">
-        <div className="mx-auto max-w-[1440px] bg-transparent px-4 py-2.5 sm:px-6 lg:px-8">
-          <button type="button" onClick={() => setShowDrafts((open) => !open)} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[12px] font-medium text-slate-700 backdrop-blur-xl transition hover:bg-white/18 hover:text-slate-900">Server drafts <span className="ml-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px]">{ws.drafts.length}</span></button>
-          {showDrafts && <div className="mt-3 flex flex-wrap gap-2 bg-transparent">{ws.drafts.length === 0 ? <p className="text-[12px] text-slate-500">No drafts yet.</p> : ws.drafts.map((draft) => <div key={draft.id} className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/8 px-3 py-1.5 text-[12px] backdrop-blur-xl"><span className="max-w-44 truncate font-medium">{draft.name}</span><button type="button" onClick={() => loadDraft(draft.id)} className="rounded-full border border-blue-400/25 bg-blue-500/12 px-2 py-0.5 text-[10px] font-medium text-blue-800 backdrop-blur-xl">Load</button><button type="button" onClick={() => ws.deleteDraft(draft.id)} className="rounded-full border border-red-400/20 bg-red-500/10 px-2 py-0.5 text-[10px] text-red-700">Delete</button></div>)}</div>}
+      {ws.drafts.length > 0 && (
+        <div className="mx-auto max-w-[1440px] px-4 pt-3 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap gap-2">
+            {ws.drafts.map((draft) => (
+              <div
+                key={draft.id}
+                className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/8 px-3 py-1.5 text-[12px] backdrop-blur-xl"
+              >
+                <span className="max-w-44 truncate font-medium">
+                  {draft.name}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => loadDraft(draft.id)}
+                  className="rounded-full border border-blue-400/25 bg-blue-500/12 px-2 py-0.5 text-[10px] font-medium text-blue-800"
+                >
+                  Load
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => ws.deleteDraft(draft.id)}
+                  className="rounded-full border border-red-400/20 bg-red-500/10 px-2 py-0.5 text-[10px] text-red-700"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {activePlatform === "facebook" && <FacebookPublisherComposer workspace={ws} onOpenLibrary={() => navigate("/library")} onOpenAccounts={() => navigate("/accounts")} onSaveDraft={() => setShowSaveDialog(true)} pendingMediaLibraryTransfer={pendingMediaLibraryTransfer} onMediaLibraryTransferHydrated={handleMediaLibraryTransferHydrated} />}
       {activePlatform === "tiktok" && <TikTokPublisherComposer workspace={ws} onOpenLibrary={() => navigate("/library")} onOpenAccounts={() => navigate("/accounts")} onSaveDraft={() => setShowSaveDialog(true)} />}

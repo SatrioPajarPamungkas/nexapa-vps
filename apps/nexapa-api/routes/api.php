@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\DeveloperSettingsController;
 use App\Http\Controllers\Api\DownloadJobController;
 use App\Http\Controllers\Api\DownloadResultController;
+use App\Http\Controllers\Api\FacebookPageInsightController;
 use App\Http\Controllers\Api\MediaAssetContentController;
 use App\Http\Controllers\Api\MediaAssetController;
 use App\Http\Controllers\Api\MediaAssetUploadController;
@@ -141,6 +142,10 @@ Route::prefix('v1')
 
         // Connected Accounts
         Route::get('connected-accounts', [\App\Http\Controllers\Api\ConnectedAccountController::class, 'index']);
+        Route::get(
+            'connected-accounts/{connectedAccount}/facebook-insights',
+            FacebookPageInsightController::class
+        )->middleware('throttle:60,1');
         Route::post('connected-accounts/{platform}/connect', [\App\Http\Controllers\Api\ConnectedAccountController::class, 'connect']);
         Route::post('connected-accounts/{connectedAccount}/reconnect', [\App\Http\Controllers\Api\ConnectedAccountController::class, 'reconnect']);
         Route::post('connected-accounts/{connectedAccount}/refresh', [\App\Http\Controllers\Api\ConnectedAccountController::class, 'refresh']);

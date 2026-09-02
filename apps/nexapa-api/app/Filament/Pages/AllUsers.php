@@ -347,12 +347,11 @@ class AllUsers extends Page implements HasTable
                         ! $this->isProtected($record)
                     )
                     ->requiresConfirmation()
-                    ->modalHeading('Hapus akun dari panel?')
+                    ->modalHeading('Hapus akun secara permanen?')
                     ->modalDescription(
-                        'Akun akan diarsipkan dan akses login diblokir. '
-                        .'Data CRM tetap disimpan agar dapat dipulihkan.'
+                        'Akun Auth, workspace, chat, mapping, subscription, sesi, token, dan cache terkait akan dihapus permanen. Tindakan ini tidak dapat dipulihkan.'
                     )
-                    ->modalSubmitActionLabel('Ya, hapus akun')
+                    ->modalSubmitActionLabel('Ya, hapus permanen')
                     ->action(fn (UnifiedUserRecord $record) =>
                         $this->runLifecycle('archive', $record)
                     ),
@@ -438,7 +437,7 @@ class AllUsers extends Page implements HasTable
                 ->title(match ($operation) {
                     'suspend' => 'Akun berhasil disuspend',
                     'activate' => 'Akun berhasil diaktifkan',
-                    default => 'Akun berhasil dihapus dari panel',
+                    default => 'Akun dan seluruh data terkait berhasil dihapus permanen',
                 })
                 ->send();
         } catch (Throwable $exception) {

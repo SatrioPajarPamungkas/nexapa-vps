@@ -32,7 +32,7 @@ begin
     where ns.nspname = 'public'
       and rel.relname = 'whatsapp_config'
       and con.contype = 'u'
-      and (select array_agg(att.attname order by key.ordinality)
+      and (select array_agg(att.attname::text order by key.ordinality)
            from unnest(con.conkey) with ordinality key(attnum, ordinality)
            join pg_attribute att on att.attrelid = rel.oid and att.attnum = key.attnum)
           = array['account_id']::text[]
@@ -99,7 +99,7 @@ begin
     join pg_namespace ns on ns.oid = rel.relnamespace
     where ns.nspname = 'public' and rel.relname = 'conversations'
       and con.contype = 'u'
-      and (select array_agg(att.attname order by key.ordinality)
+      and (select array_agg(att.attname::text order by key.ordinality)
            from unnest(con.conkey) with ordinality key(attnum, ordinality)
            join pg_attribute att on att.attrelid = rel.oid and att.attnum = key.attnum)
           = array['account_id','contact_id']::text[]

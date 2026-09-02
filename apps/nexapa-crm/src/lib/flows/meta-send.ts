@@ -15,6 +15,7 @@ import {
 } from '@/lib/whatsapp/phone-utils'
 import { supabaseAdmin } from './admin-client'
 import { resolveWhatsAppRecipient } from '@/lib/whatsapp/contact-recipient'
+import { resolveConversationConnection } from '@/lib/whatsapp/connection'
 
 // ------------------------------------------------------------
 // Flows-side Meta sender (interactive variants).
@@ -78,14 +79,10 @@ export async function engineSendText(
 
   const recipient = resolveWhatsAppRecipient(contact)
 
-  const { data: config, error: configErr } = await db
-    .from('whatsapp_config')
-    .select('*')
-    .eq('account_id', args.accountId)
-    .single()
-  if (configErr || !config) {
-    throw new Error('WhatsApp not configured for this account')
-  }
+  const config = await resolveConversationConnection(
+    db, args.accountId, args.conversationId,
+  )
+  if (!config) throw new Error('WhatsApp connection not found for this conversation')
 
   const accessToken = decrypt(config.access_token)
 
@@ -196,14 +193,10 @@ export async function engineSendMedia(
 
   const recipient = resolveWhatsAppRecipient(contact)
 
-  const { data: config, error: configErr } = await db
-    .from('whatsapp_config')
-    .select('*')
-    .eq('account_id', args.accountId)
-    .single()
-  if (configErr || !config) {
-    throw new Error('WhatsApp not configured for this account')
-  }
+  const config = await resolveConversationConnection(
+    db, args.accountId, args.conversationId,
+  )
+  if (!config) throw new Error('WhatsApp connection not found for this conversation')
 
   const accessToken = decrypt(config.access_token)
 
@@ -356,14 +349,10 @@ async function sendInteractiveViaMeta(
 
   const recipient = resolveWhatsAppRecipient(contact)
 
-  const { data: config, error: configErr } = await db
-    .from('whatsapp_config')
-    .select('*')
-    .eq('account_id', input.accountId)
-    .single()
-  if (configErr || !config) {
-    throw new Error('WhatsApp not configured for this account')
-  }
+  const config = await resolveConversationConnection(
+    db, input.accountId, input.conversationId,
+  )
+  if (!config) throw new Error('WhatsApp connection not found for this conversation')
 
   const accessToken = decrypt(config.access_token)
 

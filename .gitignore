@@ -30,6 +30,7 @@ storage/framework/views/*
 
 # Database dumps
 *.sql
+!apps/nexapa-crm/supabase/migrations/*.sql
 *.sqlite
 *.db
 *.dump

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getMediaUrl, downloadMedia } from '@/lib/whatsapp/meta-api'
 import { decrypt } from '@/lib/whatsapp/encryption'
+import { resolveWhatsAppConnection } from '@/lib/whatsapp/connection'
 
 export async function GET(
   request: Request,
@@ -9,6 +10,7 @@ export async function GET(
 ) {
   try {
     const { mediaId } = await params
+    const connectionId = new URL(request.url).searchParams.get('connection_id')
 
     if (!mediaId) {
       return NextResponse.json(
@@ -49,13 +51,9 @@ export async function GET(
     }
 
     // Fetch and decrypt WhatsApp config
-    const { data: config, error: configError } = await supabase
-      .from('whatsapp_config')
-      .select('*')
-      .eq('account_id', accountId)
-      .single()
+    const config = await resolveWhatsAppConnection(supabase, accountId, connectionId)
 
-    if (configError || !config) {
+    if (!config) {
       return NextResponse.json(
         { error: 'WhatsApp not configured' },
         { status: 400 }

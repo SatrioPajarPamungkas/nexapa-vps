@@ -187,8 +187,8 @@ function InboxPageInner() {
 
       if (!user) return;
 
-      // whatsapp_config is one-row-per-account post-multi-user, so
-      // the previous `.eq('user_id', user.id)` would miss the row
+      // WhatsApp connections are account-scoped. Check the selected
+      // default number so multiple saved rows never break this probe.
       // for any teammate who didn't personally save the config —
       // the "WhatsApp not connected" banner would show in the
       // shared inbox even though the admin had it configured.
@@ -208,6 +208,7 @@ function InboxPageInner() {
         .from("whatsapp_config")
         .select("status")
         .eq("account_id", accountId)
+        .eq("is_active", true)
         .maybeSingle();
 
       setWhatsappConnected(data?.status === "connected");

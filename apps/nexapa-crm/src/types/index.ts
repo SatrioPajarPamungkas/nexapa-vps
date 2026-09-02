@@ -166,6 +166,8 @@ export interface Conversation {
   id: string;
   user_id: string;
   contact_id: string;
+  /** WhatsApp number that owns this thread. Never switch on reply. */
+  whatsapp_config_id?: string | null;
   status: ConversationStatus;
   assigned_agent_id?: string;
   last_message_text?: string;
@@ -274,7 +276,11 @@ export interface MessageReaction {
 export interface WhatsAppConfig {
   id: string;
   user_id: string;
+  account_id: string;
   phone_number_id: string;
+  label?: string | null;
+  display_phone_number?: string | null;
+  is_active: boolean;
   waba_id?: string;
   access_token: string;
   verify_token?: string;

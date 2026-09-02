@@ -44,6 +44,7 @@ import {
 } from '@/lib/whatsapp/phone-utils';
 import type { MessageTemplate } from '@/types';
 import { isMessageTemplate } from '@/lib/whatsapp/template-row-guard';
+import { resolveWhatsAppConnection } from '@/lib/whatsapp/connection';
 
 export const MEDIA_KINDS = ['image', 'video', 'document', 'audio'] as const;
 export const VALID_MESSAGE_TYPES = [
@@ -257,16 +258,22 @@ export async function sendMessageToConversation(
   }
 
   // WhatsApp config, account-scoped.
-  const { data: config, error: configError } = await db
-    .from('whatsapp_config')
-    .select('*')
-    .eq('account_id', accountId)
-    .single();
+  let config;
+  try {
+    config = await resolveWhatsAppConnection(
+      db,
+      accountId,
+      conversation.whatsapp_config_id,
+    );
+  } catch (configError) {
+    console.error('[send-message] connection lookup failed:', configError);
+    throw new SendMessageError('db_error', 'Failed to load WhatsApp connection', 500);
+  }
 
-  if (configError || !config) {
+  if (!config) {
     throw new SendMessageError(
       'whatsapp_not_configured',
-      'WhatsApp not configured. Please set up your WhatsApp integration first.',
+      'The WhatsApp connection for this conversation is no longer available.',
       400
     );
   }

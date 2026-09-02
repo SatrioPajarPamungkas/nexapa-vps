@@ -172,6 +172,7 @@ export async function POST(request: Request) {
       .from('whatsapp_config')
       .select('id, phone_number_id, registered_at')
       .eq('account_id', ctx.accountId)
+      .eq('phone_number_id', phoneNumberId)
       .maybeSingle();
 
     if (existingError) {
@@ -235,6 +236,7 @@ export async function POST(request: Request) {
 
     const row = {
       phone_number_id: phoneNumberId,
+      display_phone_number: phoneInfo.display_phone_number ?? null,
       waba_id: wabaId,
       access_token: encryptedAccessToken,
       // One global server-side verify token protects the shared webhook.
@@ -248,11 +250,14 @@ export async function POST(request: Request) {
       updated_at: now,
     };
 
+    let savedConnectionId = existing?.id ?? null;
+
     if (existing) {
       const { error } = await ctx.supabase
         .from('whatsapp_config')
         .update(row)
-        .eq('account_id', ctx.accountId);
+        .eq('account_id', ctx.accountId)
+        .eq('id', existing.id);
       if (error) {
         console.error(
           '[whatsapp/embedded-signup] config update failed:',
@@ -261,11 +266,16 @@ export async function POST(request: Request) {
         throw new Error('Config update failed');
       }
     } else {
-      const { error } = await ctx.supabase.from('whatsapp_config').insert({
-        ...row,
-        account_id: ctx.accountId,
-        user_id: ctx.userId,
-      });
+      const { data: inserted, error } = await ctx.supabase
+        .from('whatsapp_config')
+        .insert({
+          ...row,
+          account_id: ctx.accountId,
+          user_id: ctx.userId,
+          is_active: false,
+        })
+        .select('id')
+        .single();
       if (error) {
         console.error(
           '[whatsapp/embedded-signup] config insert failed:',
@@ -273,7 +283,14 @@ export async function POST(request: Request) {
         );
         throw new Error('Config insert failed');
       }
+      savedConnectionId = inserted.id;
     }
+
+    const { error: activateError } = await ctx.supabase.rpc(
+      'activate_whatsapp_connection',
+      { connection_id: savedConnectionId },
+    );
+    if (activateError) throw new Error('Config activation failed');
 
     return NextResponse.json({
       success: true,

@@ -326,6 +326,9 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
           // inserts that need it for NOT NULL FK compliance. Always
           // the admin who saved the WhatsApp config.
           config.user_id,
+          // Immutable routing key: this inbound thread belongs to the
+          // exact business number Meta delivered it to.
+          config.id,
           decryptedAccessToken
         )
       }
@@ -622,6 +625,7 @@ async function processMessage(
   // (contacts, conversations). Always the admin who saved the
   // WhatsApp config; the choice is arbitrary post-017 but stable.
   configOwnerUserId: string,
+  whatsappConfigId: string,
   accessToken: string
 ) {
   // Meta supplies the BSUID on every modern inbound webhook through
@@ -664,7 +668,8 @@ async function processMessage(
   const convResult = await findOrCreateConversation(
     accountId,
     configOwnerUserId,
-    contactRecord.id
+    contactRecord.id,
+    whatsappConfigId,
   )
   if (!convResult) return
   const conversation = convResult.conversation
@@ -690,7 +695,7 @@ async function processMessage(
 
   // Parse message content based on type
   const { contentText, mediaUrl, mediaType, interactiveReplyId } =
-    await parseMessageContent(message, accessToken)
+    await parseMessageContent(message, accessToken, whatsappConfigId)
 
   // Resolve swipe-reply context if present. A missing parent is fine —
   // we just store NULL and the UI renders the message without a quote.
@@ -919,7 +924,8 @@ async function processMessage(
 
 async function parseMessageContent(
   message: WhatsAppMessage,
-  accessToken: string
+  accessToken: string,
+  whatsappConfigId: string,
 ): Promise<{
   contentText: string | null
   mediaUrl: string | null
@@ -942,7 +948,7 @@ async function parseMessageContent(
   ): Promise<string | null> => {
     try {
       await getMediaUrl({ mediaId, accessToken })
-      return `/api/whatsapp/media/${mediaId}`
+      return `/api/whatsapp/media/${mediaId}?connection_id=${encodeURIComponent(whatsappConfigId)}`
     } catch (error) {
       console.error(
         `Failed to verify media ${mediaId} with Meta:`,
@@ -1256,6 +1262,7 @@ async function findOrCreateConversation(
   accountId: string,
   configOwnerUserId: string,
   contactId: string,
+  whatsappConfigId: string,
 ) {
   // Look for an existing conversation in this account, oldest-first.
   //
@@ -1274,6 +1281,7 @@ async function findOrCreateConversation(
     .from('conversations')
     .select('*')
     .eq('account_id', accountId)
+    .eq('whatsapp_config_id', whatsappConfigId)
     .eq('contact_id', contactId)
     .order('created_at', { ascending: true })
     .limit(1)
@@ -1295,6 +1303,7 @@ async function findOrCreateConversation(
       account_id: accountId,
       user_id: configOwnerUserId,
       contact_id: contactId,
+      whatsapp_config_id: whatsappConfigId,
     })
     .select()
     .single()
@@ -1309,6 +1318,7 @@ async function findOrCreateConversation(
         .from('conversations')
         .select('*')
         .eq('account_id', accountId)
+        .eq('whatsapp_config_id', whatsappConfigId)
         .eq('contact_id', contactId)
         .order('created_at', { ascending: true })
         .limit(1)

@@ -11,6 +11,7 @@ import {
 } from '@/lib/whatsapp/phone-utils'
 import { supabaseAdmin } from './admin-client'
 import { resolveWhatsAppRecipient } from '@/lib/whatsapp/contact-recipient'
+import { resolveConversationConnection } from '@/lib/whatsapp/connection'
 
 // ------------------------------------------------------------
 // Automation-side Meta sender.
@@ -127,14 +128,10 @@ async function sendViaMeta(input: SendInput): Promise<{ whatsapp_message_id: str
 
   const recipient = resolveWhatsAppRecipient(contact)
 
-  const { data: config, error: configErr } = await db
-    .from('whatsapp_config')
-    .select('*')
-    .eq('account_id', input.accountId)
-    .single()
-  if (configErr || !config) {
-    throw new Error('WhatsApp not configured for this account')
-  }
+  const config = await resolveConversationConnection(
+    db, input.accountId, input.conversationId,
+  )
+  if (!config) throw new Error('WhatsApp connection not found for this conversation')
 
   const accessToken = decrypt(config.access_token)
 

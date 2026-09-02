@@ -40,8 +40,8 @@ type ResetReason = 'token_corrupted' | 'meta_api_error' | null;
 export function WhatsAppConfig() {
   const t = useTranslations('Settings.whatsapp');
   const supabase = createClient();
-  // After multi-user, whatsapp_config is one-row-per-account, not
-  // one-row-per-user. We pull `accountId` straight off the auth
+  // Connections are shared by the account, not owned by one teammate.
+  // We pull `accountId` straight off the auth
   // context and key every read off it — so a teammate who just
   // joined an account sees the inviter's saved config without
   // having to re-enter anything.
@@ -53,6 +53,7 @@ export function WhatsAppConfig() {
   const [resetting, setResetting] = useState(false);
   const [showToken, setShowToken] = useState(false);
   const [config, setConfig] = useState<WhatsAppConfigType | null>(null);
+  const [connections, setConnections] = useState<WhatsAppConfigType[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>('unknown');
   const [resetReason, setResetReason] = useState<ResetReason>(null);
   const [statusMessage, setStatusMessage] = useState<string>('');
@@ -101,19 +102,21 @@ export function WhatsAppConfig() {
       // Load form values from Supabase (shows what's in DB).
       // Switched from `user_id` (which would only match the row's
       // original author) to `account_id` so every member of the
-      // account sees the same saved configuration. UNIQUE(account_id)
-      // on the table guarantees the .maybeSingle() return type
-      // remains accurate.
-      const { data, error } = await supabase
+      // account sees every saved number; the active row is loaded into
+      // the editor while the rest remain selectable above it.
+      const { data: rows, error } = await supabase
         .from('whatsapp_config')
         .select('*')
         .eq('account_id', acctId)
-        .maybeSingle();
+        .order('is_active', { ascending: false })
+        .order('created_at', { ascending: true });
 
       if (error) {
         console.error('Failed to load config row:', error);
       }
 
+      const data = rows?.find((row) => row.is_active) ?? rows?.[0] ?? null;
+      setConnections((rows ?? []) as WhatsAppConfigType[]);
       if (data) {
         setConfig(data);
         setPhoneNumberId(data.phone_number_id || '');
@@ -137,7 +140,7 @@ export function WhatsAppConfig() {
       // Then verify health via the API (decrypts token + pings Meta)
       if (data) {
         try {
-          const res = await fetch('/api/whatsapp/config', { method: 'GET' });
+          const res = await fetch(`/api/whatsapp/config?id=${data.id}`, { method: 'GET' });
           const payload = await res.json();
 
           if (payload.connected) {
@@ -281,7 +284,8 @@ export function WhatsAppConfig() {
   async function handleTestConnection() {
     try {
       setTesting(true);
-      const res = await fetch('/api/whatsapp/config', { method: 'GET' });
+      const suffix = config ? `?id=${config.id}` : '';
+      const res = await fetch(`/api/whatsapp/config${suffix}`, { method: 'GET' });
       const payload = await res.json();
 
       if (payload.connected) {
@@ -312,7 +316,8 @@ export function WhatsAppConfig() {
     setVerifyingRegistration(true);
     setRegistrationProbe(null);
     try {
-      const res = await fetch('/api/whatsapp/config/verify-registration', {
+      const suffix = config ? `?id=${config.id}` : '';
+      const res = await fetch(`/api/whatsapp/config/verify-registration${suffix}`, {
         method: 'GET',
       });
       const data = (await res.json()) as RegistrationProbe;
@@ -341,7 +346,8 @@ export function WhatsAppConfig() {
 
     try {
       setResetting(true);
-      const res = await fetch('/api/whatsapp/config', { method: 'DELETE' });
+      const suffix = config ? `?id=${config.id}` : '';
+      const res = await fetch(`/api/whatsapp/config${suffix}`, { method: 'DELETE' });
       const data = await res.json();
 
       if (!res.ok) {
@@ -351,6 +357,7 @@ export function WhatsAppConfig() {
 
       toast.success('Configuration cleared. You can now re-enter your credentials.');
       setConfig(null);
+      setConnections((current) => current.filter((row) => row.id !== config?.id));
       setPhoneNumberId('');
       setWabaId('');
       setAccessToken('');
@@ -370,6 +377,32 @@ export function WhatsAppConfig() {
   function handleCopyWebhookUrl() {
     navigator.clipboard.writeText(webhookUrl);
     toast.success('Webhook URL copied to clipboard');
+  }
+
+  async function handleSelectConnection(connection: WhatsAppConfigType) {
+    const res = await fetch('/api/whatsapp/config', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ connection_id: connection.id }),
+    });
+    if (!res.ok) {
+      toast.error('Failed to select WhatsApp number');
+      return;
+    }
+    loadedAccountIdRef.current = null;
+    if (accountId) await fetchConfig(accountId);
+  }
+
+  function handleAddConnection() {
+    setConfig(null);
+    setPhoneNumberId('');
+    setWabaId('');
+    setAccessToken('');
+    setVerifyToken('');
+    setPin('');
+    setTokenEdited(false);
+    setConnectionStatus('disconnected');
+    setStatusMessage('Enter credentials for the additional WhatsApp number.');
   }
 
   if (loading) {
@@ -397,6 +430,41 @@ export function WhatsAppConfig() {
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
       {/* Main config form */}
       <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>WhatsApp numbers</CardTitle>
+            <CardDescription>
+              Add unlimited numbers. Each number keeps its own isolated conversations.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {connections.map((connection) => (
+              <button
+                type="button"
+                key={connection.id}
+                onClick={() => void handleSelectConnection(connection)}
+                className={`flex w-full items-center justify-between rounded-md border p-3 text-left ${
+                  config?.id === connection.id ? 'border-primary bg-primary/5' : 'border-border'
+                }`}
+              >
+                <span>
+                  <span className="block font-medium">
+                    {connection.label || connection.display_phone_number || connection.phone_number_id}
+                  </span>
+                  <span className="block text-xs text-muted-foreground">
+                    Phone Number ID: {connection.phone_number_id}
+                  </span>
+                </span>
+                {connection.is_active && (
+                  <span className="rounded-full bg-primary/10 px-2 py-1 text-xs text-primary">Active</span>
+                )}
+              </button>
+            ))}
+            <Button type="button" variant="outline" className="w-full" onClick={handleAddConnection}>
+              Add WhatsApp number
+            </Button>
+          </CardContent>
+        </Card>
         {/* Corrupted-token reset banner */}
         {showResetBanner && (
           <Alert className="bg-amber-950/40 border-amber-600/40">

@@ -7,6 +7,7 @@ import {
   verifyPhoneNumber,
 } from '@/lib/whatsapp/meta-api'
 import { encrypt, decrypt } from '@/lib/whatsapp/encryption'
+import { recordCrmActivity } from '@/lib/audit/record-crm-activity'
 
 /**
  * Resolve the caller's account_id from their profile. Inlined here
@@ -438,6 +439,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Configuration saved but could not be selected' }, { status: 500 })
     }
 
+    await recordCrmActivity(request, {
+      email: user.email ?? '',
+      name: user.user_metadata?.name ?? user.user_metadata?.full_name ?? null,
+      action: 'whatsapp.connection_saved',
+      title: existing
+        ? 'Konfigurasi nomor WhatsApp diperbarui.'
+        : 'Nomor WhatsApp ditambahkan.',
+      subjectId: savedConnectionId,
+      metadata: {
+        operation: existing ? 'updated' : 'created',
+        phone_number_id: phone_number_id,
+        registered: registeredAt != null,
+      },
+    })
+
     if (registrationError) {
       // Save succeeded but the number isn't actually live. Return
       // 200 with a structured error so the UI can show the specific
@@ -537,6 +553,15 @@ export async function DELETE(request: Request) {
       }
     }
 
+    await recordCrmActivity(request, {
+      email: user.email ?? '',
+      name: user.user_metadata?.name ?? user.user_metadata?.full_name ?? null,
+      action: 'whatsapp.connection_deleted',
+      title: 'Nomor WhatsApp dihapus permanen dari CRM.',
+      subjectId: target.id,
+      metadata: { was_active: target.is_active },
+    })
+
     return NextResponse.json({ success: true, deleted_id: target.id })
   } catch (error) {
     console.error('Error in WhatsApp config DELETE:', error)
@@ -567,7 +592,17 @@ export async function PATCH(request: Request) {
   const { error } = await supabase.rpc('activate_whatsapp_connection', {
     connection_id: connectionId,
   })
-  return error
-    ? NextResponse.json({ error: 'Failed to change connection' }, { status: 500 })
-    : NextResponse.json({ success: true, active_id: connectionId })
+  if (error) {
+    return NextResponse.json({ error: 'Failed to change connection' }, { status: 500 })
+  }
+
+  await recordCrmActivity(request, {
+    email: user.email ?? '',
+    name: user.user_metadata?.name ?? user.user_metadata?.full_name ?? null,
+    action: 'whatsapp.connection_selected',
+    title: 'Nomor WhatsApp aktif diganti.',
+    subjectId: connectionId,
+  })
+
+  return NextResponse.json({ success: true, active_id: connectionId })
 }

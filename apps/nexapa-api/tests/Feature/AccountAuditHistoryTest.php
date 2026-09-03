@@ -72,4 +72,43 @@ class AccountAuditHistoryTest extends TestCase
         $this->assertSame($user->name, $log->actor_name);
         $this->assertSame($user->email, $log->actor_email);
     }
+
+    public function test_trusted_crm_can_record_whatsapp_activity(): void
+    {
+        config()->set('services.nexapa_internal.crm_auth_key', 'audit-secret');
+        $user = User::factory()->create(['email' => 'crm-audit@example.com']);
+
+        $this->withHeaders([
+            'X-Nexapa-Crm-Auth-Key' => 'audit-secret',
+        ])->postJson('/api/internal/crm-audit', [
+            'email' => $user->email,
+            'name' => $user->name,
+            'action' => 'whatsapp.connection_selected',
+            'title' => 'Nomor WhatsApp aktif diganti.',
+            'subject_id' => 'connection-123',
+            'ip_address' => '203.0.113.20',
+            'user_agent' => 'CRM Audit Test',
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('activity_logs', [
+            'user_id' => $user->id,
+            'actor_email' => $user->email,
+            'action' => 'whatsapp.connection_selected',
+            'product' => 'crm',
+            'ip_address' => '203.0.113.20',
+        ]);
+    }
+
+    public function test_untrusted_crm_cannot_write_audit_history(): void
+    {
+        config()->set('services.nexapa_internal.crm_auth_key', 'audit-secret');
+
+        $this->postJson('/api/internal/crm-audit', [
+            'email' => 'attacker@example.com',
+            'action' => 'whatsapp.connection_deleted',
+            'title' => 'Unauthorized event.',
+        ])->assertUnauthorized();
+
+        $this->assertDatabaseCount('activity_logs', 0);
+    }
 }

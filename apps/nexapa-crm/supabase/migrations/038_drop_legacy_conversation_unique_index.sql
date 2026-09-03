@@ -4,6 +4,10 @@
 -- the compatibility matcher did not catch. Remove every remaining exact
 -- UNIQUE(account_id, contact_id) index, then assert the new identity exists.
 
+alter table public.conversations
+  drop constraint if exists idx_conversations_account_contact;
+drop index if exists public.idx_conversations_account_contact;
+
 do $$
 declare legacy_constraint text;
 declare legacy_index text;

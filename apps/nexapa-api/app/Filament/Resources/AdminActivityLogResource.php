@@ -17,13 +17,13 @@ class AdminActivityLogResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static ?string $navigationLabel = 'Riwayat Akun';
+    protected static ?string $navigationLabel = 'Riwayat Admin';
 
     protected static ?int $navigationSort = 9;
 
-    protected static ?string $modelLabel = 'Riwayat Akun';
+    protected static ?string $modelLabel = 'Riwayat Admin';
 
-    protected static ?string $pluralModelLabel = 'Riwayat Akun';
+    protected static ?string $pluralModelLabel = 'Riwayat Admin';
 
     protected static ?string $navigationGroup = 'Operasional Sistem';
 
@@ -207,7 +207,11 @@ class AdminActivityLogResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['user']);
+            ->with(['user'])
+            ->where(function (Builder $query): void {
+                $query->where('product', 'admin')
+                    ->orWhere('category', 'admin');
+            });
     }
 
     public static function canCreate(): bool
@@ -235,6 +239,9 @@ class AdminActivityLogResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::count();
+        return static::getModel()::query()
+            ->where('product', 'admin')
+            ->orWhere('category', 'admin')
+            ->count();
     }
 }

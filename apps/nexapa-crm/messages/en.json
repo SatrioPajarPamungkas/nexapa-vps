@@ -1445,6 +1445,8 @@
       "tokenCorrupted": "Stored token can't be decrypted",
       "resetting": "Resetting...",
       "resetConfig": "Reset Configuration",
+      "deletingConnection": "Deleting permanently...",
+      "deleteConnection": "Delete WhatsApp Number Permanently",
       "credentialsValid": "Credentials valid",
       "notConnected": "Not Connected",
       "connectedDesc": "Your access token authenticates with Meta. See Registration status below for whether webhooks are actually wired.",

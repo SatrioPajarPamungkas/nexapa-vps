@@ -1445,6 +1445,8 @@
       "tokenCorrupted": "저장된 토큰을 복호화할 수 없습니다",
       "resetting": "초기화 중...",
       "resetConfig": "설정 초기화",
+      "deletingConnection": "영구 삭제 중...",
+      "deleteConnection": "WhatsApp 번호 영구 삭제",
       "credentialsValid": "자격 증명이 유효합니다",
       "notConnected": "연결되지 않음",
       "connectedDesc": "액세스 토큰으로 Meta 인증이 완료되었습니다. 웹훅이 실제로 연결되었는지는 아래 등록 상태를 확인하세요.",

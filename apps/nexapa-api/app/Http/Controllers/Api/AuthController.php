@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\VerifyEmailNotification;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,6 +15,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        private readonly ActivityLogService $activityLog
+    ) {}
+
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -93,6 +98,8 @@ class AuthController extends Controller
             $request->session()->regenerate();
         }
 
+        $this->audit($user, 'auth.registered', 'Akun berhasil dibuat.');
+
         return response()->json([
             'success' => true,
             'message' => 'Registration successful. Please verify your email.',
@@ -135,6 +142,7 @@ class AuthController extends Controller
             ->first();
 
         if ($loginUser?->is_suspended === true) {
+            $this->audit($loginUser, 'auth.login_blocked', 'Login ditolak karena akun disuspend.', 'blocked');
             return response()->json([
                 'success' => false,
                 'message' => 'Akun Anda sedang disuspend. Hubungi administrator.',
@@ -216,8 +224,9 @@ class AuthController extends Controller
 
         $data = $validator->validated();
         $email = Str::lower(Str::trim($data['email']));
+        $emailChanged = $email !== $user->email;
 
-        if ($email !== $user->email) {
+        if ($emailChanged) {
             $user->email_verified_at = null;
         }
 
@@ -225,6 +234,14 @@ class AuthController extends Controller
             'name' => $data['name'],
             'email' => $email,
         ]);
+
+        $this->audit(
+            $user,
+            'account.profile_updated',
+            'Profil akun diperbarui.',
+            'success',
+            ['email_changed' => $emailChanged]
+        );
 
         return response()->json([
             'success' => true,
@@ -239,6 +256,24 @@ class AuthController extends Controller
                     'is_admin' => (bool) ($user->is_admin ?? false),
                 ],
             ],
+        ]);
+    }
+
+    private function audit(
+        User $user,
+        string $action,
+        string $title,
+        string $status = 'success',
+        array $metadata = []
+    ): void {
+        $this->activityLog->log([
+            'user' => $user,
+            'category' => 'authentication',
+            'action' => $action,
+            'title' => $title,
+            'status' => $status,
+            'product' => 'publisher',
+            'metadata' => $metadata,
         ]);
     }
 }

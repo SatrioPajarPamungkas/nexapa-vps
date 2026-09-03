@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\InternalCrmEntitlementController;
 use App\Http\Controllers\Api\InternalCrmLoginController;
+use App\Http\Controllers\Api\InternalCrmAuditController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\OAuth\TikTokOAuthController;
@@ -104,6 +105,11 @@ Route::post(
     'internal/crm-login',
     [InternalCrmLoginController::class, 'store']
 )->middleware('throttle:10,1');
+
+Route::post(
+    'internal/crm-audit',
+    [InternalCrmAuditController::class, 'store']
+)->middleware('throttle:300,1');
 
 // Subscription status remains available when a package expires.
 Route::get(

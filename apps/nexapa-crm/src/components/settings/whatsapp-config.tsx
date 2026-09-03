@@ -12,7 +12,7 @@ import {
   ExternalLink,
   Zap,
   AlertTriangle,
-  RotateCcw,
+  Trash2,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
@@ -339,36 +339,35 @@ export function WhatsAppConfig() {
     }
   }
 
-  async function handleReset() {
-    if (!confirm('This will delete the current WhatsApp config so you can re-enter it. Continue?')) {
+  async function handleDeleteConnection() {
+    if (!config) return;
+
+    const connectionName =
+      config.label || config.display_phone_number || config.phone_number_id;
+    if (!confirm(
+      `Permanently delete WhatsApp number ${connectionName}?\n\n` +
+      'Its encrypted credentials, conversations, and messages will be deleted from Nexapa CRM. ' +
+      'Other WhatsApp numbers and the CRM user account will not be affected. This cannot be undone.'
+    )) {
       return;
     }
 
     try {
       setResetting(true);
-      const suffix = config ? `?id=${config.id}` : '';
-      const res = await fetch(`/api/whatsapp/config${suffix}`, { method: 'DELETE' });
+      const res = await fetch(`/api/whatsapp/config?id=${config.id}`, { method: 'DELETE' });
       const data = await res.json();
 
       if (!res.ok) {
-        toast.error(data.error || 'Failed to reset configuration');
+        toast.error(data.error || 'Failed to delete WhatsApp number');
         return;
       }
 
-      toast.success('Configuration cleared. You can now re-enter your credentials.');
-      setConfig(null);
-      setConnections((current) => current.filter((row) => row.id !== config?.id));
-      setPhoneNumberId('');
-      setWabaId('');
-      setAccessToken('');
-      setVerifyToken('');
-      setTokenEdited(false);
-      setConnectionStatus('disconnected');
-      setResetReason(null);
-      setStatusMessage('');
+      toast.success(`WhatsApp number ${connectionName} was permanently deleted from Nexapa CRM.`);
+      loadedAccountIdRef.current = null;
+      if (accountId) await fetchConfig(accountId);
     } catch (err) {
-      console.error('Reset error:', err);
-      toast.error('Failed to reset configuration');
+      console.error('Delete connection error:', err);
+      toast.error('Failed to delete WhatsApp number');
     } finally {
       setResetting(false);
     }
@@ -478,7 +477,7 @@ export function WhatsAppConfig() {
                   {statusMessage}
                 </AlertDescription>
                 <Button
-                  onClick={handleReset}
+                  onClick={handleDeleteConnection}
                   disabled={resetting}
                   size="sm"
                   className="mt-3 bg-amber-600 hover:bg-amber-700 text-white"
@@ -486,12 +485,12 @@ export function WhatsAppConfig() {
                   {resetting ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />
-                      {t('resetting')}
+                      {t('deletingConnection')}
                     </>
                   ) : (
                     <>
-                      <RotateCcw className="size-4" />
-                      {t('resetConfig')}
+                      <Trash2 className="size-4" />
+                      {t('deleteConnection')}
                     </>
                   )}
                 </Button>
@@ -814,19 +813,19 @@ export function WhatsAppConfig() {
           {config && (
             <Button
               variant="outline"
-              onClick={handleReset}
+              onClick={handleDeleteConnection}
               disabled={resetting}
               className="border-red-900 text-red-400 hover:text-red-300 hover:bg-red-950/40"
             >
               {resetting ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  {t('resetting')}
+                  {t('deletingConnection')}
                 </>
               ) : (
                 <>
-                  <RotateCcw className="size-4" />
-                  {t('resetConfig')}
+                  <Trash2 className="size-4" />
+                  {t('deleteConnection')}
                 </>
               )}
             </Button>

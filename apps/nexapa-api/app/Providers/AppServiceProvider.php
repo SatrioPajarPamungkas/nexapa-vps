@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Console\Commands\DownloadPurgeOrphanStorage;
 use App\Models\PublisherPost;
 use App\Observers\PublisherPostObserver;
+use App\Listeners\AccountAuthenticationSubscriber;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         PublisherPost::observe(PublisherPostObserver::class);
+        Event::subscribe(AccountAuthenticationSubscriber::class);
         \Illuminate\Http\Resources\Json\JsonResource::withoutWrapping();
 
         // Register console commands manually if auto-discovery is not enabled

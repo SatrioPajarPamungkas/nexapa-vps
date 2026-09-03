@@ -31,6 +31,8 @@ class AdminActivityLogger
         try {
             ActivityLog::create([
                 'user_id' => $this->adminUserId,
+                'actor_name' => Auth::user()?->name,
+                'actor_email' => Auth::user()?->email,
                 'category' => 'admin',
                 'action' => $action,
                 'title' => $description,
@@ -39,6 +41,7 @@ class AdminActivityLogger
                 'subject_id' => $subject ? $subject->id : null,
                 'status' => $status,
                 'platform' => null,
+                'product' => 'admin',
                 'metadata' => SafeMetadata::sanitize($metadata),
                 'ip_address' => $this->ipAddress,
                 'user_agent' => $this->userAgent,

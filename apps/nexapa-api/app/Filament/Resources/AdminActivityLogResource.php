@@ -17,13 +17,13 @@ class AdminActivityLogResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static ?string $navigationLabel = 'Activity Log';
+    protected static ?string $navigationLabel = 'Riwayat Akun';
 
     protected static ?int $navigationSort = 9;
 
-    protected static ?string $modelLabel = 'Activity Log';
+    protected static ?string $modelLabel = 'Riwayat Akun';
 
-    protected static ?string $pluralModelLabel = 'Activity Logs';
+    protected static ?string $pluralModelLabel = 'Riwayat Akun';
 
     protected static ?string $navigationGroup = 'Operasional Sistem';
 
@@ -63,11 +63,11 @@ class AdminActivityLogResource extends Resource
                     ->dateTime('d M Y H:i:s')
                     ->sortable(),
                 Tables\Columns\Layout\Stack::make([
-                    Tables\Columns\TextColumn::make('user.name')
-                        ->label('Admin')
-                        ->searchable(['user.name', 'user.email'])
-                        ->sortable('user.name')
-                        ->description(fn ($record): string => $record->user?->email ?? '-'),
+                    Tables\Columns\TextColumn::make('actor_name')
+                        ->label('Pengguna')
+                        ->state(fn ($record): string => $record->actor_name ?? $record->user?->name ?? 'Tidak dikenal')
+                        ->searchable(['actor_name', 'actor_email'])
+                        ->description(fn ($record): string => $record->actor_email ?? $record->user?->email ?? '-'),
                 ]),
                 Tables\Columns\TextColumn::make('action')
                     ->label('Action')
@@ -96,6 +96,10 @@ class AdminActivityLogResource extends Resource
                         'blocked' => 'warning',
                     ])
                     ->sortable(),
+                Tables\Columns\TextColumn::make('product')
+                    ->label('Produk')
+                    ->badge()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('ip_address')
                     ->label('IP Address')
                     ->toggleable()
@@ -107,8 +111,23 @@ class AdminActivityLogResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('user')
-                    ->label('Admin User')
+                    ->label('Pengguna')
                     ->relationship('user', 'name'),
+                Tables\Filters\SelectFilter::make('product')
+                    ->label('Produk')
+                    ->options([
+                        'publisher' => 'Publisher',
+                        'crm' => 'CRM',
+                        'admin' => 'Admin',
+                    ]),
+                Tables\Filters\SelectFilter::make('category')
+                    ->label('Kategori')
+                    ->options([
+                        'authentication' => 'Login & keamanan',
+                        'account' => 'Akun',
+                        'admin' => 'Admin',
+                        'whatsapp' => 'WhatsApp',
+                    ]),
                 Tables\Filters\SelectFilter::make('action')
                     ->options([
                         'user.promoted_to_super_admin' => 'User Promoted to Super Admin',
@@ -130,6 +149,18 @@ class AdminActivityLogResource extends Resource
                         'queue_job.forgotten' => 'Job Forgotten',
                         'settings.updated' => 'Settings Updated',
                         'settings.update_failed' => 'Settings Update Failed',
+                        'auth.registered' => 'Akun dibuat',
+                        'auth.login_succeeded' => 'Login Publisher berhasil',
+                        'auth.login_failed' => 'Login Publisher gagal',
+                        'auth.login_blocked' => 'Login Publisher diblokir',
+                        'auth.crm_login_succeeded' => 'Login CRM berhasil',
+                        'auth.crm_login_failed' => 'Login CRM gagal',
+                        'auth.crm_login_blocked' => 'Login CRM diblokir',
+                        'auth.logout' => 'Logout',
+                        'account.profile_updated' => 'Profil diperbarui',
+                        'user.suspended' => 'Akun disuspend',
+                        'user.activated' => 'Akun diaktifkan',
+                        'user.purged' => 'Akun dihapus permanen',
                     ]),
                 Tables\Filters\SelectFilter::make('status')
                     ->options([
@@ -176,8 +207,7 @@ class AdminActivityLogResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->with(['user'])
-            ->where('category', 'admin');
+            ->with(['user']);
     }
 
     public static function canCreate(): bool
@@ -205,6 +235,6 @@ class AdminActivityLogResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return static::getModel()::where('category', 'admin')->count();
+        return static::getModel()::count();
     }
 }

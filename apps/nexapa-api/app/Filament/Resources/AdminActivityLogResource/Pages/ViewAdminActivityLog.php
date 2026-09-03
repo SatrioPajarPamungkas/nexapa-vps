@@ -39,13 +39,15 @@ class ViewAdminActivityLog extends ViewRecord
                                 default => 'gray',
                             }),
                     ])->columns(3),
-                Infolists\Components\Section::make('Admin')
+                Infolists\Components\Section::make('Pengguna dan perangkat')
                     ->schema([
-                        Infolists\Components\TextEntry::make('user.name')
-                            ->label('Admin Name')
+                        Infolists\Components\TextEntry::make('actor_name')
+                            ->label('Nama')
+                            ->state(fn ($record): string => $record->actor_name ?? $record->user?->name ?? '-')
                             ->default('-'),
-                        Infolists\Components\TextEntry::make('user.email')
-                            ->label('Admin Email')
+                        Infolists\Components\TextEntry::make('actor_email')
+                            ->label('Email')
+                            ->state(fn ($record): string => $record->actor_email ?? $record->user?->email ?? '-')
                             ->default('-'),
                         Infolists\Components\TextEntry::make('ip_address')
                             ->label('IP Address')
@@ -55,6 +57,10 @@ class ViewAdminActivityLog extends ViewRecord
                             ->label('User Agent')
                             ->default('-')
                             ->limit(100),
+                        Infolists\Components\TextEntry::make('product')
+                            ->label('Produk')
+                            ->badge()
+                            ->default('-'),
                     ])->columns(2),
                 Infolists\Components\Section::make('Action')
                     ->schema([

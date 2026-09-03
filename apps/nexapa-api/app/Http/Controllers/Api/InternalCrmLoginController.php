@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\Provisioning\CrmWorkspaceProvisioningService;
+use App\Services\ActivityLogService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -18,7 +19,8 @@ class InternalCrmLoginController extends Controller
 {
     public function __construct(
         private readonly CrmWorkspaceProvisioningService
-            $workspaceProvisioning
+            $workspaceProvisioning,
+        private readonly ActivityLogService $activityLog,
     ) {}
 
     public function store(Request $request): JsonResponse
@@ -71,6 +73,14 @@ class InternalCrmLoginController extends Controller
                 $user->password
             )
         ) {
+            $this->activityLog->log([
+                'category' => 'authentication',
+                'action' => 'auth.crm_login_failed',
+                'title' => 'Percobaan login CRM gagal.',
+                'status' => 'failed',
+                'product' => 'crm',
+                'metadata' => ['email_hash' => hash('sha256', $email)],
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Email atau password salah.',
@@ -78,6 +88,7 @@ class InternalCrmLoginController extends Controller
         }
 
         if ((bool) ($user->is_suspended ?? false)) {
+            $this->audit($user, 'auth.crm_login_blocked', 'Login CRM ditolak karena akun disuspend.', 'blocked');
             return response()->json([
                 'success' => false,
                 'message' =>
@@ -86,6 +97,7 @@ class InternalCrmLoginController extends Controller
         }
 
         if (! $user->hasVerifiedEmail()) {
+            $this->audit($user, 'auth.crm_login_blocked', 'Login CRM ditolak karena email belum diverifikasi.', 'blocked');
             return response()->json([
                 'success' => false,
                 'message' =>
@@ -256,10 +268,28 @@ class InternalCrmLoginController extends Controller
             ], Response::HTTP_CONFLICT);
         }
 
+        $this->audit($user, 'auth.crm_login_succeeded', 'Login CRM berhasil.');
+
         return response()->json([
             'success' => true,
             'token_hash' => $tokenHash,
             'crm_user_id' => $crmUserId,
+        ]);
+    }
+
+    private function audit(
+        User $user,
+        string $action,
+        string $title,
+        string $status = 'success'
+    ): void {
+        $this->activityLog->log([
+            'user' => $user,
+            'category' => 'authentication',
+            'action' => $action,
+            'title' => $title,
+            'status' => $status,
+            'product' => 'crm',
         ]);
     }
 }

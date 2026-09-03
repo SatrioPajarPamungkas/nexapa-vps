@@ -90,6 +90,15 @@ class UserLifecycleService
 
         DB::transaction(function () use ($record, $publisher, $email): void {
             if ($publisher !== null) {
+                if (Schema::hasTable('activity_logs')) {
+                    DB::table('activity_logs')
+                        ->where('user_id', $publisher->getKey())
+                        ->update([
+                            'actor_name' => $publisher->name,
+                            'actor_email' => $publisher->email,
+                        ]);
+                }
+
                 $publisher->tokens()->delete();
                 $this->deleteSessions($publisher);
                 $this->purgePublisherData((int) $publisher->getKey());
@@ -196,7 +205,6 @@ class UserLifecycleService
             'media_assets',
             'download_jobs',
             'connected_accounts',
-            'activity_logs',
         ] as $table) {
             if (Schema::hasTable($table)) {
                 DB::table($table)->where('user_id', $userId)->delete();
@@ -343,6 +351,8 @@ class UserLifecycleService
                         : 'Akun pengguna disuspend.'
                 ),
             [
+                'target_name' => $record->name,
+                'target_email' => strtolower(trim((string) $record->email)),
                 'email_hash' => hash(
                     'sha256',
                     strtolower(trim((string) $record->email))

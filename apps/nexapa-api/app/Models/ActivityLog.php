@@ -16,6 +16,8 @@ class ActivityLog extends Model
 
     protected $fillable = [
         'user_id',
+        'actor_name',
+        'actor_email',
         'category',
         'action',
         'title',
@@ -24,7 +26,10 @@ class ActivityLog extends Model
         'subject_id',
         'status',
         'platform',
+        'product',
         'metadata',
+        'ip_address',
+        'user_agent',
     ];
 
     protected function casts(): array

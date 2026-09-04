@@ -37,6 +37,7 @@ function supabaseAdmin() {
 interface WhatsAppMessage {
   id: string
   from?: string
+  to?: string
   from_user_id?: string
   timestamp: string
   type: string
@@ -61,6 +62,7 @@ interface WhatsAppMessage {
   }
   /** Present when the customer swipe-replies to one of our messages. */
   context?: { id: string }
+  history_context?: { status?: string }
 }
 
 interface WhatsAppWebhookEntry {
@@ -73,8 +75,8 @@ interface WhatsAppWebhookEntry {
         phone_number_id: string
       }
       contacts?: Array<{
-        profile: {
-          name: string
+        profile?: {
+          name?: string
           username?: string
           country_code?: string
         }
@@ -82,6 +84,33 @@ interface WhatsAppWebhookEntry {
         user_id?: string
       }>
       messages?: WhatsAppMessage[]
+      message_echoes?: WhatsAppMessage[]
+      history?: Array<{
+        phase?: number
+        progress?: number
+        chunk_order?: number
+        threads?: Array<{
+          id: string
+          messages?: WhatsAppMessage[]
+        }>
+        errors?: Array<{
+          code?: number
+          title?: string
+          message?: string
+        }>
+      }>
+      state_sync?: Array<{
+        type: string
+        action?: string
+        contact?: {
+          full_name?: string
+          first_name?: string
+          phone_number?: string
+          user_id?: string
+          username?: string
+        }
+        metadata?: { timestamp?: string }
+      }>
       statuses?: Array<{
         id: string
         status: string
@@ -261,6 +290,22 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
 
       const value = change.value
 
+      // WhatsApp Business app Coexistence sends three additional fields.
+      // Handle them separately: they do not always include contacts[] and
+      // must never trigger automations or unread badges during bulk sync.
+      if (change.field === 'history') {
+        await handleCoexistenceHistory(value)
+        continue
+      }
+      if (change.field === 'smb_app_state_sync') {
+        await handleCoexistenceStateSync(value)
+        continue
+      }
+      if (change.field === 'smb_message_echoes') {
+        await handleCoexistenceEchoes(value)
+        continue
+      }
+
       // Handle status updates
       if (value.statuses) {
         for (const status of value.statuses) {
@@ -333,6 +378,232 @@ async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {
         )
       }
     }
+  }
+}
+
+
+type WhatsAppConfigRow = {
+  id: string
+  account_id: string
+  user_id: string
+  access_token: string
+}
+
+async function coexistenceConfig(
+  phoneNumberId: string
+): Promise<WhatsAppConfigRow | null> {
+  const { data, error } = await supabaseAdmin()
+    .from('whatsapp_config')
+    .select('id, account_id, user_id, access_token')
+    .eq('phone_number_id', phoneNumberId)
+
+  if (error || !data || data.length !== 1) {
+    console.error('[coexistence] config lookup failed:', {
+      phoneNumberId,
+      count: data?.length ?? 0,
+      error: error?.message,
+    })
+    return null
+  }
+  return data[0] as WhatsAppConfigRow
+}
+
+const SYNC_CONTENT_TYPES = new Set([
+  'text', 'image', 'document', 'audio', 'video',
+  'location', 'template', 'interactive',
+])
+
+function syncedContentType(type: string): string {
+  if (SYNC_CONTENT_TYPES.has(type)) return type
+  if (type === 'sticker') return 'image'
+  return 'text'
+}
+
+function normalizedHistoryStatus(status?: string): string {
+  const value = status?.toLowerCase()
+  return value === 'sent' || value === 'delivered' || value === 'read'
+    ? value
+    : 'delivered'
+}
+
+/**
+ * Persists history and phone-sent echo messages without firing inbound
+ * automations, AI replies, broadcast-reply counters, or unread badges.
+ * The (conversation_id, message_id) lookup makes Meta chunk retries safe.
+ */
+async function persistCoexistenceMessage(args: {
+  config: WhatsAppConfigRow
+  message: WhatsAppMessage
+  remotePhone: string
+  senderType: 'customer' | 'agent'
+  contactName?: string
+}) {
+  const { config, message, senderType } = args
+  const phone = normalizePhone(args.remotePhone) || null
+  if (!phone) {
+    console.warn('[coexistence] skipped message without a customer phone:', message.id)
+    return
+  }
+
+  const contactOutcome = await findOrCreateContact(
+    config.account_id,
+    config.user_id,
+    phone,
+    args.contactName || phone,
+    senderType === 'customer' ? message.from_user_id?.trim() || null : null,
+    null,
+  )
+  if (!contactOutcome) return
+
+  const convResult = await findOrCreateConversation(
+    config.account_id,
+    config.user_id,
+    contactOutcome.contact.id,
+    config.id,
+  )
+  if (!convResult) return
+  const conversation = convResult.conversation
+
+  const { data: duplicate } = await supabaseAdmin()
+    .from('messages')
+    .select('id')
+    .eq('conversation_id', conversation.id)
+    .eq('message_id', message.id)
+    .limit(1)
+    .maybeSingle()
+  if (duplicate) return
+
+  let accessToken: string
+  try {
+    accessToken = decrypt(config.access_token)
+  } catch (error) {
+    console.error('[coexistence] access token decrypt failed:', error)
+    return
+  }
+
+  const { contentText, mediaUrl, interactiveReplyId } =
+    await parseMessageContent(message, accessToken, config.id)
+  const createdAt = new Date(
+    Number.parseInt(message.timestamp, 10) * 1000
+  ).toISOString()
+
+  const { error: insertError } = await supabaseAdmin()
+    .from('messages')
+    .insert({
+      conversation_id: conversation.id,
+      sender_type: senderType,
+      content_type: syncedContentType(message.type),
+      content_text: contentText,
+      media_url: mediaUrl,
+      message_id: message.id,
+      status: normalizedHistoryStatus(message.history_context?.status),
+      created_at: createdAt,
+      interactive_reply_id: interactiveReplyId,
+    })
+
+  if (insertError) {
+    if (!isUniqueViolation(insertError)) {
+      console.error('[coexistence] message insert failed:', insertError)
+    }
+    return
+  }
+
+  const previousTime = conversation.last_message_at
+    ? Date.parse(conversation.last_message_at)
+    : 0
+  if (Date.parse(createdAt) >= previousTime) {
+    await supabaseAdmin()
+      .from('conversations')
+      .update({
+        last_message_text: contentText || `[${message.type}]`,
+        last_message_at: createdAt,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', conversation.id)
+  }
+}
+
+async function handleCoexistenceEchoes(
+  value: WhatsAppWebhookEntry['changes'][number]['value']
+) {
+  const phoneNumberId = value.metadata?.phone_number_id
+  if (!phoneNumberId || !value.message_echoes?.length) return
+  const config = await coexistenceConfig(phoneNumberId)
+  if (!config) return
+
+  for (const message of value.message_echoes) {
+    const remotePhone = message.to?.trim() || ''
+    await persistCoexistenceMessage({
+      config,
+      message,
+      remotePhone,
+      senderType: 'agent',
+    })
+  }
+}
+
+async function handleCoexistenceHistory(
+  value: WhatsAppWebhookEntry['changes'][number]['value']
+) {
+  const phoneNumberId = value.metadata?.phone_number_id
+  if (!phoneNumberId || !value.history?.length) return
+  const config = await coexistenceConfig(phoneNumberId)
+  if (!config) return
+
+  const businessPhone =
+    normalizePhone(value.metadata.display_phone_number || '') || ''
+
+  for (const chunk of value.history) {
+    if (chunk.errors?.length) {
+      console.warn('[coexistence] history sharing unavailable:', chunk.errors)
+      continue
+    }
+    for (const thread of chunk.threads ?? []) {
+      const remotePhone = normalizePhone(thread.id) || thread.id
+      for (const message of thread.messages ?? []) {
+        const from = normalizePhone(message.from || '') || ''
+        await persistCoexistenceMessage({
+          config,
+          message,
+          remotePhone,
+          senderType: from && from === businessPhone ? 'agent' : 'customer',
+        })
+      }
+    }
+  }
+}
+
+async function handleCoexistenceStateSync(
+  value: WhatsAppWebhookEntry['changes'][number]['value']
+) {
+  const phoneNumberId = value.metadata?.phone_number_id
+  if (!phoneNumberId || !value.state_sync?.length) return
+  const config = await coexistenceConfig(phoneNumberId)
+  if (!config) return
+
+  for (const item of value.state_sync) {
+    if (item.type !== 'contact' || item.action === 'remove' || !item.contact) {
+      // Removing a phone contact must not erase CRM history.
+      continue
+    }
+    const rawPhone = item.contact.phone_number?.trim() || ''
+    const phone = normalizePhone(rawPhone) || null
+    const userId = item.contact.user_id?.trim() || null
+    if (!phone && !userId) continue
+
+    await findOrCreateContact(
+      config.account_id,
+      config.user_id,
+      phone,
+      item.contact.full_name?.trim() ||
+        item.contact.first_name?.trim() ||
+        item.contact.username?.trim() ||
+        phone ||
+        userId ||
+        'WhatsApp contact',
+      userId,
+      item.contact.username?.trim() || null,
+    )
   }
 }
 
@@ -609,8 +880,8 @@ async function handleReaction(
 async function processMessage(
   message: WhatsAppMessage,
   contact: {
-    profile: {
-      name: string
+    profile?: {
+      name?: string
       username?: string
       country_code?: string
     }
@@ -648,8 +919,13 @@ async function processMessage(
       ? normalizePhone(rawPhone) || null
       : null
 
-  const contactName = contact.profile.name
-  const whatsappUsername = contact.profile.username?.trim() || null
+  const whatsappUsername = contact.profile?.username?.trim() || null
+  const contactName =
+    contact.profile?.name?.trim() ||
+    whatsappUsername ||
+    senderPhone ||
+    whatsappUserId ||
+    'WhatsApp user'
 
   // Find or create contact. BSUID is the authoritative identity;
   // phone remains the backwards-compatible secondary identity.

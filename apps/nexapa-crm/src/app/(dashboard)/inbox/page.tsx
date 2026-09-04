@@ -54,6 +54,9 @@ function InboxPageInner() {
   const [whatsappConnected, setWhatsappConnected] = useState<boolean | null>(
     null
   );
+  const [activeWhatsappConfigId, setActiveWhatsappConfigId] = useState<
+    string | null
+  >(null);
   /**
    * Bumped whenever we want children (ConversationList, MessageThread)
    * to refetch from the DB — used as a safety net against missed
@@ -132,7 +135,7 @@ function InboxPageInner() {
   // Also self-heals if a realtime event was missed: callers can invoke
   // this whenever they reference a conversation id they don't recognise.
   const hydrateConversation = useCallback(async (convId: string) => {
-    if (hydratingConvIdsRef.current.has(convId)) return;
+    if (!activeWhatsappConfigId || hydratingConvIdsRef.current.has(convId)) return;
     hydratingConvIdsRef.current.add(convId);
     try {
       const supabase = createClient();
@@ -141,6 +144,7 @@ function InboxPageInner() {
         .select(CONVERSATION_SELECT)
         .eq("id", convId)
         .eq("account_id", accountId)
+        .eq("whatsapp_config_id", activeWhatsappConfigId)
         .maybeSingle();
       if (error) {
         // Supabase errors have non-enumerable properties — log fields
@@ -174,7 +178,7 @@ function InboxPageInner() {
     } finally {
       hydratingConvIdsRef.current.delete(convId);
     }
-  }, [accountId]);
+  }, [accountId, activeWhatsappConfigId]);
 
   // Check WhatsApp connection status on mount
   useEffect(() => {
@@ -206,11 +210,12 @@ function InboxPageInner() {
 
       const { data } = await supabase
         .from("whatsapp_config")
-        .select("status")
+        .select("id, status")
         .eq("account_id", accountId)
         .eq("is_active", true)
         .maybeSingle();
 
+      setActiveWhatsappConfigId(data?.id ?? null);
       setWhatsappConnected(data?.status === "connected");
     };
 
@@ -305,6 +310,13 @@ function InboxPageInner() {
     }) => {
       const conv = event.new;
 
+      if (
+        (event.eventType === "INSERT" || event.eventType === "UPDATE") &&
+        conv.whatsapp_config_id !== activeWhatsappConfigId
+      ) {
+        return;
+      }
+
       if (event.eventType === "INSERT") {
         // Prepend immediately for snappy UX so the new conv shows in the
         // list right away, then hydrate to fill in the `contact` join
@@ -355,7 +367,7 @@ function InboxPageInner() {
         }
       }
     },
-    [activeConversation, hydrateConversation]
+    [activeConversation, activeWhatsappConfigId, hydrateConversation]
   );
 
   // Subscribe to realtime. The `isConnected` flag below feeds the
@@ -608,6 +620,7 @@ function InboxPageInner() {
         >
           <ConversationList
             accountId={accountId}
+            whatsappConfigId={activeWhatsappConfigId}
             activeConversationId={activeConversation?.id ?? null}
             onSelect={handleSelectConversation}
             conversations={conversations}

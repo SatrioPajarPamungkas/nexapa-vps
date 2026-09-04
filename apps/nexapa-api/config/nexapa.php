@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'frontend_url' => env('FRONTEND_URL', 'https://app.nexapa.app'),
     'worker_token' => env('NEXAPA_WORKER_TOKEN', ''),
     'tiktok' => [
         'client_key' => env('TIKTOK_CLIENT_KEY'),

@@ -75,8 +75,8 @@ interface WhatsAppWebhookEntry {
         phone_number_id: string
       }
       contacts?: Array<{
-        profile: {
-          name: string
+        profile?: {
+          name?: string
           username?: string
           country_code?: string
         }
@@ -880,8 +880,8 @@ async function handleReaction(
 async function processMessage(
   message: WhatsAppMessage,
   contact: {
-    profile: {
-      name: string
+    profile?: {
+      name?: string
       username?: string
       country_code?: string
     }
@@ -919,8 +919,13 @@ async function processMessage(
       ? normalizePhone(rawPhone) || null
       : null
 
-  const contactName = contact.profile.name
-  const whatsappUsername = contact.profile.username?.trim() || null
+  const whatsappUsername = contact.profile?.username?.trim() || null
+  const contactName =
+    contact.profile?.name?.trim() ||
+    whatsappUsername ||
+    senderPhone ||
+    whatsappUserId ||
+    'WhatsApp user'
 
   // Find or create contact. BSUID is the authoritative identity;
   // phone remains the backwards-compatible secondary identity.

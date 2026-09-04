@@ -41,6 +41,10 @@ class FacebookOAuthController extends Controller
         // the frontend instead of throwing an undefined-variable error.
         $returnTo = '/accounts';
 
+        if (! is_string($state) || $state === '') {
+            return $this->redirectToFrontend('invalid_state', null, [], $returnTo);
+        }
+
         $payload = $this->stateService->consumeState($state);
 
         if ($payload === null) {

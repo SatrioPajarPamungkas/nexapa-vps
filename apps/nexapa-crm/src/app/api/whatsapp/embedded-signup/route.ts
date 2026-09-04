@@ -16,6 +16,7 @@ import {
 } from '@/lib/whatsapp/embedded-signup';
 import { encrypt } from '@/lib/whatsapp/encryption';
 import {
+  listWabaPhoneNumbers,
   registerPhoneNumber,
   subscribeWabaToApp,
 } from '@/lib/whatsapp/meta-api';
@@ -102,7 +103,7 @@ export async function POST(request: Request) {
 
     const code = typeof body.code === 'string' ? body.code.trim() : '';
     const wabaId = typeof body.waba_id === 'string' ? body.waba_id.trim() : '';
-    const phoneNumberId =
+    let phoneNumberId =
       typeof body.phone_number_id === 'string'
         ? body.phone_number_id.trim()
         : '';
@@ -110,6 +111,8 @@ export async function POST(request: Request) {
       typeof body.registration_pin === 'string'
         ? body.registration_pin.trim()
         : '';
+    const onboardingMode =
+      body.onboarding_mode === 'business_app' ? 'business_app' : 'cloud_api';
 
     if (code.length < 8 || code.length > 4096) {
       throw new EmbeddedSignupError('Invalid Embedded Signup code.');
@@ -117,7 +120,10 @@ export async function POST(request: Request) {
     if (!META_ID_PATTERN.test(wabaId)) {
       throw new EmbeddedSignupError('Invalid WhatsApp Business Account ID.');
     }
-    if (!META_ID_PATTERN.test(phoneNumberId)) {
+    if (phoneNumberId && !META_ID_PATTERN.test(phoneNumberId)) {
+      throw new EmbeddedSignupError('Invalid WhatsApp phone number ID.');
+    }
+    if (!phoneNumberId && onboardingMode !== 'business_app') {
       throw new EmbeddedSignupError('Invalid WhatsApp phone number ID.');
     }
     if (suppliedRegistrationPin && !/^\d{6}$/.test(suppliedRegistrationPin)) {
@@ -127,6 +133,20 @@ export async function POST(request: Request) {
     }
 
     const accessToken = await exchangeEmbeddedSignupCode(code);
+
+    if (!phoneNumberId) {
+      const phoneNumbers = await listWabaPhoneNumbers({ wabaId, accessToken });
+      if (phoneNumbers.length !== 1) {
+        throw new EmbeddedSignupError(
+          phoneNumbers.length === 0
+            ? 'Meta did not share a WhatsApp Business app phone number.'
+            : 'Meta shared multiple phone numbers without identifying the selected one. Please retry onboarding.',
+          422
+        );
+      }
+      phoneNumberId = phoneNumbers[0].id;
+    }
+
     const phoneInfo = await verifyEmbeddedSignupAsset({
       wabaId,
       phoneNumberId,
@@ -204,7 +224,10 @@ export async function POST(request: Request) {
       existing.registered_at != null;
 
     let registrationPin: string | null = null;
-    if (!sameRegisteredNumber) {
+    // Coexistence keeps registration under the WhatsApp Business app.
+    // Calling /register here would migrate/claim the number as regular
+    // Cloud API and defeat the purpose of coexistence.
+    if (!sameRegisteredNumber && onboardingMode !== 'business_app') {
       const pinForRegistration =
         suppliedRegistrationPin || generateRegistrationPin();
       let registration;
@@ -296,6 +319,7 @@ export async function POST(request: Request) {
       success: true,
       phone_info: phoneInfo,
       registration_pin: registrationPin,
+      onboarding_mode: onboardingMode,
     });
   } catch (error) {
     return embeddedSignupErrorResponse(error);

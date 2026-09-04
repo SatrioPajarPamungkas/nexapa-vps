@@ -36,6 +36,10 @@ class FacebookOAuthController extends Controller
 
         $correlationId = $this->generateCorrelationId();
         $startTime = now();
+        // State is single-use. Keep a safe fallback available before
+        // consuming it so repeated/expired callbacks still redirect to
+        // the frontend instead of throwing an undefined-variable error.
+        $returnTo = '/accounts';
 
         $payload = $this->stateService->consumeState($state);
 
@@ -209,7 +213,7 @@ class FacebookOAuthController extends Controller
             return $this->redirectToFrontend('facebook_page_sync_failed', null, [], $returnTo);
         }
 
-        $duration = now()->diffInSeconds($startTime);
+        $duration = $startTime->diffInSeconds(now());
 
         Log::info('Facebook OAuth completed successfully', [
             'correlation_id' => $correlationId,

@@ -67,6 +67,35 @@ export async function verifyPhoneNumber(
   return response.json()
 }
 
+export interface ListWabaPhoneNumbersArgs {
+  wabaId: string
+  accessToken: string
+}
+
+/**
+ * Resolve phone-number assets shared by Embedded Signup. Coexistence
+ * completion events may contain only the WABA id, so the server must
+ * discover the phone number with the exchanged token.
+ */
+export async function listWabaPhoneNumbers(
+  args: ListWabaPhoneNumbersArgs
+): Promise<MetaPhoneInfo[]> {
+  const { wabaId, accessToken } = args
+  const url =
+    `${META_API_BASE}/${wabaId}/phone_numbers?fields=id,display_phone_number,verified_name,quality_rating`
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!response.ok) {
+    await throwMetaError(
+      response,
+      `Could not list WhatsApp phone numbers: ${response.status}`
+    )
+  }
+  const data = (await response.json()) as { data?: MetaPhoneInfo[] }
+  return data.data ?? []
+}
+
 // ============================================================
 // Cloud API registration (subscription for inbound webhooks)
 // ============================================================

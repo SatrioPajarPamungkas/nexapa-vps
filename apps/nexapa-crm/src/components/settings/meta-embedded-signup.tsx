@@ -36,7 +36,7 @@ interface EmbeddedSignupSettings {
 
 interface EmbeddedSignupSession {
   wabaId: string;
-  phoneNumberId: string;
+  phoneNumberId?: string;
 }
 
 interface FacebookLoginResponse {
@@ -259,19 +259,24 @@ export function MetaEmbeddedSignup({
           ? (payload.data as Record<string, unknown>)
           : {};
 
-      if (eventName === 'FINISH') {
+      if (
+        eventName === 'FINISH' ||
+        eventName === 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING'
+      ) {
         const wabaId = typeof data.waba_id === 'string' ? data.waba_id : '';
         const phoneNumberId =
           typeof data.phone_number_id === 'string' ? data.phone_number_id : '';
-        if (!wabaId || !phoneNumberId) {
+        if (!wabaId) {
           settleWaiter({
             error: new Error(
-              'Meta finished without returning the selected phone number.'
+              'Meta finished without returning the WhatsApp Business Account.'
             ),
           });
           return;
         }
-        const session = { wabaId, phoneNumberId };
+        // Coexistence completion can omit phone_number_id. The server
+        // resolves it from the WABA using the exchanged access token.
+        const session = { wabaId, phoneNumberId: phoneNumberId || undefined };
         sessionRef.current = session;
         settleWaiter({ session });
       } else if (eventName === 'CANCEL') {
@@ -305,7 +310,9 @@ export function MetaEmbeddedSignup({
     });
   }, []);
 
-  async function connectWithMeta() {
+  async function connectWithMeta(
+    onboardingMode: 'cloud_api' | 'business_app' = 'cloud_api'
+  ) {
     if (!settings || !window.FB || !sdkReady || connecting) return;
     setConnecting(true);
     setRegistrationPin(null);
@@ -333,6 +340,7 @@ export function MetaEmbeddedSignup({
                 waba_id: session.wabaId,
                 phone_number_id: session.phoneNumberId,
                 registration_pin: existingRegistrationPin || undefined,
+                onboarding_mode: onboardingMode,
               }),
             });
             const payload = (await response.json()) as {
@@ -375,7 +383,10 @@ export function MetaEmbeddedSignup({
           override_default_response_type: true,
           extras: {
             setup: {},
-            featureType: '',
+            featureType:
+              onboardingMode === 'business_app'
+                ? 'whatsapp_business_app_onboarding'
+                : '',
             sessionInfoVersion: '3',
           },
         }
@@ -523,7 +534,7 @@ export function MetaEmbeddedSignup({
             onClick={
               subscriptionRequired
                 ? () => setShowPlans(true)
-                : connectWithMeta
+                : () => connectWithMeta('cloud_api')
             }
             disabled={
               profileLoading ||
@@ -556,8 +567,30 @@ export function MetaEmbeddedSignup({
               ? 'Lihat Pilihan Paket'
               : connecting
                 ? 'Finishing connection…'
-                : 'Continue with Meta'}
+                : 'Connect Cloud API number'}
           </Button>
+          {!subscriptionRequired && (
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => connectWithMeta('business_app')}
+              disabled={
+                profileLoading ||
+                !canEditSettings ||
+                loading ||
+                !sdkReady ||
+                connecting
+              }
+              title="Keep using this number in the WhatsApp Business app and Nexapa CRM"
+            >
+              {connecting ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <MessageCircle />
+              )}
+              Connect WhatsApp Business on phone
+            </Button>
+          )}
           <a
             href="https://developers.facebook.com/docs/whatsapp/embedded-signup"
             target="_blank"

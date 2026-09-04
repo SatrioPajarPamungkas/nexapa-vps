@@ -24,6 +24,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ConversationListProps {
   accountId: string | null;
+  whatsappConfigId: string | null;
   activeConversationId: string | null;
   onSelect: (conversation: Conversation) => void;
   conversations: Conversation[];
@@ -49,6 +50,7 @@ type InboxFilter = ConversationStatus | "all" | "unread";
 
 export function ConversationList({
   accountId,
+  whatsappConfigId,
   activeConversationId,
   onSelect,
   conversations,
@@ -93,7 +95,7 @@ export function ConversationList({
   });
 
   useEffect(() => {
-    if (!accountId) {
+    if (!accountId || !whatsappConfigId) {
       setLoading(false);
       onConversationsLoadedRef.current([]);
       return;
@@ -106,6 +108,7 @@ export function ConversationList({
         .from("conversations")
         .select(CONVERSATION_SELECT)
         .eq("account_id", accountId)
+        .eq("whatsapp_config_id", whatsappConfigId)
         .order("last_message_at", { ascending: false });
 
       if (cancelled) return;
@@ -132,7 +135,7 @@ export function ConversationList({
     // `resyncToken` is included so the parent can force a refetch when
     // the realtime channel reconnects or the tab regains focus — catches
     // up on any events sent while the WS was disconnected or throttled.
-  }, [accountId, resyncToken]);
+  }, [accountId, whatsappConfigId, resyncToken]);
 
   // Tag definitions for the filter picker — loaded once so labels/colours
   // stay stable regardless of which conversations happen to be loaded.

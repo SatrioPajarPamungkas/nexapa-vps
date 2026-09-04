@@ -2,7 +2,7 @@
 
 ## Struktur menu
 
-Panel `https://api.nexapa.me/admin` memiliki group **Manajemen Pengguna**:
+Panel `https://api.nexapa.app/admin` memiliki group **Manajemen Pengguna**:
 
 - **Semua Pengguna** — direktori ringkas Publisher + CRM tanpa menyatukan database.
 - **User Publisher** — resource Eloquent `App\Models\User` beserta relasi pemakaian.

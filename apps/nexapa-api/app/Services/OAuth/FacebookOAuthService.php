@@ -57,7 +57,7 @@ class FacebookOAuthService
 
     private function buildBackendRedirectUri(): string
     {
-        $appUrl = Config::get('app.url', 'https://api.nexapa.me');
+        $appUrl = Config::get('app.url', 'https://api.nexapa.app');
         return rtrim($appUrl, '/') . '/api/v1/oauth/facebook/callback';
     }
 

@@ -1,5 +1,5 @@
 server {
-    server_name app.nexapa.me;
+    server_name app.nexapa.app;
 
     root /var/www/nexapa-web/dist;
     index index.html;
@@ -16,8 +16,8 @@ server {
 
     listen [::]:443 ssl ipv6only=on; # managed by Certbot
     listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/app.nexapa.me/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/app.nexapa.me/privkey.pem; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/app.nexapa.app/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/app.nexapa.app/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
@@ -25,7 +25,7 @@ server {
 }
 
 server {
-    server_name api.nexapa.me;
+    server_name api.nexapa.app;
 
     root /var/www/nexapa-api/public;
     index index.php;
@@ -47,36 +47,36 @@ server {
 
     listen [::]:443 ssl; # managed by Certbot
     listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/app.nexapa.me/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/app.nexapa.me/privkey.pem; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/app.nexapa.app/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/app.nexapa.app/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
 
 }
 server {
-    if ($host = app.nexapa.me) {
+    if ($host = app.nexapa.app) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
 
 
     listen 80;
     listen [::]:80;
-    server_name app.nexapa.me;
+    server_name app.nexapa.app;
     return 404; # managed by Certbot
 
 
 }
 
 server {
-    if ($host = api.nexapa.me) {
+    if ($host = api.nexapa.app) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
 
 
     listen 80;
     listen [::]:80;
-    server_name api.nexapa.me;
+    server_name api.nexapa.app;
     return 404; # managed by Certbot
 
 

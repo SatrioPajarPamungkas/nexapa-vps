@@ -2,7 +2,7 @@ server {
     listen 80;
     listen [::]:80;
 
-    server_name new.nexapa.me;
+    server_name new.nexapa.app;
 
     root /var/www/nexapa-staging;
     index index.html;

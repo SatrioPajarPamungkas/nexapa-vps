@@ -307,14 +307,14 @@ export function AppTopbar({
                 <button
                   onClick={() => {
                     closeDropdown();
-                    window.location.href = "mailto:support@nexapa.me?subject=Nexapa%20Support";
+                    window.location.href = "mailto:support@nexapa.app?subject=Nexapa%20Support";
                   }}
                   className="flex w-full items-center gap-3 bg-transparent px-4 py-2.5 text-sm text-slate-800 transition-colors hover:bg-white/45"
                 >
                   <LifeBuoy className="h-4 w-4 text-slate-600" />
                   <div className="flex flex-col items-start">
                     <span>Help &amp; Support</span>
-                    <span className="text-[11px] text-slate-600">support@nexapa.me</span>
+                    <span className="text-[11px] text-slate-600">support@nexapa.app</span>
                   </div>
                 </button>
               </div>

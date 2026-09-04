@@ -17,7 +17,7 @@ class FacebookSettingsResource extends JsonResource
             'has_stored_secret' => $hasStoredSecret,
             'configuration_id' => $this->facebook_configuration_id ?? null,
             'graph_api_version' => $this->facebook_graph_api_version ?? 'v21.0',
-            'callback_url' => config('nexapa.facebook.callback_url', 'https://api.nexapa.me/api/v1/oauth/facebook/callback'),
+            'callback_url' => config('nexapa.facebook.callback_url', 'https://api.nexapa.app/api/v1/oauth/facebook/callback'),
         ];
     }
 }

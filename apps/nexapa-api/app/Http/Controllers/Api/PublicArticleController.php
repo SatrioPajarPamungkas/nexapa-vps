@@ -234,7 +234,7 @@ class PublicArticleController extends Controller
                 rtrim(
                     (string) config(
                         'app.frontend_url',
-                        'https://nexapa.me'
+                        'https://nexapa.app'
                     ),
                     '/'
                 )

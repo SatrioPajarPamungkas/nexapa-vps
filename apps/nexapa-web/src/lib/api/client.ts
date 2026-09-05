@@ -11,6 +11,7 @@ export type RequestOptions = {
   signal?: AbortSignal;
   headers?: Record<string, string>;
   timeout?: number;
+  cache?: RequestCache;
 };
 
 export function isApiConfigured(): boolean {
@@ -88,6 +89,7 @@ export async function apiFetch<T>(
       body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
       signal: controller.signal,
       credentials: "include",
+      cache: options.cache,
     });
 
     if (response.status === 204) {

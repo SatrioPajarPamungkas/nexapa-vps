@@ -101,7 +101,7 @@ class ConnectedAccountController extends Controller
                     'tiktok_configured' => $tiktokConfigured,
                     'facebook_configured' => $facebookConfigured,
                 ],
-            ]);
+            ])->withHeaders($this->noStoreHeaders());
         }
 
         // Legacy response (no pagination)
@@ -122,7 +122,7 @@ class ConnectedAccountController extends Controller
                 'tiktok_configured' => $tiktokConfigured,
                 'facebook_configured' => $facebookConfigured,
             ],
-        ]);
+        ])->withHeaders($this->noStoreHeaders());
     }
 
     /**
@@ -292,8 +292,8 @@ class ConnectedAccountController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Account removed.',
-            ]);
+                'message' => 'Account permanently removed.',
+            ])->withHeaders($this->noStoreHeaders());
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
@@ -301,4 +301,18 @@ class ConnectedAccountController extends Controller
             ], 404);
         }
     }
+    /**
+     * Prevent browsers and intermediary caches from retaining account data.
+     *
+     * @return array<string, string>
+     */
+    private function noStoreHeaders(): array
+    {
+        return [
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, private',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
+        ];
+    }
+
 }

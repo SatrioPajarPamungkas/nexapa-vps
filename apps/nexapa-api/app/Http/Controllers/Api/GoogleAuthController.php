@@ -23,7 +23,7 @@ class GoogleAuthController extends Controller
         }
 
         if (!config('services.google.client_id') || !config('services.google.client_secret')) {
-            $frontendUrl = config('app.frontend_url') ?? env('FRONTEND_URL', 'https://app.nexapa.me');
+            $frontendUrl = config('app.frontend_url') ?? env('FRONTEND_URL', 'https://app.nexapa.app');
             return redirect($frontendUrl . '/login?google_error=not_configured');
         }
 
@@ -36,7 +36,7 @@ class GoogleAuthController extends Controller
             abort(404);
         }
 
-        $frontendUrl = config('app.frontend_url') ?? env('FRONTEND_URL', 'https://app.nexapa.me');
+        $frontendUrl = config('app.frontend_url') ?? env('FRONTEND_URL', 'https://app.nexapa.app');
 
         try {
             $googleUser = Socialite::driver('google')->user();

@@ -7,7 +7,7 @@ Nexapa is a media workflow platform for content management, connected accounts, 
 - Product name: Nexapa
 - Frontend package: nexapa-web
 - Primary app domain: nexapa.app (planned)
-- Brand/marketing domain: nexapa.me (planned)
+- Brand/marketing domain: nexapa.app (planned)
 - Future API domain: api.nexapa.app
 
 This repository contains the frontend application shell only.

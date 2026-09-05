@@ -10,7 +10,7 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        env('FRONTEND_URL', 'https://app.nexapa.me'),
+        env('FRONTEND_URL', 'https://app.nexapa.app'),
     ],
 
     'allowed_origins_patterns' => [],

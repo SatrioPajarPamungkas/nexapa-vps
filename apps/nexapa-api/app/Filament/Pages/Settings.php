@@ -186,7 +186,7 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
                                     ->schema([
                                         TextInput::make('facebook_redirect_uri')
                                             ->label('Redirect URI')
-                                            ->default('https://api.nexapa.me/api/v1/oauth/facebook/callback')
+                                            ->default('https://api.nexapa.app/api/v1/oauth/facebook/callback')
                                             ->disabled()
                                             ->helperText('Fixed callback URL - must match Facebook App settings'),
                                     ]),
@@ -224,7 +224,7 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
                                     ->schema([
                                         TextInput::make('tiktok_redirect_uri')
                                             ->label('Redirect URI')
-                                            ->default('https://api.nexapa.me/api/v1/oauth/tiktok/callback')
+                                            ->default('https://api.nexapa.app/api/v1/oauth/tiktok/callback')
                                             ->disabled()
                                             ->helperText('Fixed callback URL - must match TikTok App settings'),
                                     ]),
@@ -443,7 +443,7 @@ class Settings extends Page implements \Filament\Forms\Contracts\HasForms
                                         TextInput::make('support_email')
                                             ->label('Support Email')
                                             ->email()
-                                            ->default('support@nexapa.me')
+                                            ->default('support@nexapa.app')
                                             ->maxLength(255),
                                         TextInput::make('business_email')
                                             ->label('Business Email')

@@ -2,9 +2,9 @@ NEXAPA × AIFORGE — STAGING PACKAGE
 
 Status:
 - Paket ini adalah preview statis untuk evaluasi desain.
-- Website produksi nexapa.me belum disentuh.
+- Website produksi nexapa.app belum disentuh.
 - Homepage utama: index.html
-- Tombol Buka Nexapa CRM mengarah ke https://crm.nexapa.me
+- Tombol Buka Nexapa CRM mengarah ke https://crm.nexapa.app
 
 Audit teknis:
 - Static HTML + Bootstrap + jQuery.
@@ -23,4 +23,4 @@ Tahap berikutnya:
 - Port desain terpilih ke Blade Laravel.
 - Gunakan route dan konten Nexapa yang sudah ada.
 - Nonaktifkan contact.php dan ganti formulir dengan route Laravel.
-- Migrasi melalui staging, bukan langsung ke nexapa.me.
+- Migrasi melalui staging, bukan langsung ke nexapa.app.

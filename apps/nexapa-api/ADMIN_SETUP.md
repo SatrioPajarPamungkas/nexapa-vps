@@ -22,7 +22,7 @@ Ganti `admin@example.com` dengan email user yang akan dipromosikan.
 
 Setelah user dipromosikan:
 
-1. Buka https://api.nexapa.me/admin
+1. Buka https://api.nexapa.app/admin
 2. Login dengan email dan password user yang sudah di-promote
 3. Dashboard admin akan tampil dengan statistik
 

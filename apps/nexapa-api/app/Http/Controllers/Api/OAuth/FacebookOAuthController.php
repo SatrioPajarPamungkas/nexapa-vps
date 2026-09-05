@@ -238,7 +238,7 @@ class FacebookOAuthController extends Controller
 
     private function redirectToFrontend(string $errorCode, ?string $errorDescription = null, array $extraParams = [], ?string $returnTo = null): RedirectResponse
     {
-        $frontendUrl = Config::get('nexapa.frontend_url', 'https://app.nexapa.me');
+        $frontendUrl = Config::get('nexapa.frontend_url', 'https://app.nexapa.app');
         $frontendUrl = rtrim($frontendUrl, '/');
         
         $params = [];

@@ -3,12 +3,12 @@
 ## Root Cause
 
 HTTP 419 (CSRF Token Mismatch) occurs because Laravel Sanctum's stateful authentication is not properly configured for the cross-subdomain setup between:
-- Frontend: `https://app.nexapa.me`
-- Backend: `https://api.nexapa.me`
+- Frontend: `https://app.nexapa.app`
+- Backend: `https://api.nexapa.app`
 
 The session cookie and CSRF token validation fail because:
-1. Session cookie domain not set to `.nexapa.me` (needs to include leading dot for all subdomains)
-2. `SANCTUM_STATEFUL_DOMAINS` not including `app.nexapa.me`
+1. Session cookie domain not set to `.nexapa.app` (needs to include leading dot for all subdomains)
+2. `SANCTUM_STATEFUL_DOMAINS` not including `app.nexapa.app`
 3. Frontend not sending credentials with requests
 4. Frontend not fetching CSRF cookie before making state-changing requests
 
@@ -17,12 +17,12 @@ The session cookie and CSRF token validation fail because:
 ### Backend (nexapa-api)
 
 1. **`.env.example`** - Updated with production values:
-   - `APP_URL=https://api.nexapa.me`
-   - `FRONTEND_URL=https://app.nexapa.me`
-   - `SESSION_DOMAIN=.nexapa.me`
+   - `APP_URL=https://api.nexapa.app`
+   - `FRONTEND_URL=https://app.nexapa.app`
+   - `SESSION_DOMAIN=.nexapa.app`
    - `SESSION_SECURE_COOKIE=true`
    - `SESSION_SAME_SITE=lax`
-   - `SANCTUM_STATEFUL_DOMAINS=app.nexapa.me`
+   - `SANCTUM_STATEFUL_DOMAINS=app.nexapa.app`
 
 ### Backend Files Already Correct (No Changes Needed)
 
@@ -32,14 +32,14 @@ The session cookie and CSRF token validation fail because:
 - `config/sanctum.php` - Already reads from environment variables
 - `routes/api.php` - Connected account routes already protected by `auth:sanctum`
 
-### Frontend (app.nexapa.me - requires separate update)
+### Frontend (app.nexapa.app - requires separate update)
 
 The frontend Axios client must be configured to:
 
 ```typescript
 // Axios configuration
 const apiClient = axios.create({
-  baseURL: 'https://api.nexapa.me',
+  baseURL: 'https://api.nexapa.app',
   withCredentials: true,
   withXSRFToken: true,
   headers: {
@@ -64,15 +64,15 @@ window.location.assign(authorizationUrl);
 
 ## Production .env Configuration
 
-Add these to your production `.env` file on `api.nexapa.me`:
+Add these to your production `.env` file on `api.nexapa.app`:
 
 ```env
-APP_URL=https://api.nexapa.me
-FRONTEND_URL=https://app.nexapa.me
-SESSION_DOMAIN=.nexapa.me
+APP_URL=https://api.nexapa.app
+FRONTEND_URL=https://app.nexapa.app
+SESSION_DOMAIN=.nexapa.app
 SESSION_SECURE_COOKIE=true
 SESSION_SAME_SITE=lax
-SANCTUM_STATEFUL_DOMAINS=app.nexapa.me
+SANCTUM_STATEFUL_DOMAINS=app.nexapa.app
 ```
 
 **Do not modify:**
@@ -98,9 +98,9 @@ php artisan cache:clear sessions
 
 ## Manual Browser Verification Steps
 
-1. **Clear browser cookies** for `nexapa.me` domain
+1. **Clear browser cookies** for `nexapa.app` domain
 
-2. **Log in** at `https://app.nexapa.me`
+2. **Log in** at `https://app.nexapa.app`
 
 3. **Open browser DevTools** → Network tab
 
@@ -111,7 +111,7 @@ php artisan cache:clear sessions
    a. **GET /sanctum/csrf-cookie**
       - Status: `200 OK`
       - Response headers should include: `Set-Cookie: XSRF-TOKEN=...`
-      - Cookie domain: `.nexapa.me`
+      - Cookie domain: `.nexapa.app`
 
    b. **POST /api/v1/connected-accounts/tiktok/connect**
       - Status: `200 OK` or `201 Created` (NOT 419)
@@ -144,11 +144,11 @@ If still getting 419:
 
 2. **Verify cookies are being set:**
    - In DevTools → Application → Cookies
-   - Check `XSRF-TOKEN` and session cookie exist for `.nexapa.me`
+   - Check `XSRF-TOKEN` and session cookie exist for `.nexapa.app`
 
 3. **Verify CORS headers:**
    - Response should include: `Access-Control-Allow-Credentials: true`
-   - Response should include: `Access-Control-Allow-Origin: https://app.nexapa.me`
+   - Response should include: `Access-Control-Allow-Origin: https://app.nexapa.app`
 
 4. **Check logs:**
    ```bash
@@ -159,5 +159,5 @@ If still getting 419:
 
 - `SESSION_SECURE_COOKIE=true` ensures cookies only sent over HTTPS
 - `SESSION_SAME_SITE=lax` allows cross-site navigation while preventing CSRF
-- `SESSION_DOMAIN=.nexapa.me` (with leading dot) allows all subdomains
+- `SESSION_DOMAIN=.nexapa.app` (with leading dot) allows all subdomains
 - Never commit `.env` with real secrets to version control

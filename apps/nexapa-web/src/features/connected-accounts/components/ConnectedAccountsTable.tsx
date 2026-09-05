@@ -275,10 +275,7 @@ export function ConnectedAccountsTable({
                   <button
                     type="button"
                     role="menuitem"
-                    onClick={() => {
-                      onRemove(account.id);
-                      setOpenMenuId(null);
-                    }}
+                    onClick={(event) => { event.preventDefault(); event.stopPropagation(); setOpenMenuId(null); window.setTimeout(() => onRemove(account.id), 0); }}
                     disabled={isRemoving}
                     className="flex w-full items-center gap-2 px-3 py-2 text-[11px] text-rose-600 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50"
                   >
@@ -360,7 +357,7 @@ export function ConnectedAccountsTable({
                                 <Star className="h-3.5 w-3.5" /> Set as Default
                               </button>
                             )}
-                            <button type="button" role="menuitem" onClick={() => { onRemove(page.id); setOpenMenuId(null); }} disabled={pIsRemoving} className="flex w-full items-center gap-2 px-3 py-2 text-[11px] text-rose-600 hover:bg-red-500/10 disabled:opacity-50">Remove</button>
+                            <button type="button" role="menuitem" onClick={(event) => { event.preventDefault(); event.stopPropagation(); setOpenMenuId(null); window.setTimeout(() => onRemove(page.id), 0); }} disabled={pIsRemoving} className="flex w-full items-center gap-2 px-3 py-2 text-[11px] text-rose-600 hover:bg-red-500/10 disabled:opacity-50">Remove</button>
                           </PortalDropdown>
                         </div>
                       </div>
@@ -446,7 +443,7 @@ export function ConnectedAccountsTable({
                   <Star className="h-3.5 w-3.5" /> Set as Default
                 </button>
               )}
-              <button type="button" role="menuitem" onClick={() => { onRemove(account.id); setOpenMenuId(null); }} disabled={isRemoving} className="flex w-full items-center gap-2 px-3 py-2 text-[11px] text-rose-600 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50">
+              <button type="button" role="menuitem" onClick={(event) => { event.preventDefault(); event.stopPropagation(); setOpenMenuId(null); window.setTimeout(() => onRemove(account.id), 0); }} disabled={isRemoving} className="flex w-full items-center gap-2 px-3 py-2 text-[11px] text-rose-600 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-50">
                 Remove
               </button>
             </PortalDropdown>

@@ -36,6 +36,7 @@ export function useConnectedAccounts() {
   });
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [connectDialogOpen, setConnectDialogOpen] = useState(false);
+  const [removeCandidate, setRemoveCandidate] = useState<ConnectedAccount | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -199,32 +200,52 @@ export function useConnectedAccounts() {
     }
   }, [accounts, showFeedback]);
 
-  const handleRemove = useCallback(async (accountId: string) => {
-    const account = accounts.find((a) => a.id === accountId);
+  const requestRemove = useCallback((accountId: string) => {
+    const account = accounts.find((item) => item.id === accountId);
+    if (account) setRemoveCandidate(account);
+  }, [accounts]);
+
+  const cancelRemove = useCallback(() => {
+    if (!loading.removingId) setRemoveCandidate(null);
+  }, [loading.removingId]);
+
+  const confirmRemove = useCallback(async () => {
+    const account = removeCandidate;
     if (!account) return;
 
-    // Confirmation
-    const confirmed = window.confirm(
-      `Remove ${account.display_name}? This will disconnect the account from Nexapa.`
-    );
-    if (!confirmed) return;
+    setLoading((prev) => ({ ...prev, removingId: account.id }));
 
-    setLoading((prev) => ({ ...prev, removingId: accountId }));
     try {
-      await removeAccount(accountId);
-      setAccounts((prev) => prev.filter((a) => a.id !== accountId));
-      await fetchAccounts();
-      showFeedback("success", "Account permanently removed");
+      await removeAccount(account.id);
+
+      // Remove the parent and every locally rendered child immediately.
+      setAccounts((prev) =>
+        prev.filter(
+          (item) =>
+            item.id !== account.id &&
+            item.parent_connected_account_id !== account.id,
+        ),
+      );
+      setRemoveCandidate(null);
+      showFeedback("success", "Account dan data terkait berhasil dihapus permanen.");
+
+      // Reconcile silently against an explicitly uncached server response.
+      void getConnectedAccounts()
+        .then(setAccounts)
+        .catch(() => {
+          // The confirmed local removal remains authoritative until the
+          // regular page refetch retries.
+        });
     } catch (err) {
       if (err instanceof ApiError) {
-        showFeedback("error", `Removal failed: ${err.message}`);
+        showFeedback("error", `Penghapusan gagal: ${err.message}`);
       } else {
-        showFeedback("error", "Failed to remove account");
+        showFeedback("error", "Akun gagal dihapus.");
       }
     } finally {
       setLoading((prev) => ({ ...prev, removingId: null }));
     }
-  }, [accounts, fetchAccounts, showFeedback]);
+  }, [removeCandidate, showFeedback]);
 
   useEffect(() => {
     abortRef.current = new AbortController();
@@ -274,7 +295,10 @@ export function useConnectedAccounts() {
     handleReconnect,
     handleRefresh,
     handleSetDefault,
-    handleRemove,
+    requestRemove,
+    cancelRemove,
+    confirmRemove,
+    removeCandidate,
     refetch,
     showFeedback,
   };

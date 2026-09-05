@@ -27,6 +27,8 @@ export function FacebookPagesPage() {
   async function load(signal?: AbortSignal) {
     setLoading(true);
     setError(null);
+    setAdmin(null);
+    setPages([]);
 
     try {
       const [accounts, pageResponse] = await Promise.all([
@@ -48,7 +50,8 @@ export function FacebookPagesPage() {
       );
 
       if (!parent) {
-        throw new Error("Facebook Admin account tidak ditemukan.");
+        navigate("/accounts", { replace: true });
+        return;
       }
 
       setAdmin(parent);
@@ -56,6 +59,8 @@ export function FacebookPagesPage() {
     } catch (reason) {
       if (signal?.aborted) return;
 
+      setAdmin(null);
+      setPages([]);
       setError(
         reason instanceof Error
           ? reason.message

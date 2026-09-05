@@ -25,6 +25,7 @@ class FacebookOAuthService
     {
         $this->scopes = Config::get('nexapa.facebook.scopes', [
             'public_profile',
+            'business_management',
             'pages_show_list',
             'pages_read_engagement',
             'read_insights',

@@ -213,7 +213,8 @@ export function useConnectedAccounts() {
     try {
       await removeAccount(accountId);
       setAccounts((prev) => prev.filter((a) => a.id !== accountId));
-      showFeedback("success", "Account removed");
+      await fetchAccounts();
+      showFeedback("success", "Account permanently removed");
     } catch (err) {
       if (err instanceof ApiError) {
         showFeedback("error", `Removal failed: ${err.message}`);
@@ -223,7 +224,7 @@ export function useConnectedAccounts() {
     } finally {
       setLoading((prev) => ({ ...prev, removingId: null }));
     }
-  }, [accounts, showFeedback]);
+  }, [accounts, fetchAccounts, showFeedback]);
 
   useEffect(() => {
     abortRef.current = new AbortController();

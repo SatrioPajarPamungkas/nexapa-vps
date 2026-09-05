@@ -51,11 +51,11 @@ export function DestinationAccountCard({ account, selected, onToggle, singleSele
 
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5">
-          <span className="truncate text-[12px] font-medium text-slate-900">{account.label}</span>
+          <span className="truncate text-[13px] font-semibold text-white">{account.label}</span>
           {account.isDemo && <span className="rounded-full border border-amber-400/25 bg-amber-400/15 px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none text-amber-800">Demo</span>}
           {account.isDefault && <Star className="h-3 w-3 fill-amber-400 text-amber-400" aria-label="Default account" />}
         </span>
-        <span className="flex flex-wrap items-center gap-1 text-[10px] text-slate-500">
+        <span className="flex flex-wrap items-center gap-1 text-[10px] text-white/60">
           <span>{PLATFORM_DISPLAY[account.platform]}</span>
           {account.accountType && <><span className="text-white/30">&middot;</span><span className="truncate rounded-full border border-white/10 bg-white/5 px-1.5 py-0.5 text-[9px]">{account.accountType.replace('facebook_', '')}</span></>}
           <span className="text-white/30">&middot;</span>

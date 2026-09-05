@@ -30,17 +30,17 @@ export function PlatformGrid({ selectedPlatform, onPlatformSelect, counts }: Pro
   return (
     <section className="mt-5 bg-transparent">
       <div className="mb-3 flex items-center justify-between bg-transparent">
-        <h2 className="text-[14px] font-semibold text-slate-900 drop-shadow-[0_1px_8px_rgba(255,255,255,0.8)]">Publishing Platforms</h2>
+        <h2 className="text-[16px] font-semibold text-slate-900 drop-shadow-[0_1px_8px_rgba(255,255,255,0.8)]">Platform Publikasi</h2>
         <button
           type="button"
           onClick={() => onPlatformSelect("all")}
-          className={`rounded-full border px-3 py-1 text-[11px] font-medium backdrop-blur-xl transition ${
+          className={`rounded-full border px-3.5 py-1.5 text-[12px] font-medium backdrop-blur-xl transition ${
             selectedPlatform === "all"
               ? "border-white/20 bg-white/18 text-slate-900 shadow-sm"
               : "border-white/15 bg-white/8 text-slate-600 hover:bg-white/15 hover:text-slate-900"
           }`}
         >
-          {selectedPlatform === "all" ? "Showing all" : "View all"}
+          {selectedPlatform === "all" ? "Menampilkan semua" : "Tampilkan semua"}
         </button>
       </div>
       <div className="grid grid-cols-2 gap-3 bg-transparent sm:grid-cols-3 lg:grid-cols-6">

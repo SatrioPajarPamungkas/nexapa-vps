@@ -20,6 +20,14 @@ return [
         'redirect_uri' => env('FACEBOOK_REDIRECT_URI', 'http://localhost:3000/callback/facebook'),
         'authorization_url' => 'https://www.facebook.com/v18.0/dialog/oauth',
         'token_url' => 'https://graph.facebook.com/v18.0/oauth/access_token',
+        'scopes' => [
+            'public_profile',
+            'business_management',
+            'pages_show_list',
+            'pages_read_engagement',
+            'read_insights',
+            'pages_manage_posts',
+        ],
     ],
     'allowed_storage_path_prefixes' => [
         'media',

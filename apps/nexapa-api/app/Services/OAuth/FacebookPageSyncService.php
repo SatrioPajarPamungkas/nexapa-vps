@@ -173,11 +173,17 @@ class FacebookPageSyncService
                 'tasks' => $page['tasks'],
                 'last_synced_at' => now()->toISOString(),
                 'sync_source' => 'facebook_graph_api',
+                'source_edge' => $page['source_edge'] ?? null,
+                'business_id' => $page['business_id'] ?? null,
+                'business_name' => $page['business_name'] ?? null,
             ]);
         } else {
             $existing->metadata = array_merge($existing->metadata ?? [], [
                 'last_synced_at' => now()->toISOString(),
                 'sync_source' => 'facebook_graph_api',
+                'source_edge' => $page['source_edge'] ?? null,
+                'business_id' => $page['business_id'] ?? null,
+                'business_name' => $page['business_name'] ?? null,
             ]);
         }
 

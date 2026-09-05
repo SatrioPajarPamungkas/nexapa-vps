@@ -18,7 +18,7 @@ export function AccountsAttentionPanel() {
               account={account}
               onRefresh={hook.handleRefresh}
               onSetDefault={hook.handleSetDefault}
-              onRemove={hook.handleRemove}
+              onRemove={hook.requestRemove}
               actionLoading={hook.loading.refreshingId === account.id}
             />
           ))}

@@ -17,7 +17,7 @@ class ConnectedAccountRemovalTest extends TestCase
     {
         Http::fake();
 
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
 
         $parent = ConnectedAccount::create([
             'user_id' => $user->id,
@@ -68,7 +68,7 @@ class ConnectedAccountRemovalTest extends TestCase
 
     public function test_account_list_response_is_not_cacheable(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['is_admin' => true]);
 
         Sanctum::actingAs($user);
 
@@ -79,8 +79,8 @@ class ConnectedAccountRemovalTest extends TestCase
 
     public function test_user_cannot_remove_another_users_account(): void
     {
-        $owner = User::factory()->create();
-        $otherUser = User::factory()->create();
+        $owner = User::factory()->create(['is_admin' => true]);
+        $otherUser = User::factory()->create(['is_admin' => true]);
 
         $account = ConnectedAccount::create([
             'user_id' => $owner->id,

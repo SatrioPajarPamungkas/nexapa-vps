@@ -6,6 +6,7 @@ import { useConnectedAccounts } from "@/features/connected-accounts/hooks/useCon
 import { PlatformGrid } from "@/features/connected-accounts/components/PlatformGrid";
 import { ConnectAccountDialog } from "@/features/connected-accounts/components/ConnectAccountDialog";
 import { ConnectedAccountsTable } from "@/features/connected-accounts/components/ConnectedAccountsTable";
+import { ConfirmDialog } from "@/components/feedback/ConfirmDialog";
 
 type AccountPlatformFilter = "all" | "tiktok" | "facebook" | "shopee";
 
@@ -170,7 +171,7 @@ export function ConnectedAccountsPage() {
                   selectedPlatform={selectedPlatform}
                   onRefresh={hook.handleRefresh}
                   onSetDefault={hook.handleSetDefault}
-                  onRemove={hook.handleRemove}
+                  onRemove={hook.requestRemove}
                   onReconnect={hook.handleReconnect}
                   actionLoading={{
                     reconnectingId: hook.loading.reconnectingId,
@@ -194,6 +195,25 @@ export function ConnectedAccountsPage() {
           window.setTimeout(() => lastTriggerRef.current?.focus(), 0);
         }}
         onSelect={hook.handleConnect}
+      />
+
+      <ConfirmDialog
+        open={hook.removeCandidate !== null}
+        title="Hapus akun terhubung?"
+        description={
+          hook.removeCandidate?.account_type === "facebook_admin"
+            ? `${hook.removeCandidate.display_name} dan seluruh Facebook Page di bawahnya akan dihapus permanen dari Nexapa. Tindakan ini tidak dapat dibatalkan.`
+            : `${hook.removeCandidate?.display_name ?? "Akun ini"} akan dihapus permanen dari Nexapa. Tindakan ini tidak dapat dibatalkan.`
+        }
+        confirmLabel="Hapus permanen"
+        cancelLabel="Batal"
+        variant="danger"
+        loading={
+          hook.removeCandidate !== null &&
+          hook.loading.removingId === hook.removeCandidate.id
+        }
+        onConfirm={() => void hook.confirmRemove()}
+        onCancel={hook.cancelRemove}
       />
 
       <div className="sr-only" aria-live="polite" aria-atomic="true">

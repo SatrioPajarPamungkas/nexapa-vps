@@ -48,8 +48,6 @@ export async function apiFetch<T>(
   const controller = new AbortController();
   const externalSignal = options.signal;
 
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
   if (externalSignal) {
     if (externalSignal.aborted) {
       controller.abort();
@@ -58,7 +56,7 @@ export async function apiFetch<T>(
     }
   }
 
-  timeoutId = setTimeout(() => controller.abort(), timeout);
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
     const headers: Record<string, string> = {
@@ -133,9 +131,7 @@ export async function apiFetch<T>(
     }
     throw ApiError.networkError();
   } finally {
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
-    }
+    clearTimeout(timeoutId);
   }
 }
 
@@ -193,8 +189,6 @@ export async function apiFetchBlob(
   const controller = new AbortController();
   const externalSignal = options.signal;
 
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
   if (externalSignal) {
     if (externalSignal.aborted) {
       controller.abort();
@@ -203,7 +197,7 @@ export async function apiFetchBlob(
     }
   }
 
-  timeoutId = setTimeout(() => controller.abort(), timeout);
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
     const headers: Record<string, string> = {
@@ -250,9 +244,7 @@ export async function apiFetchBlob(
     }
     throw ApiError.networkError();
   } finally {
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
-    }
+    clearTimeout(timeoutId);
   }
 }
 

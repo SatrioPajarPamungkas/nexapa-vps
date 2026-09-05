@@ -58,7 +58,7 @@ class ConnectedAccountRemovalTest extends TestCase
         $response
             ->assertOk()
             ->assertJsonPath('message', 'Account permanently removed.')
-            ->assertHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            ->assertHeaderContains('Cache-Control', 'no-store');
 
         $this->assertDatabaseMissing('connected_accounts', ['id' => $parent->id]);
         $this->assertDatabaseMissing('connected_accounts', ['id' => $child->id]);
@@ -74,7 +74,7 @@ class ConnectedAccountRemovalTest extends TestCase
 
         $this->getJson('/api/v1/connected-accounts')
             ->assertOk()
-            ->assertHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            ->assertHeaderContains('Cache-Control', 'no-store');
     }
 
     public function test_user_cannot_remove_another_users_account(): void

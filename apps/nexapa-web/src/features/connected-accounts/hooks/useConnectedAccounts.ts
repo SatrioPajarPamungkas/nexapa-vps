@@ -74,15 +74,15 @@ export function useConnectedAccounts() {
     try {
       const result = await connectAccount(platform);
       
-      const authorizationUrl = result.authorization_url ?? (result as any).data?.authorization_url;
+      const authorizationUrl = result.authorization_url;
       
       if (authorizationUrl) {
         window.location.assign(authorizationUrl);
         showFeedback("info", "Redirecting to authorization...");
-      } else if (result.requires_browser_session ?? (result as any).data?.requires_browser_session) {
+      } else if (result.requires_browser_session) {
         showFeedback("info", "Browser session required. Check Settings for connection instructions.");
-      } else if (result.account ?? (result as any).data?.account) {
-        const account = result.account ?? (result as any).data?.account;
+      } else if (result.account) {
+        const account = result.account;
         setAccounts((prev) => [...prev, account]);
         showFeedback("success", `${platform === "tiktok" ? "TikTok" : "Facebook"} account connected`);
       }
@@ -103,14 +103,14 @@ export function useConnectedAccounts() {
     try {
       const result = await connectAccount(platform);
       
-      const authorizationUrl = result.authorization_url ?? (result as any).data?.authorization_url;
+      const authorizationUrl = result.authorization_url;
       
       if (authorizationUrl) {
         window.location.assign(authorizationUrl);
-      } else if (result.requires_browser_session ?? (result as any).data?.requires_browser_session) {
+      } else if (result.requires_browser_session) {
         showFeedback("info", "Browser session required. Check Settings for connection instructions.");
-      } else if (result.account ?? (result as any).data?.account) {
-        const account = result.account ?? (result as any).data?.account;
+      } else if (result.account) {
+        const account = result.account;
         setAccounts((prev) => [...prev, account]);
         showFeedback("success", `${platform === "tiktok" ? "TikTok" : "Facebook"} account connected`);
       }
@@ -130,7 +130,7 @@ export function useConnectedAccounts() {
     try {
       const result = await reconnectAccount(accountId, "/accounts");
       
-      const authorizationUrl = result.authorization_url ?? (result as any).data?.authorization_url;
+      const authorizationUrl = result.authorization_url;
       
       if (authorizationUrl) {
         window.location.assign(authorizationUrl);

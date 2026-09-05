@@ -96,6 +96,7 @@ export async function getConnectedAccounts(signal?: AbortSignal): Promise<Connec
   const resp = await apiFetch<ApiConnectedAccountsResponse>("/connected-accounts", {
     method: "GET",
     signal,
+    cache: "no-store",
   });
   return resp.data ?? [];
 }
@@ -120,6 +121,7 @@ export async function getConnectedAccountsPaginated(
   return apiFetch<ApiConnectedAccountsPaginatedResponse>(path, {
     method: "GET",
     signal: params.signal,
+    cache: "no-store",
   });
 }
 
@@ -182,6 +184,7 @@ export async function removeAccount(
   await apiFetch<void>(`/connected-accounts/${accountId}`, {
     method: "DELETE",
     signal,
+    cache: "no-store",
   });
 }
 

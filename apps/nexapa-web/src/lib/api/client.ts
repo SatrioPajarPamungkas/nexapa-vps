@@ -11,6 +11,7 @@ export type RequestOptions = {
   signal?: AbortSignal;
   headers?: Record<string, string>;
   timeout?: number;
+  cache?: RequestCache;
 };
 
 export function isApiConfigured(): boolean {
@@ -47,8 +48,6 @@ export async function apiFetch<T>(
   const controller = new AbortController();
   const externalSignal = options.signal;
 
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
   if (externalSignal) {
     if (externalSignal.aborted) {
       controller.abort();
@@ -57,7 +56,7 @@ export async function apiFetch<T>(
     }
   }
 
-  timeoutId = setTimeout(() => controller.abort(), timeout);
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
     const headers: Record<string, string> = {
@@ -88,6 +87,7 @@ export async function apiFetch<T>(
       body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
       signal: controller.signal,
       credentials: "include",
+      cache: options.cache,
     });
 
     if (response.status === 204) {
@@ -131,9 +131,7 @@ export async function apiFetch<T>(
     }
     throw ApiError.networkError();
   } finally {
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
-    }
+    clearTimeout(timeoutId);
   }
 }
 
@@ -191,8 +189,6 @@ export async function apiFetchBlob(
   const controller = new AbortController();
   const externalSignal = options.signal;
 
-  let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
   if (externalSignal) {
     if (externalSignal.aborted) {
       controller.abort();
@@ -201,7 +197,7 @@ export async function apiFetchBlob(
     }
   }
 
-  timeoutId = setTimeout(() => controller.abort(), timeout);
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
     const headers: Record<string, string> = {
@@ -248,9 +244,7 @@ export async function apiFetchBlob(
     }
     throw ApiError.networkError();
   } finally {
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
-    }
+    clearTimeout(timeoutId);
   }
 }
 

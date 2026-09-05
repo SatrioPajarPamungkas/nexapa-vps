@@ -353,7 +353,10 @@ class ConnectedAccountService
     }
 
     /**
-     * Remove account.
+     * Permanently remove a connected account and all of its provider data.
+     *
+     * Provider revocation is best-effort: a provider outage must not prevent
+     * the user from deleting locally stored tokens and account metadata.
      *
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
@@ -363,42 +366,62 @@ class ConnectedAccountService
             ->where('user_id', $userId)
             ->firstOrFail();
 
-        if ($account->platform === 'tiktok') {
-            $this->disconnectTikTokAccount($account);
-            return;
-        }
-
-        $account->delete();
+        $this->revokeProviderAccess($account);
+        $this->permanentlyDeleteAccountTree($account);
     }
 
-    /**
-     * Disconnect TikTok account with provider revocation.
-     */
-    private function disconnectTikTokAccount(ConnectedAccount $account): void
+    private function revokeProviderAccess(ConnectedAccount $account): void
     {
         $accessToken = $account->access_token_encrypted;
 
-        if (!empty($accessToken)) {
-            try {
-                $this->tikTokOAuthService->revokeAccessToken($accessToken);
-            } catch (RuntimeException $e) {
-                if ($e->getCode() === 503) {
-                    throw new RuntimeException('TikTok service temporarily unavailable. Cannot revoke token. Please try again later.', 503);
-                }
-            }
+        if (empty($accessToken)) {
+            return;
         }
 
-        DB::transaction(function () use ($account) {
-            $account->access_token_encrypted = null;
-            $account->refresh_token_encrypted = null;
-            $account->token_expires_at = null;
-            $account->refresh_token_expires_at = null;
-            $account->scopes = null;
-            $account->status = 'disconnected';
-            $account->is_default = false;
-            $account->save();
+        try {
+            if ($account->platform === 'tiktok') {
+                $this->tikTokOAuthService->revokeAccessToken($accessToken);
+            } elseif ($account->platform === 'facebook' && $account->isFacebookAdmin()) {
+                $this->facebookOAuthService->revokeAccessToken($accessToken);
+            }
+        } catch (\Throwable $exception) {
+            Log::warning('Provider token revocation failed during permanent account removal.', [
+                'connected_account_id' => $account->id,
+                'platform' => $account->platform,
+                'exception' => $exception::class,
+            ]);
+        }
+    }
 
-            $account->delete();
+    private function permanentlyDeleteAccountTree(ConnectedAccount $account): void
+    {
+        DB::transaction(function () use ($account): void {
+            $children = ConnectedAccount::withTrashed()
+                ->where('parent_connected_account_id', $account->id)
+                ->where('user_id', $account->user_id)
+                ->get();
+
+            foreach ($children as $child) {
+                $this->eraseCredentials($child);
+                $child->forceDelete();
+            }
+
+            $this->eraseCredentials($account);
+            $account->forceDelete();
         });
     }
+
+    private function eraseCredentials(ConnectedAccount $account): void
+    {
+        $account->access_token_encrypted = null;
+        $account->refresh_token_encrypted = null;
+        $account->token_expires_at = null;
+        $account->refresh_token_expires_at = null;
+        $account->scopes = null;
+        $account->metadata = null;
+        $account->status = 'disconnected';
+        $account->is_default = false;
+        $account->save();
+    }
+
 }

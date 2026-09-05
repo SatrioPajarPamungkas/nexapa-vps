@@ -340,45 +340,152 @@ class FacebookOAuthService
             throw new InvalidArgumentException('Access token is required.');
         }
 
-        $url = 'https://graph.facebook.com/' . $this->graphApiVersion . '/me/accounts';
-        $pages = [];
-        $nextUrl = null;
+        $pagesById = [];
 
-        do {
-            $requestUrl = $nextUrl ?? $url;
+        $this->mergePageCollection(
+            $pagesById,
+            $this->fetchGraphCollection(
+                '/me/accounts',
+                $accessToken,
+                'id,name,username,picture.type(large),access_token,tasks'
+            ),
+            'user_accounts'
+        );
 
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $accessToken,
+        try {
+            $businesses = $this->fetchGraphCollection(
+                '/me/businesses',
+                $accessToken,
+                'id,name'
+            );
+
+            foreach ($businesses as $business) {
+                $businessId = $business['id'] ?? null;
+
+                if (empty($businessId)) {
+                    continue;
+                }
+
+                foreach (['owned_pages', 'client_pages'] as $edge) {
+                    try {
+                        $businessPages = $this->fetchGraphCollection(
+                            '/'.$businessId.'/'.$edge,
+                            $accessToken,
+                            'id,name,username,picture.type(large),access_token,tasks'
+                        );
+
+                        $this->mergePageCollection(
+                            $pagesById,
+                            $businessPages,
+                            'business_'.$edge,
+                            $businessId,
+                            $business['name'] ?? null
+                        );
+                    } catch (FacebookOAuthException $exception) {
+                        Log::warning('Facebook Business Page edge could not be read.', [
+                            'business_id' => $businessId,
+                            'edge' => $edge,
+                            'provider_error' => $exception->getProviderError(),
+                            'fbtrace_id' => $exception->getFbTraceId(),
+                        ]);
+                    }
+                }
+            }
+        } catch (FacebookOAuthException $exception) {
+            // Keep directly managed Pages usable when business_management was
+            // declined or has not received Advanced Access yet.
+            Log::warning('Facebook Business Manager discovery unavailable.', [
+                'provider_error' => $exception->getProviderError(),
+                'fbtrace_id' => $exception->getFbTraceId(),
+            ]);
+        }
+
+        return array_values($pagesById);
+    }
+
+    /**
+     * Read every page of a Graph API collection.
+     */
+    private function fetchGraphCollection(
+        string $path,
+        string $accessToken,
+        string $fields
+    ): array {
+        $url = str_starts_with($path, 'http')
+            ? $path
+            : 'https://graph.facebook.com/'.$this->graphApiVersion.$path;
+
+        $items = [];
+        $nextUrl = $url;
+        $firstRequest = true;
+
+        while ($nextUrl !== null) {
+            $request = Http::withHeaders([
+                'Authorization' => 'Bearer '.$accessToken,
                 'Accept' => 'application/json',
-            ])
-                ->timeout(60)
-                ->get($requestUrl, [
-                    'fields' => 'id,name,username,picture.type(large),access_token,tasks',
-                    'limit' => 100,
-                ]);
+            ])->timeout(60);
 
-            if (!$response->ok()) {
+            $response = $firstRequest
+                ? $request->get($nextUrl, [
+                    'fields' => $fields,
+                    'limit' => 100,
+                ])
+                : $request->get($nextUrl);
+
+            if (! $response->ok()) {
                 $this->handleProviderError($response);
             }
 
-            $data = $response->json();
-            $pageData = $data['data'] ?? [];
+            $payload = $response->json();
+            array_push($items, ...($payload['data'] ?? []));
 
-            foreach ($pageData as $page) {
-                $pages[] = [
-                    'id' => $page['id'] ?? null,
-                    'name' => $page['name'] ?? 'Unknown Page',
-                    'username' => $page['username'] ?? null,
-                    'picture' => $page['picture']['data']['url'] ?? null,
-                    'access_token' => $page['access_token'] ?? null,
-                    'tasks' => $page['tasks'] ?? null,
-                ];
+            $nextUrl = $payload['paging']['next'] ?? null;
+            $firstRequest = false;
+        }
+
+        return $items;
+    }
+
+    /**
+     * Normalize and deduplicate Pages returned by user and Business edges.
+     */
+    private function mergePageCollection(
+        array &$pagesById,
+        array $pages,
+        string $source,
+        ?string $businessId = null,
+        ?string $businessName = null
+    ): void {
+        foreach ($pages as $page) {
+            $pageId = $page['id'] ?? null;
+
+            if (empty($pageId)) {
+                continue;
             }
 
-            $nextUrl = $data['paging']['next'] ?? null;
-        } while ($nextUrl);
+            $normalized = [
+                'id' => $pageId,
+                'name' => $page['name'] ?? 'Unknown Page',
+                'username' => $page['username'] ?? null,
+                'picture' => $page['picture']['data']['url'] ?? null,
+                'access_token' => $page['access_token'] ?? null,
+                'tasks' => $page['tasks'] ?? null,
+                'source_edge' => $source,
+                'business_id' => $businessId,
+                'business_name' => $businessName,
+            ];
 
-        return $pages;
+            if (! isset($pagesById[$pageId])) {
+                $pagesById[$pageId] = $normalized;
+                continue;
+            }
+
+            foreach ($normalized as $key => $value) {
+                if ($value !== null && $value !== []) {
+                    $pagesById[$pageId][$key] = $value;
+                }
+            }
+        }
     }
 
     public function revokeAccessToken(string $accessToken): void

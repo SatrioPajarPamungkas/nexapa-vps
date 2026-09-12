@@ -25,6 +25,7 @@ Nexapa membantu bisnis mengelola publikasi konten lintas platform dan komunikasi
 | Publisher | [app.nexapa.app](https://app.nexapa.app) | Pengelolaan akun dan publikasi konten |
 | CRM | [crm.nexapa.app](https://crm.nexapa.app) | Inbox, kontak, pipeline, broadcast, dan otomasi WhatsApp |
 | API | [api.nexapa.app](https://api.nexapa.app) | Backend dan integrasi layanan Nexapa |
+| Commerce (pengembangan) | `store.nexapa.app` | Katalog, checkout, dan delivery produk digital |
 
 ## Fitur Utama
 
@@ -52,7 +53,8 @@ Nexapa membantu bisnis mengelola publikasi konten lintas platform dan komunikasi
 apps/
 ├── nexapa-web/   # Publisher — React, TypeScript, Vite
 ├── nexapa-api/   # Backend API — Laravel, PHP
-└── nexapa-crm/   # WhatsApp CRM — Next.js, React, Supabase
+├── nexapa-crm/   # WhatsApp CRM — Next.js, React, Supabase
+└── nexapa-commerce/ # Commerce API + Admin — Medusa, Node.js, PostgreSQL
 ```
 
 ## Teknologi
@@ -62,6 +64,7 @@ apps/
 | Publisher | React 19, TypeScript, Vite, Tailwind CSS |
 | API | Laravel 13, PHP 8.3, Laravel Sanctum, Filament |
 | CRM | Next.js 16, React 19, TypeScript, Tailwind CSS |
+| Commerce | Medusa 2, TypeScript, PostgreSQL, Redis |
 | Data dan autentikasi CRM | Supabase |
 | Web server produksi | Nginx |
 | Process management | systemd |

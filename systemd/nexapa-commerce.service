@@ -1,0 +1,20 @@
+[Unit]
+Description=Nexapa Medusa Commerce
+After=network.target postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/nexapa-vps/apps/nexapa-commerce
+Environment=NODE_ENV=production
+EnvironmentFile=/opt/nexapa-vps/apps/nexapa-commerce/.env
+ExecStart=/usr/bin/corepack yarn start
+Restart=always
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

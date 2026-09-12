@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DashboardShell } from "./dashboard-shell";
 import { ExpiredSubscriptionModal } from "@/components/subscription/expired-subscription-modal";
+import { TelegramSupportFloat } from "@/components/support/telegram-support-float";
 
 // Server layout whose only job is to declare "do not index" metadata
 // for the authed app. robots.ts already disallows these paths at the
@@ -29,6 +30,7 @@ export default function DashboardLayout({
     <>
       <DashboardShell>{children}</DashboardShell>
       <ExpiredSubscriptionModal />
+      <TelegramSupportFloat />
     </>
   );
 }

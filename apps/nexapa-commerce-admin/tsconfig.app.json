@@ -3,7 +3,6 @@
     "target": "ES2022",
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "allowJs": false,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -14,7 +13,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["third_party/medusa-ui/src/*"],
+      "@medusajs/icons": ["third_party/medusa-icons/src/index.ts"]
+    }
   },
-  "include": ["src"]
+  "include": ["src", "third_party/medusa-ui/src", "third_party/medusa-icons/src"]
 }

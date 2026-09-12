@@ -20,5 +20,5 @@
       "@medusajs/icons": ["third_party/medusa-icons/src/index.ts"]
     }
   },
-  "include": ["src", "third_party/medusa-ui/src", "third_party/medusa-icons/src"]
+  "include": ["src"]
 }

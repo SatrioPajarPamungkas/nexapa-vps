@@ -112,7 +112,7 @@ export function App() {
                   {visibleProducts.map((product) => (
                     <Table.Row key={product.id}><Table.Cell className="text-ui-fg-base font-medium">{product.name}</Table.Cell><Table.Cell>{product.type}</Table.Cell><Table.Cell>{rupiah(product.price)}</Table.Cell><Table.Cell><Badge size="2xsmall" rounded="full" color={product.status === "Aktif" ? "green" : "grey"}>{product.status}</Badge></Table.Cell></Table.Row>
                   ))}
-                  {!visibleProducts.length && <Table.Row><Table.Cell colSpan={4} className="text-center">Produk tidak ditemukan.</Table.Cell></Table.Row>}
+                  {!visibleProducts.length && <Table.Row><td colSpan={4} className="text-ui-fg-subtle h-12 text-center">Produk tidak ditemukan.</td></Table.Row>}
                 </Table.Body>
               </Table>
             </Container>

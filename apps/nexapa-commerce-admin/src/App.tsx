@@ -1,214 +1,210 @@
 /**
- * Adapted from Medusa Community Admin MainLayout.
+ * Nexapa Commerce shell adapted from Medusa Community Admin MainLayout.
  * Upstream f8dce55556a1e68d6ea9b2fb88852b2a76fbd73c — MIT.
  */
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import {
-  Buildings, CogSixTooth, CurrencyDollar, MagnifyingGlass,
-  PencilSquare, ReceiptPercent, ShoppingCart, Tag, Trash, Users,
+  Buildings, ChartBar, CogSixTooth, CurrencyDollar, DocumentText,
+  MagnifyingGlass, ReceiptPercent, ShoppingCart, Tag, Users,
 } from "../third_party/medusa-icons/src"
-import { Alert } from "../third_party/medusa-ui/src/components/alert"
 import { Avatar } from "../third_party/medusa-ui/src/components/avatar"
 import { Badge } from "../third_party/medusa-ui/src/components/badge"
-import { Button } from "../third_party/medusa-ui/src/components/button"
-import { Container } from "../third_party/medusa-ui/src/components/container"
 import { Divider } from "../third_party/medusa-ui/src/components/divider"
-import { Heading } from "../third_party/medusa-ui/src/components/heading"
-import { IconButton } from "../third_party/medusa-ui/src/components/icon-button"
-import { Prompt } from "../third_party/medusa-ui/src/components/prompt"
-import { Table } from "../third_party/medusa-ui/src/components/table"
+import { DropdownMenu } from "../third_party/medusa-ui/src/components/dropdown-menu"
+import { Skeleton } from "../third_party/medusa-ui/src/components/skeleton"
 import { Text } from "../third_party/medusa-ui/src/components/text"
 import {
-  CommerceProduct,
-  deleteProduct,
-  listProducts,
-  ProductStatus,
+  AdminUser, CommerceApiError, CommerceProduct, currentUser,
+  deleteProduct, listProducts, logout, ProductStatus,
 } from "./commerce-api"
-import { ProductFormDrawer } from "./ProductFormDrawer"
+import { LoginPage } from "./LoginPage"
+import { ProductFormModal } from "./ProductFormModal"
+import {
+  EmptyDomainPage, OverviewPage, ProductDetailPage, ProductListPage,
+} from "./ProductPages"
 
-const nav = [
-  { label: "Pesanan", icon: ShoppingCart },
-  { label: "Produk", icon: Tag },
-  { label: "File Digital", icon: Buildings },
-  { label: "Pelanggan", icon: Users },
-  { label: "Promosi", icon: ReceiptPercent },
-  { label: "Daftar Harga", icon: CurrencyDollar },
+type Page = "overview" | "orders" | "products" | "files" | "customers" | "promotions" | "pricing" | "settings" | "product-detail"
+
+const navigation: Array<{ label: string; page: Page; icon: typeof Tag; group: "Commerce" | "Kelola" }> = [
+  { label: "Overview", page: "overview", icon: ChartBar, group: "Commerce" },
+  { label: "Pesanan", page: "orders", icon: ShoppingCart, group: "Commerce" },
+  { label: "Produk", page: "products", icon: Tag, group: "Commerce" },
+  { label: "File Digital", page: "files", icon: DocumentText, group: "Commerce" },
+  { label: "Pelanggan", page: "customers", icon: Users, group: "Kelola" },
+  { label: "Promosi", page: "promotions", icon: ReceiptPercent, group: "Kelola" },
+  { label: "Daftar Harga", page: "pricing", icon: CurrencyDollar, group: "Kelola" },
 ]
 
-const statusLabels: Record<ProductStatus, string> = {
-  active: "Aktif",
-  draft: "Draf",
-  archived: "Diarsipkan",
+const pageTitles: Record<Page, string> = {
+  overview: "Overview", orders: "Pesanan", products: "Produk", files: "File Digital",
+  customers: "Pelanggan", promotions: "Promosi", pricing: "Daftar Harga",
+  settings: "Pengaturan", "product-detail": "Detail Produk",
 }
 
-const filters: Array<{ value: ProductStatus | "all"; label: string }> = [
-  { value: "all", label: "Semua" },
-  { value: "active", label: "Aktif" },
-  { value: "draft", label: "Draf" },
-  { value: "archived", label: "Diarsipkan" },
-]
-
-const rupiah = (value: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value)
-
 export function App() {
-  const [page, setPage] = useState("Produk")
+  const [auth, setAuth] = useState<"checking" | "guest" | "ready">("checking")
+  const [user, setUser] = useState<AdminUser | null>(null)
+  const [page, setPage] = useState<Page>("overview")
   const [products, setProducts] = useState<CommerceProduct[]>([])
   const [query, setQuery] = useState("")
-  const [filter, setFilter] = useState<ProductStatus | "all">("all")
-  const [loading, setLoading] = useState(true)
+  const [status, setStatus] = useState<ProductStatus | "all">("all")
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
+  const [selectedProduct, setSelectedProduct] = useState<CommerceProduct | null>(null)
+  const [editorOpen, setEditorOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<CommerceProduct | null>(null)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
+    currentUser()
+      .then((response) => {
+        if (response.data.user.is_admin) {
+          setUser(response.data.user)
+          setAuth("ready")
+        } else {
+          setAuth("guest")
+        }
+      })
+      .catch(() => setAuth("guest"))
+  }, [])
+
+  useEffect(() => {
+    if (auth !== "ready") return
     const controller = new AbortController()
     const timer = window.setTimeout(async () => {
       setLoading(true)
       setError("")
       try {
-        const response = await listProducts(query, filter, controller.signal)
+        const response = await listProducts(query, status, controller.signal)
         setProducts(response.data)
       } catch (caught) {
-        if (!controller.signal.aborted) {
-          setError(caught instanceof Error ? caught.message : "Produk gagal dimuat.")
+        if (controller.signal.aborted) return
+        if (caught instanceof CommerceApiError && caught.status === 401) {
+          setUser(null)
+          setAuth("guest")
+          return
         }
+        setError(caught instanceof Error ? caught.message : "Produk gagal dimuat.")
       } finally {
         if (!controller.signal.aborted) setLoading(false)
       }
     }, 250)
+    return () => { window.clearTimeout(timer); controller.abort() }
+  }, [auth, query, status, refreshKey])
 
-    return () => {
-      window.clearTimeout(timer)
-      controller.abort()
-    }
-  }, [query, filter])
-
-  const cycleFilter = () => {
-    const index = filters.findIndex((item) => item.value === filter)
-    setFilter(filters[(index + 1) % filters.length].value)
-  }
-
-  const openCreate = () => {
+  const openCreate = useCallback(() => {
     setEditingProduct(null)
-    setDrawerOpen(true)
-  }
+    setEditorOpen(true)
+  }, [])
 
-  const openEdit = (product: CommerceProduct) => {
+  const openEdit = useCallback((product: CommerceProduct) => {
     setEditingProduct(product)
-    setDrawerOpen(true)
-  }
+    setEditorOpen(true)
+  }, [])
+
+  const selectProduct = useCallback((product: CommerceProduct) => {
+    setSelectedProduct(product)
+    setPage("product-detail")
+  }, [])
 
   const productSaved = (product: CommerceProduct) => {
-    setProducts((items) => {
-      const exists = items.some((item) => item.id === product.id)
-      return exists
-        ? items.map((item) => item.id === product.id ? product : item)
-        : [product, ...items]
-    })
+    setProducts((items) => items.some((item) => item.id === product.id)
+      ? items.map((item) => item.id === product.id ? product : item)
+      : [product, ...items])
+    if (selectedProduct?.id === product.id) setSelectedProduct(product)
   }
 
   const removeProduct = async (product: CommerceProduct) => {
-    setDeletingId(product.id)
     setError("")
     try {
       await deleteProduct(product.id)
       setProducts((items) => items.filter((item) => item.id !== product.id))
+      if (selectedProduct?.id === product.id) {
+        setSelectedProduct(null)
+        setPage("products")
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Produk gagal dihapus.")
-    } finally {
-      setDeletingId(null)
     }
   }
 
+  const signOut = async () => {
+    try { await logout() } finally {
+      setUser(null)
+      setProducts([])
+      setAuth("guest")
+    }
+  }
+
+  if (auth === "checking") {
+    return <div className="bg-ui-bg-subtle flex min-h-dvh items-center justify-center"><div className="flex w-[280px] flex-col items-center gap-y-4"><Avatar variant="squared" size="large" fallback="N" /><Skeleton className="h-3 w-32" /><Skeleton className="h-3 w-48" /></div></div>
+  }
+
+  if (auth === "guest" || !user) {
+    return <LoginPage onAuthenticated={(authenticatedUser) => { setUser(authenticatedUser); setAuth("ready") }} />
+  }
+
   return (
-    <div className="flex min-h-screen bg-ui-bg-subtle text-ui-fg-base">
-      <aside className="bg-ui-bg-subtle border-ui-border-base flex w-[240px] shrink-0 flex-col border-r">
-        <button onClick={() => setPage("Produk")} className="hover:bg-ui-bg-subtle-hover m-3 grid grid-cols-[24px_1fr] items-center gap-x-3 rounded-md p-0.5 text-left">
-          <Avatar variant="squared" size="xsmall" fallback="N" />
-          <Text size="small" weight="plus">Nexapa Commerce</Text>
-        </button>
+    <div className="bg-ui-bg-subtle flex min-h-dvh text-ui-fg-base">
+      <aside className="border-ui-border-base bg-ui-bg-subtle fixed inset-y-0 left-0 z-20 flex w-[250px] flex-col border-r">
+        <div className="p-3">
+          <button onClick={() => setPage("overview")} className="hover:bg-ui-bg-subtle-hover flex w-full items-center gap-x-3 rounded-md p-1.5 text-left">
+            <Avatar variant="squared" size="small" fallback="N" />
+            <div className="min-w-0"><Text size="small" weight="plus">Nexapa Commerce</Text><Text size="xsmall" className="text-ui-fg-muted">Digital products</Text></div>
+          </button>
+        </div>
         <div className="px-3"><Divider variant="dashed" /></div>
 
-        <nav className="flex flex-1 flex-col gap-y-1 p-3">
-          <label className="text-ui-fg-subtle hover:bg-ui-bg-subtle-hover flex items-center gap-x-2.5 rounded-md px-2 py-1.5">
-            <MagnifyingGlass />
-            <input value={query} onChange={(event) => { setQuery(event.target.value); setPage("Produk") }} className="txt-compact-small min-w-0 flex-1 bg-transparent outline-none" placeholder="Pencarian" />
-          </label>
-          {nav.map(({ label, icon: Icon }) => (
-            <button key={label} onClick={() => setPage(label)} className={(page === label ? "bg-ui-bg-subtle-hover text-ui-fg-base " : "text-ui-fg-subtle hover:bg-ui-bg-subtle-hover ") + "flex items-center gap-x-2.5 rounded-md px-2 py-1.5 text-left"}>
-              <Icon /><Text size="small" weight="plus">{label}</Text>
-            </button>
+        <div className="px-3 pt-3">
+          <button onClick={() => setPage("products")} className="bg-ui-bg-field shadow-borders-base text-ui-fg-subtle flex h-8 w-full items-center gap-x-2 rounded-md px-2 text-left">
+            <MagnifyingGlass /><Text size="small">Cari di Commerce</Text><span className="text-ui-fg-muted txt-compact-xsmall ml-auto rounded border px-1.5">⌘K</span>
+          </button>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-3">
+          {(["Commerce", "Kelola"] as const).map((group) => (
+            <div key={group} className="mb-5">
+              <Text size="xsmall" weight="plus" className="text-ui-fg-muted mb-1 block px-2 uppercase tracking-wide">{group}</Text>
+              <div className="space-y-0.5">
+                {navigation.filter((item) => item.group === group).map(({ label, page: itemPage, icon: Icon }) => {
+                  const active = page === itemPage || (itemPage === "products" && page === "product-detail")
+                  return <button key={itemPage} onClick={() => setPage(itemPage)} className={(active ? "bg-ui-bg-subtle-hover text-ui-fg-base " : "text-ui-fg-subtle hover:bg-ui-bg-subtle-hover ") + "flex w-full items-center gap-x-2.5 rounded-md px-2 py-1.5 text-left"}><Icon /><Text size="small" weight="plus">{label}</Text>{itemPage === "products" && products.length > 0 && <Badge size="2xsmall" className="ml-auto">{products.length}</Badge>}</button>
+                })}
+              </div>
+            </div>
           ))}
         </nav>
 
         <div className="p-3">
-          <button onClick={() => setPage("Pengaturan")} className="text-ui-fg-subtle hover:bg-ui-bg-subtle-hover mb-3 flex w-full items-center gap-x-2.5 rounded-md px-2 py-1.5">
-            <CogSixTooth /><Text size="small" weight="plus">Pengaturan</Text>
-          </button>
+          <button onClick={() => setPage("settings")} className={(page === "settings" ? "bg-ui-bg-subtle-hover text-ui-fg-base " : "text-ui-fg-subtle hover:bg-ui-bg-subtle-hover ") + "mb-3 flex w-full items-center gap-x-2.5 rounded-md px-2 py-1.5 text-left"}><CogSixTooth /><Text size="small" weight="plus">Pengaturan</Text></button>
           <Divider variant="dashed" />
-          <div className="flex items-center gap-x-3 px-1 py-3">
-            <Avatar size="small" fallback="NP" />
-            <div><Text size="small" weight="plus">Owner Nexapa</Text><Text size="xsmall" className="text-ui-fg-subtle">Administrator</Text></div>
-          </div>
+          <DropdownMenu>
+            <DropdownMenu.Trigger asChild><button className="hover:bg-ui-bg-subtle-hover mt-3 flex w-full items-center gap-x-3 rounded-md p-1 text-left"><Avatar size="small" fallback={user.name.slice(0, 2).toUpperCase()} /><div className="min-w-0"><Text size="small" weight="plus" className="truncate">{user.name}</Text><Text size="xsmall" className="text-ui-fg-muted truncate">{user.email}</Text></div></button></DropdownMenu.Trigger>
+            <DropdownMenu.Content align="start" side="top"><DropdownMenu.Label className="px-2 py-1.5">Administrator</DropdownMenu.Label><DropdownMenu.Separator /><DropdownMenu.Item onClick={signOut}>Keluar dari Commerce</DropdownMenu.Item></DropdownMenu.Content>
+          </DropdownMenu>
         </div>
       </aside>
 
-      <main className="min-w-0 flex-1 p-8">
-        <div className="mx-auto max-w-[1200px]">
-          {page === "Produk" ? (
-            <Container className="divide-y p-0">
-              <div className="flex items-center justify-between px-6 py-4">
-                <div><Heading level="h1">Produk</Heading><Text className="text-ui-fg-subtle">Kelola produk digital Nexapa.</Text></div>
-                <Button onClick={openCreate}>Tambah produk</Button>
-              </div>
-              <div className="flex items-center gap-x-2 px-6 py-3">
-                <label className="border-ui-border-base bg-ui-bg-field flex h-8 flex-1 items-center gap-x-2 rounded-md border px-2">
-                  <MagnifyingGlass className="text-ui-fg-muted" />
-                  <input value={query} onChange={(event) => setQuery(event.target.value)} className="txt-compact-small h-full flex-1 bg-transparent outline-none" placeholder="Cari produk" />
-                </label>
-                <Button variant="secondary" onClick={cycleFilter}>Filter: {filters.find((item) => item.value === filter)?.label}</Button>
-              </div>
-              {error && <div className="px-6 py-4"><Alert variant="error">{error}</Alert></div>}
-              <Table>
-                <Table.Header><Table.Row><Table.HeaderCell>Produk</Table.HeaderCell><Table.HeaderCell>Jenis</Table.HeaderCell><Table.HeaderCell>Harga</Table.HeaderCell><Table.HeaderCell>Status</Table.HeaderCell><Table.HeaderCell><span className="sr-only">Tindakan</span></Table.HeaderCell></Table.Row></Table.Header>
-                <Table.Body>
-                  {products.map((product) => (
-                    <Table.Row key={product.id}>
-                      <Table.Cell className="text-ui-fg-base font-medium">{product.name}</Table.Cell>
-                      <Table.Cell>{product.type}</Table.Cell>
-                      <Table.Cell>{rupiah(product.price_amount)}</Table.Cell>
-                      <Table.Cell><Badge size="2xsmall" rounded="full" color={product.status === "active" ? "green" : "grey"}>{statusLabels[product.status]}</Badge></Table.Cell>
-                      <Table.Cell>
-                        <div className="flex justify-end gap-x-1">
-                          <IconButton size="small" variant="transparent" title={`Edit ${product.name}`} onClick={() => openEdit(product)}><PencilSquare /></IconButton>
-                          <Prompt>
-                            <Prompt.Trigger asChild><IconButton size="small" variant="transparent" title={`Hapus ${product.name}`}><Trash /></IconButton></Prompt.Trigger>
-                            <Prompt.Content>
-                              <Prompt.Header><Prompt.Title>Hapus produk?</Prompt.Title><Prompt.Description>Produk “{product.name}” akan dihapus dari katalog. Tindakan ini dapat dipulihkan dari database.</Prompt.Description></Prompt.Header>
-                              <Prompt.Footer><Prompt.Cancel>Batal</Prompt.Cancel><Prompt.Action disabled={deletingId === product.id} onClick={() => removeProduct(product)}>Hapus</Prompt.Action></Prompt.Footer>
-                            </Prompt.Content>
-                          </Prompt>
-                        </div>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                  {!loading && !products.length && <Table.Row><td colSpan={5} className="text-ui-fg-subtle h-12 text-center">Produk tidak ditemukan.</td></Table.Row>}
-                  {loading && <Table.Row><td colSpan={5} className="text-ui-fg-subtle h-12 text-center">Memuat produk…</td></Table.Row>}
-                </Table.Body>
-              </Table>
-            </Container>
-          ) : (
-            <Container>
-              <Heading level="h1">{page}</Heading>
-              <Text className="text-ui-fg-subtle mt-1">Halaman {page.toLowerCase()} sudah aktif. Modul Laravel akan disambungkan pada tahap berikutnya.</Text>
-            </Container>
-          )}
-        </div>
-      </main>
+      <div className="min-w-0 flex-1 pl-[250px]">
+        <header className="border-ui-border-base bg-ui-bg-base/80 sticky top-0 z-10 flex h-12 items-center border-b px-6 backdrop-blur">
+          <Text size="small" className="text-ui-fg-muted">Nexapa</Text><span className="text-ui-fg-muted mx-2">/</span><Text size="small" weight="plus">{pageTitles[page]}</Text>
+          <div className="ml-auto flex items-center gap-x-2"><span className="bg-ui-bg-subtle text-ui-fg-subtle txt-compact-xsmall rounded-md border px-2 py-1">Production</span><div className="size-2 rounded-full bg-ui-tag-green-icon" /></div>
+        </header>
 
-      <ProductFormDrawer open={drawerOpen} product={editingProduct} onOpenChange={setDrawerOpen} onSaved={productSaved} />
+        <main className="mx-auto w-full max-w-[1440px] p-6 lg:p-8">
+          {page === "overview" && <OverviewPage products={products} loading={loading} onCreate={openCreate} onSelect={selectProduct} />}
+          {page === "products" && <ProductListPage products={products} loading={loading} error={error} query={query} status={status} onQueryChange={setQuery} onStatusChange={setStatus} onRefresh={() => setRefreshKey((value) => value + 1)} onCreate={openCreate} onEdit={openEdit} onDelete={removeProduct} onSelect={selectProduct} />}
+          {page === "product-detail" && selectedProduct && <ProductDetailPage product={selectedProduct} onBack={() => setPage("products")} onEdit={openEdit} onDelete={removeProduct} />}
+          {page === "orders" && <EmptyDomainPage title="Belum ada pesanan" description="Pesanan produk digital akan muncul di sini setelah checkout dan payment webhook aktif." icon={ShoppingCart} />}
+          {page === "files" && <EmptyDomainPage title="Belum ada file digital" description="File private dan entitlement unduhan akan dikelola secara aman dari halaman ini." icon={DocumentText} />}
+          {page === "customers" && <EmptyDomainPage title="Belum ada pelanggan" description="Profil pelanggan terbentuk otomatis setelah transaksi pertama." icon={Users} />}
+          {page === "promotions" && <EmptyDomainPage title="Belum ada promosi" description="Kode diskon dan kampanye Commerce akan dikelola dari halaman ini." icon={ReceiptPercent} />}
+          {page === "pricing" && <EmptyDomainPage title="Daftar harga utama" description="Semua produk saat ini menggunakan harga IDR yang ditetapkan pada katalog." icon={CurrencyDollar} />}
+          {page === "settings" && <EmptyDomainPage title="Commerce terhubung" description={`Sesi administrator ${user.email} terhubung ke Laravel Nexapa API.`} icon={Buildings} />}
+        </main>
+      </div>
+
+      <ProductFormModal open={editorOpen} product={editingProduct} onOpenChange={setEditorOpen} onSaved={productSaved} />
     </div>
   )
 }

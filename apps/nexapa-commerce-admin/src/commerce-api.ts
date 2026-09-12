@@ -23,6 +23,15 @@ export type ProductInput = {
   status: ProductStatus
 }
 
+export type AdminUser = {
+  id: number
+  name: string
+  email: string
+  email_verified: boolean
+  role: string
+  is_admin: boolean
+}
+
 type ProductCollectionResponse = {
   success: boolean
   data: CommerceProduct[]
@@ -93,6 +102,28 @@ async function request<T>(url: string, init: RequestInit = {}): Promise<T> {
   }
 
   return body as T
+}
+
+export async function currentUser() {
+  return request<{ success: boolean; data: { user: AdminUser } }>(
+    `${API_ORIGIN}/api/v1/auth/me`,
+  )
+}
+
+export async function login(email: string, password: string) {
+  return request<{ success: boolean; data: { user: AdminUser } }>(
+    `${API_ORIGIN}/api/v1/auth/login`,
+    {
+      method: "POST",
+      body: JSON.stringify({ email, password, remember: true }),
+    },
+  )
+}
+
+export async function logout() {
+  return request<{ success: boolean }>(`${API_ORIGIN}/api/v1/auth/logout`, {
+    method: "POST",
+  })
 }
 
 export async function listProducts(search: string, status: ProductStatus | "all", signal?: AbortSignal) {

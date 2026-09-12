@@ -1,6 +1,7 @@
 {
   "name": "@nexapa/commerce",
   "version": "0.0.1",
+  "packageManager": "yarn@4.12.0",
   "description": "Nexapa commerce backend and admin dashboard powered by Medusa.",
   "author": "Nexapa",
   "license": "MIT",

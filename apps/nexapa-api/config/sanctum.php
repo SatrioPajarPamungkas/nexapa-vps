@@ -18,7 +18,7 @@ return [
     |
     */
 
-    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', 'app.nexapa.app,api.nexapa.app,localhost')),
+    'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', 'app.nexapa.app,commerce.nexapa.app,api.nexapa.app,localhost')),
 
     /*
     |--------------------------------------------------------------------------

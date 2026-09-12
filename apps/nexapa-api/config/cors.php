@@ -11,6 +11,7 @@ return [
 
     'allowed_origins' => [
         env('FRONTEND_URL', 'https://app.nexapa.app'),
+        env('COMMERCE_FRONTEND_URL', 'https://commerce.nexapa.app'),
     ],
 
     'allowed_origins_patterns' => [],

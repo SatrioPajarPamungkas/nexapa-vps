@@ -2,21 +2,29 @@
  * Adapted from Medusa Community Admin MainLayout.
  * Upstream f8dce55556a1e68d6ea9b2fb88852b2a76fbd73c — MIT.
  */
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Buildings, CogSixTooth, CurrencyDollar, MagnifyingGlass,
-  ReceiptPercent, ShoppingCart, Tag, Users,
+  PencilSquare, ReceiptPercent, ShoppingCart, Tag, Trash, Users,
 } from "../third_party/medusa-icons/src"
+import { Alert } from "../third_party/medusa-ui/src/components/alert"
 import { Avatar } from "../third_party/medusa-ui/src/components/avatar"
 import { Badge } from "../third_party/medusa-ui/src/components/badge"
 import { Button } from "../third_party/medusa-ui/src/components/button"
 import { Container } from "../third_party/medusa-ui/src/components/container"
 import { Divider } from "../third_party/medusa-ui/src/components/divider"
 import { Heading } from "../third_party/medusa-ui/src/components/heading"
+import { IconButton } from "../third_party/medusa-ui/src/components/icon-button"
+import { Prompt } from "../third_party/medusa-ui/src/components/prompt"
 import { Table } from "../third_party/medusa-ui/src/components/table"
 import { Text } from "../third_party/medusa-ui/src/components/text"
-
-type Product = { id: number; name: string; type: string; price: number; status: "Aktif" | "Draf" }
+import {
+  CommerceProduct,
+  deleteProduct,
+  listProducts,
+  ProductStatus,
+} from "./commerce-api"
+import { ProductFormDrawer } from "./ProductFormDrawer"
 
 const nav = [
   { label: "Pesanan", icon: ShoppingCart },
@@ -27,10 +35,17 @@ const nav = [
   { label: "Daftar Harga", icon: CurrencyDollar },
 ]
 
-const initialProducts: Product[] = [
-  { id: 1, name: "Template Konten Premium", type: "Template", price: 149000, status: "Aktif" },
-  { id: 2, name: "Panduan WhatsApp Marketing", type: "E-book", price: 89000, status: "Aktif" },
-  { id: 3, name: "Paket Desain Bisnis", type: "Asset", price: 249000, status: "Draf" },
+const statusLabels: Record<ProductStatus, string> = {
+  active: "Aktif",
+  draft: "Draf",
+  archived: "Diarsipkan",
+}
+
+const filters: Array<{ value: ProductStatus | "all"; label: string }> = [
+  { value: "all", label: "Semua" },
+  { value: "active", label: "Aktif" },
+  { value: "draft", label: "Draf" },
+  { value: "archived", label: "Diarsipkan" },
 ]
 
 const rupiah = (value: number) =>
@@ -38,25 +53,74 @@ const rupiah = (value: number) =>
 
 export function App() {
   const [page, setPage] = useState("Produk")
-  const [products, setProducts] = useState(initialProducts)
+  const [products, setProducts] = useState<CommerceProduct[]>([])
   const [query, setQuery] = useState("")
-  const [filter, setFilter] = useState<"Semua" | Product["status"]>("Semua")
+  const [filter, setFilter] = useState<ProductStatus | "all">("all")
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<CommerceProduct | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const visibleProducts = useMemo(() => products.filter((product) =>
-    product.name.toLowerCase().includes(query.toLowerCase()) &&
-    (filter === "Semua" || product.status === filter)
-  ), [products, query, filter])
+  useEffect(() => {
+    const controller = new AbortController()
+    const timer = window.setTimeout(async () => {
+      setLoading(true)
+      setError("")
+      try {
+        const response = await listProducts(query, filter, controller.signal)
+        setProducts(response.data)
+      } catch (caught) {
+        if (!controller.signal.aborted) {
+          setError(caught instanceof Error ? caught.message : "Produk gagal dimuat.")
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false)
+      }
+    }, 250)
 
-  const addProduct = () => {
-    const name = window.prompt("Nama produk digital:")
-    if (!name?.trim()) return
-    const price = Number(window.prompt("Harga produk:", "100000"))
-    const type = window.prompt("Jenis produk:", "File Digital") || "File Digital"
-    setProducts((items) => [{ id: Date.now(), name: name.trim(), type, price, status: "Draf" }, ...items])
+    return () => {
+      window.clearTimeout(timer)
+      controller.abort()
+    }
+  }, [query, filter])
+
+  const cycleFilter = () => {
+    const index = filters.findIndex((item) => item.value === filter)
+    setFilter(filters[(index + 1) % filters.length].value)
   }
 
-  const cycleFilter = () =>
-    setFilter((value) => value === "Semua" ? "Aktif" : value === "Aktif" ? "Draf" : "Semua")
+  const openCreate = () => {
+    setEditingProduct(null)
+    setDrawerOpen(true)
+  }
+
+  const openEdit = (product: CommerceProduct) => {
+    setEditingProduct(product)
+    setDrawerOpen(true)
+  }
+
+  const productSaved = (product: CommerceProduct) => {
+    setProducts((items) => {
+      const exists = items.some((item) => item.id === product.id)
+      return exists
+        ? items.map((item) => item.id === product.id ? product : item)
+        : [product, ...items]
+    })
+  }
+
+  const removeProduct = async (product: CommerceProduct) => {
+    setDeletingId(product.id)
+    setError("")
+    try {
+      await deleteProduct(product.id)
+      setProducts((items) => items.filter((item) => item.id !== product.id))
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Produk gagal dihapus.")
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   return (
     <div className="flex min-h-screen bg-ui-bg-subtle text-ui-fg-base">
@@ -70,7 +134,7 @@ export function App() {
         <nav className="flex flex-1 flex-col gap-y-1 p-3">
           <label className="text-ui-fg-subtle hover:bg-ui-bg-subtle-hover flex items-center gap-x-2.5 rounded-md px-2 py-1.5">
             <MagnifyingGlass />
-            <input value={query} onChange={(e) => { setQuery(e.target.value); setPage("Produk") }} className="txt-compact-small min-w-0 flex-1 bg-transparent outline-none" placeholder="Pencarian" />
+            <input value={query} onChange={(event) => { setQuery(event.target.value); setPage("Produk") }} className="txt-compact-small min-w-0 flex-1 bg-transparent outline-none" placeholder="Pencarian" />
           </label>
           {nav.map(({ label, icon: Icon }) => (
             <button key={label} onClick={() => setPage(label)} className={(page === label ? "bg-ui-bg-subtle-hover text-ui-fg-base " : "text-ui-fg-subtle hover:bg-ui-bg-subtle-hover ") + "flex items-center gap-x-2.5 rounded-md px-2 py-1.5 text-left"}>
@@ -97,33 +161,54 @@ export function App() {
             <Container className="divide-y p-0">
               <div className="flex items-center justify-between px-6 py-4">
                 <div><Heading level="h1">Produk</Heading><Text className="text-ui-fg-subtle">Kelola produk digital Nexapa.</Text></div>
-                <Button onClick={addProduct}>Tambah produk</Button>
+                <Button onClick={openCreate}>Tambah produk</Button>
               </div>
               <div className="flex items-center gap-x-2 px-6 py-3">
                 <label className="border-ui-border-base bg-ui-bg-field flex h-8 flex-1 items-center gap-x-2 rounded-md border px-2">
                   <MagnifyingGlass className="text-ui-fg-muted" />
-                  <input value={query} onChange={(e) => setQuery(e.target.value)} className="txt-compact-small h-full flex-1 bg-transparent outline-none" placeholder="Cari produk" />
+                  <input value={query} onChange={(event) => setQuery(event.target.value)} className="txt-compact-small h-full flex-1 bg-transparent outline-none" placeholder="Cari produk" />
                 </label>
-                <Button variant="secondary" onClick={cycleFilter}>Filter: {filter}</Button>
+                <Button variant="secondary" onClick={cycleFilter}>Filter: {filters.find((item) => item.value === filter)?.label}</Button>
               </div>
+              {error && <div className="px-6 py-4"><Alert variant="error">{error}</Alert></div>}
               <Table>
-                <Table.Header><Table.Row><Table.HeaderCell>Produk</Table.HeaderCell><Table.HeaderCell>Jenis</Table.HeaderCell><Table.HeaderCell>Harga</Table.HeaderCell><Table.HeaderCell>Status</Table.HeaderCell></Table.Row></Table.Header>
+                <Table.Header><Table.Row><Table.HeaderCell>Produk</Table.HeaderCell><Table.HeaderCell>Jenis</Table.HeaderCell><Table.HeaderCell>Harga</Table.HeaderCell><Table.HeaderCell>Status</Table.HeaderCell><Table.HeaderCell><span className="sr-only">Tindakan</span></Table.HeaderCell></Table.Row></Table.Header>
                 <Table.Body>
-                  {visibleProducts.map((product) => (
-                    <Table.Row key={product.id}><Table.Cell className="text-ui-fg-base font-medium">{product.name}</Table.Cell><Table.Cell>{product.type}</Table.Cell><Table.Cell>{rupiah(product.price)}</Table.Cell><Table.Cell><Badge size="2xsmall" rounded="full" color={product.status === "Aktif" ? "green" : "grey"}>{product.status}</Badge></Table.Cell></Table.Row>
+                  {products.map((product) => (
+                    <Table.Row key={product.id}>
+                      <Table.Cell className="text-ui-fg-base font-medium">{product.name}</Table.Cell>
+                      <Table.Cell>{product.type}</Table.Cell>
+                      <Table.Cell>{rupiah(product.price_amount)}</Table.Cell>
+                      <Table.Cell><Badge size="2xsmall" rounded="full" color={product.status === "active" ? "green" : "grey"}>{statusLabels[product.status]}</Badge></Table.Cell>
+                      <Table.Cell>
+                        <div className="flex justify-end gap-x-1">
+                          <IconButton size="small" variant="transparent" title={`Edit ${product.name}`} onClick={() => openEdit(product)}><PencilSquare /></IconButton>
+                          <Prompt>
+                            <Prompt.Trigger asChild><IconButton size="small" variant="transparent" title={`Hapus ${product.name}`}><Trash /></IconButton></Prompt.Trigger>
+                            <Prompt.Content>
+                              <Prompt.Header><Prompt.Title>Hapus produk?</Prompt.Title><Prompt.Description>Produk “{product.name}” akan dihapus dari katalog. Tindakan ini dapat dipulihkan dari database.</Prompt.Description></Prompt.Header>
+                              <Prompt.Footer><Prompt.Cancel>Batal</Prompt.Cancel><Prompt.Action disabled={deletingId === product.id} onClick={() => removeProduct(product)}>Hapus</Prompt.Action></Prompt.Footer>
+                            </Prompt.Content>
+                          </Prompt>
+                        </div>
+                      </Table.Cell>
+                    </Table.Row>
                   ))}
-                  {!visibleProducts.length && <Table.Row><td colSpan={4} className="text-ui-fg-subtle h-12 text-center">Produk tidak ditemukan.</td></Table.Row>}
+                  {!loading && !products.length && <Table.Row><td colSpan={5} className="text-ui-fg-subtle h-12 text-center">Produk tidak ditemukan.</td></Table.Row>}
+                  {loading && <Table.Row><td colSpan={5} className="text-ui-fg-subtle h-12 text-center">Memuat produk…</td></Table.Row>}
                 </Table.Body>
               </Table>
             </Container>
           ) : (
             <Container>
               <Heading level="h1">{page}</Heading>
-              <Text className="text-ui-fg-subtle mt-1">Halaman {page.toLowerCase()} sudah aktif. Data Laravel akan disambungkan berikutnya.</Text>
+              <Text className="text-ui-fg-subtle mt-1">Halaman {page.toLowerCase()} sudah aktif. Modul Laravel akan disambungkan pada tahap berikutnya.</Text>
             </Container>
           )}
         </div>
       </main>
+
+      <ProductFormDrawer open={drawerOpen} product={editingProduct} onOpenChange={setDrawerOpen} onSaved={productSaved} />
     </div>
   )
 }

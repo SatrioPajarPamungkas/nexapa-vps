@@ -351,3 +351,53 @@ footer > div { display: flex; flex-direction: column; justify-self: end; text-al
   .overview-points article,
   .overview-points article:last-child { grid-column: auto; min-height: 0; }
 }
+
+
+/* Gallery-style container for the three explanations */
+.section-heading .section-overview {
+  padding: 22px;
+  border: 1px solid rgba(255,255,255,.15);
+  background:
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
+    #091d23;
+  background-size: 28px 28px;
+  box-shadow: inset 0 1px rgba(255,255,255,.025),0 24px 70px rgba(0,0,0,.18);
+}
+.section-heading .overview-intro {
+  max-width:none;
+  margin:0;
+  padding:8px 8px 24px;
+  border-bottom:1px solid rgba(255,255,255,.13);
+}
+.section-heading .overview-points {
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:1px;
+  margin-top:0;
+  padding-top:1px;
+  background:rgba(255,255,255,.13);
+}
+.section-heading .overview-points article {
+  display:block;
+  min-width:0;
+  min-height:220px;
+  padding:28px;
+  border:0 !important;
+  background:#0d2931;
+}
+.section-heading .overview-points article:nth-child(2) { background:#102f38; }
+.section-heading .overview-points article:nth-child(3) { background:#122b3b; }
+.section-heading .overview-points article > span { margin-bottom:45px; }
+.section-heading .overview-points strong { font-size:1.08rem; }
+@media (max-width:980px) {
+  .section-heading .overview-points { grid-template-columns:repeat(2,minmax(0,1fr)) !important; }
+  .section-heading .overview-points article:last-child { grid-column:1 / -1; }
+}
+@media (max-width:650px) {
+  .section-heading .section-overview { padding:12px; }
+  .section-heading .overview-points { grid-template-columns:1fr !important; }
+  .section-heading .overview-points article,
+  .section-heading .overview-points article:last-child { grid-column:auto; min-height:0; }
+  .section-heading .overview-points article > span { margin-bottom:25px; }
+}

@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  @font-face {
+    font-family: "Inter";
+    font-weight: 400;
+    src: url("../third_party/medusa-dashboard/src/assets/fonts/Inter-Regular.ttf") format("truetype");
+  }
+
+  @font-face {
+    font-family: "Inter";
+    font-weight: 500;
+    src: url("../third_party/medusa-dashboard/src/assets/fonts/Inter-Medium.ttf") format("truetype");
+  }
+
+  :root {
+    @apply bg-ui-bg-subtle text-ui-fg-base antialiased;
+    font-family: "Inter", sans-serif;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply m-0 min-h-screen;
+  }
+
+  button, input {
+    font: inherit;
+  }
+}

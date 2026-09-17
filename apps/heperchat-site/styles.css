@@ -176,3 +176,30 @@ footer > div { display: flex; flex-direction: column; justify-self: end; text-al
   .legal-hero { padding-top: 74px; }
   .legal-footer .legal-links { justify-content: flex-start; text-align: left; }
 }
+
+/* Livelier product workflow, without fabricated customer data */
+.workspace-title { padding: 34px 30px 22px; }
+.workspace-title span, .workspace-title strong { display: block; }
+.workspace-title span { margin-bottom: 7px; color: var(--muted); font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; }
+.workspace-title strong { max-width: 460px; font-size: clamp(2rem, 4vw, 4.1rem); line-height: 1.02; letter-spacing: -.05em; }
+.workflow { display: grid; grid-template-columns: 1fr 28px 1fr 28px 1fr; align-items: center; gap: 7px; padding: 22px 30px 38px; }
+.workflow-step { min-height: 118px; padding: 16px; border: 1px solid var(--line); background: rgba(255,255,255,.025); transition: transform .25s ease, border-color .25s ease, background .25s ease; }
+.workflow-step:hover { transform: translateY(-5px); border-color: rgba(73,226,181,.65); background: rgba(73,226,181,.07); }
+.workflow-step.active { border-color: var(--mint); background: var(--mint); color: var(--ink); }
+.workflow-step > span { display: block; margin-bottom: 22px; font-size: .7rem; font-weight: 850; }
+.workflow-step strong, .workflow-step small { display: block; }
+.workflow-step strong { font-size: .92rem; }
+.workflow-step small { margin-top: 4px; color: var(--muted); font-size: .72rem; }
+.workflow-step.active small { color: rgba(7,23,28,.66); }
+.workflow-line { height: 1px; background: linear-gradient(90deg,var(--mint),rgba(73,226,181,.12)); }
+.feature-card { position: relative; overflow: hidden; transition: transform .28s ease, background .28s ease, border-color .28s ease; }
+.feature-card::after { content: ""; position: absolute; inset: auto -30% -70% 30%; height: 180px; background: radial-gradient(circle,rgba(73,226,181,.12),transparent 65%); pointer-events: none; }
+.feature-card:hover { transform: translateY(-8px); border-color: rgba(73,226,181,.48); background: #12343d; }
+.feature-card.featured:hover { background: #62ebc4; }
+.feature-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 31px; padding-top: 22px; border-top: 1px solid rgba(7,23,28,.22); }
+.feature-flow span { padding: 8px 10px; background: rgba(255,255,255,.48); font-size: .72rem; font-weight: 760; }
+.feature-flow i { color: rgba(7,23,28,.55); font-style: normal; }
+@media (max-width: 650px) {
+  .workflow { grid-template-columns: 1fr; }
+  .workflow-line { width: 1px; height: 18px; margin-left: 22px; background: linear-gradient(var(--mint),rgba(73,226,181,.12)); }
+}

@@ -6,7 +6,7 @@
   <meta name="description" content="HeperChat membantu bisnis mengelola percakapan pelanggan, kontak, tim, dan automasi WhatsApp dalam satu CRM." />
   <title>HeperChat | CRM Komunikasi Pelanggan</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23091b21'/%3E%3Cpath d='M18 17h8v11h12V17h8v30h-8V36H26v11h-8z' fill='%2349e2b5'/%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="./styles.css?v=20260917-7" />
+  <link rel="stylesheet" href="./styles.css?v=20260917-8" />
 </head>
 <body>
   <header class="site-header">
@@ -99,29 +99,51 @@
           <div class="feature-top"><span class="feature-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h16v11H15l-3 3-3-3H4z"/><path d="M8 10h8M8 13h5"/></svg></span><span class="feature-label">Inbox bersama</span></div>
           <h3>Inbox tim yang terorganisir</h3>
           <p>Pantau percakapan secara realtime, tentukan penanggung jawab, dan jaga setiap tindak lanjut tetap terlihat.</p>
-          <div class="inbox-visual" aria-label="Alur inbox bersama">
-            <span class="signal-dot"></span>
-            <div><strong>Pesan masuk</strong><small>Siap ditangani tim</small></div>
-            <b>BARU</b>
+          <div class="feature-art" role="img" aria-label="Ilustrasi pesan masuk ke inbox bersama">
+            <svg viewBox="0 0 460 150" aria-hidden="true">
+              <defs><linearGradient id="inboxGlow" x1="0" x2="1"><stop stop-color="#07171c"/><stop offset="1" stop-color="#174c50"/></linearGradient></defs>
+              <path class="art-path" d="M28 42h120c14 0 25 11 25 25v15c0 14-11 25-25 25H94l-23 20 4-20H28C14 107 3 96 3 82V67c0-14 11-25 25-25Z"/>
+              <path class="art-line" d="M34 66h89M34 84h62"/>
+              <path class="art-route" d="M180 75h72c21 0 27 34 48 34h43"/>
+              <circle class="art-node" cx="262" cy="83" r="8"/>
+              <rect class="art-panel" x="343" y="58" width="104" height="74" rx="14"/>
+              <path class="art-line accent" d="M365 82h59M365 101h38"/>
+              <circle class="art-pulse" cx="426" cy="43" r="10"/>
+            </svg>
           </div>
         </article>
         <article class="feature-card feature-numbers">
           <div class="feature-top"><span class="feature-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="7" height="16" rx="2"/><rect x="13.5" y="4" width="7" height="16" rx="2"/><path d="M6.5 8h1M16.5 8h1M7 16h0M17 16h0"/></svg></span><span class="feature-label">Ruang kerja terpisah</span></div>
           <h3>Multi-nomor yang terisolasi</h3>
           <p>Setiap nomor memiliki percakapan, kontak, dan konteksnya sendiri sehingga data antarlini bisnis tidak tercampur.</p>
-          <div class="number-visual" aria-label="Ruang kerja nomor terpisah">
-            <span><i>A</i>Ruang kerja utama</span>
-            <span><i>B</i>Ruang kerja lainnya</span>
+          <div class="feature-art" role="img" aria-label="Ilustrasi ruang kerja yang terpisah">
+            <svg viewBox="0 0 460 150" aria-hidden="true">
+              <path class="art-route" d="M28 75h72"/>
+              <circle class="art-pulse" cx="28" cy="75" r="11"/>
+              <path class="art-route" d="M100 75c42 0 36-43 78-43h40M100 75c42 0 36 43 78 43h40"/>
+              <rect class="art-panel" x="218" y="8" width="213" height="53" rx="13"/>
+              <rect class="art-panel secondary" x="218" y="89" width="213" height="53" rx="13"/>
+              <circle class="art-node" cx="245" cy="34" r="9"/>
+              <circle class="art-node secondary" cx="245" cy="115" r="9"/>
+              <path class="art-line accent" d="M267 27h132M267 41h82"/>
+              <path class="art-line" d="M267 108h105M267 122h132"/>
+            </svg>
           </div>
         </article>
         <article class="feature-card feature-pipeline">
           <div class="feature-top"><span class="feature-icon"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5v14M5 7h5l2 3h7M5 17h5l2-3h7"/><path d="m17 8 2 2-2 2M17 12l2 2-2 2"/></svg></span><span class="feature-label">Alur pelanggan</span></div>
           <h3>Kontak dan pipeline</h3>
           <p>Kelompokkan pelanggan, simpan riwayat interaksi, dan gerakkan peluang ke tahap penjualan berikutnya.</p>
-          <div class="pipeline-visual" aria-label="Tahapan pipeline">
-            <span><i></i>Masuk</span>
-            <span><i></i>Diproses</span>
-            <span><i></i>Selesai</span>
+          <div class="feature-art" role="img" aria-label="Ilustrasi pergerakan pipeline pelanggan">
+            <svg viewBox="0 0 460 150" aria-hidden="true">
+              <path class="art-route" d="M36 83c55 0 62-40 119-40s65 65 124 65 73-61 145-61"/>
+              <circle class="art-node secondary" cx="36" cy="83" r="13"/>
+              <circle class="art-node" cx="155" cy="43" r="13"/>
+              <circle class="art-node secondary" cx="279" cy="108" r="13"/>
+              <circle class="art-pulse" cx="424" cy="47" r="15"/>
+              <path class="art-check" d="m416 47 6 6 11-13"/>
+              <path class="art-dash" d="M36 117h88M155 77h74M279 137h87"/>
+            </svg>
           </div>
         </article>
       </div>

@@ -8,6 +8,10 @@ import {
 } from '@/lib/whatsapp/meta-api'
 import { encrypt, decrypt } from '@/lib/whatsapp/encryption'
 import { recordCrmActivity } from '@/lib/audit/record-crm-activity'
+import {
+  reserveWabaConnection,
+  WabaQuotaError,
+} from '@/lib/whatsapp/waba-quota'
 
 /**
  * Resolve the caller's account_id from their profile. Inlined here
@@ -206,9 +210,21 @@ export async function POST(request: Request) {
       label,
     } = body
 
-    if (!access_token || !phone_number_id) {
+    const normalizedWabaId =
+      typeof waba_id === 'string'
+        ? waba_id.trim()
+        : ''
+
+    if (
+      !access_token ||
+      !phone_number_id ||
+      !/^\d{5,32}$/.test(normalizedWabaId)
+    ) {
       return NextResponse.json(
-        { error: 'access_token and phone_number_id are required' },
+        {
+          error:
+            'access_token, phone_number_id, and a valid waba_id are required',
+        },
         { status: 400 }
       )
     }
@@ -293,7 +309,7 @@ export async function POST(request: Request) {
     // /register when the user didn't provide a PIN this time around.
     const { data: existing } = await supabase
       .from('whatsapp_config')
-      .select('id, registered_at, phone_number_id')
+      .select('id, registered_at, phone_number_id, waba_id')
       .eq('account_id', accountId)
       .eq('phone_number_id', phone_number_id)
       .maybeSingle()
@@ -301,6 +317,23 @@ export async function POST(request: Request) {
     const sameNumber =
       existing?.phone_number_id === phone_number_id &&
       existing?.registered_at != null
+
+    let wabaReservationId: string | null = null
+
+    if (
+      !existing ||
+      existing.waba_id !== normalizedWabaId
+    ) {
+      const reservation =
+        await reserveWabaConnection({
+          crmUserId: user.id,
+          accountId,
+          wabaId: normalizedWabaId,
+        })
+
+      wabaReservationId =
+        reservation.reservation_id
+    }
 
     // Step 1: register the phone number for inbound webhooks.
     //
@@ -354,10 +387,10 @@ export async function POST(request: Request) {
     // Skipped only when there's no waba_id (legacy rows from before
     // we required it).
     let subscribedAppsAt: string | null = null
-    if (waba_id) {
+    if (normalizedWabaId) {
       try {
         await subscribeWabaToApp({
-          wabaId: waba_id,
+          wabaId: normalizedWabaId,
           accessToken: access_token,
         })
         subscribedAppsAt = new Date().toISOString()
@@ -377,7 +410,7 @@ export async function POST(request: Request) {
       phone_number_id,
       label: typeof label === 'string' && label.trim() ? label.trim() : null,
       display_phone_number: phoneInfo.display_phone_number ?? null,
-      waba_id: waba_id || null,
+      waba_id: normalizedWabaId,
       access_token: encryptedAccessToken,
       verify_token: encryptedVerifyToken,
       status: registrationError ? 'disconnected' : 'connected',
@@ -386,6 +419,12 @@ export async function POST(request: Request) {
       subscribed_apps_at: subscribedAppsAt ?? null,
       last_registration_error: registrationError,
       updated_at: new Date().toISOString(),
+      ...(wabaReservationId
+        ? {
+            waba_reservation_id:
+              wabaReservationId,
+          }
+        : {}),
     }
 
     let savedConnectionId = existing?.id ?? null
@@ -479,6 +518,17 @@ export async function POST(request: Request) {
       phone_info: phoneInfo,
     })
   } catch (error) {
+    if (error instanceof WabaQuotaError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          code: error.code,
+          details: error.details,
+        },
+        { status: error.status }
+      )
+    }
+
     console.error('Error in WhatsApp config POST:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

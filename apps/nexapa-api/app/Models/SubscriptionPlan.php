@@ -14,6 +14,8 @@ class SubscriptionPlan extends Model
         return [
             'monthly_price' => 'integer',
             'yearly_price' => 'integer',
+            'monthly_promo_price' => 'integer',
+            'yearly_promo_price' => 'integer',
             'limits' => 'array',
             'is_active' => 'boolean',
         ];
@@ -29,5 +31,16 @@ class SubscriptionPlan extends Model
         return $billingCycle === 'yearly'
             ? $this->yearly_price
             : $this->monthly_price;
+    }
+
+    public function finalPriceFor(string $billingCycle): int
+    {
+        $promo = $billingCycle === 'yearly'
+            ? $this->yearly_promo_price
+            : $this->monthly_promo_price;
+
+        return $promo === null
+            ? $this->priceFor($billingCycle)
+            : (int) $promo;
     }
 }

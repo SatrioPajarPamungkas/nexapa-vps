@@ -249,9 +249,7 @@ class ConnectedAccountService
         }
 
         $account->display_name = $userInfo['name'];
-        if (!empty($userInfo['picture'])) {
-            $account->avatar_url = $userInfo['picture'];
-        }
+        $account->avatar_url = null;
         $account->last_validated_at = now();
         $account->status = 'connected';
         $account->save();

@@ -108,7 +108,7 @@ export function PlatformSelector({
                   </h3>
 
                   <p className="mt-1 text-[12px] text-slate-500">
-                    Pilih platform untuk publishing
+                    Select a publishing platform
                   </p>
                 </div>
 
@@ -190,7 +190,7 @@ export function PlatformSelector({
 
               <div className="border-t border-slate-200/70 bg-slate-50/90 px-5 py-3">
                 <p className="text-[10px] leading-4 text-slate-500">
-                  Platform aktif menentukan mode publishing dan validasi.
+                  The active platform determines publishing mode and validation.
                 </p>
               </div>
             </div>

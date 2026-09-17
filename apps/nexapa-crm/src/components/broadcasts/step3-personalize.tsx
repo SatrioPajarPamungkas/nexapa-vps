@@ -96,6 +96,8 @@ export function Step3Personalize({
         supabase
           .from('contacts')
           .select('*')
+          .eq('broadcast_enabled', true)
+          .eq('broadcast_only', false)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle(),

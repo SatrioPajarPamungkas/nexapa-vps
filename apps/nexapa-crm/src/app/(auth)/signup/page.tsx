@@ -12,6 +12,7 @@ import {
   Mail,
   User,
 } from "lucide-react";
+import { safeLocalPath } from "@/lib/safe-local-path";
 
 export default function SignupPage() {
   return (
@@ -24,6 +25,7 @@ export default function SignupPage() {
 function SignupPageInner() {
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get("invite");
+  const returnTo = safeLocalPath(searchParams.get("next"));
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -77,6 +79,10 @@ function SignupPageInner() {
     }
 
     setLoading(true);
+    window.localStorage.setItem(
+      "nexapa_crm_auth_return",
+      returnTo,
+    );
 
     try {
       const response = await fetch(
@@ -149,7 +155,7 @@ function SignupPageInner() {
             href={
               inviteToken
                 ? `/login?invite=${encodeURIComponent(inviteToken)}`
-                : "/login"
+                : `/login?next=${encodeURIComponent(returnTo)}`
             }
             className="mt-6 inline-flex h-10 w-full items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-[13px] font-medium text-slate-700 transition hover:bg-slate-50"
           >

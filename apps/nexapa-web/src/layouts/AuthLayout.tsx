@@ -85,13 +85,13 @@ export function AuthLayout() {
             </div>
 
             <h1 className="mt-7 max-w-[590px] text-[42px] font-semibold leading-[1.08] tracking-[-0.035em] xl:text-[50px]">
-              Operasikan bisnis dalam satu ruang kerja yang terhubung.
+              Run your business from one connected workspace.
             </h1>
 
             <p className="mt-6 max-w-[540px] text-[15px] leading-7 text-slate-300">
-              Kelola publikasi, pelanggan, komunikasi, automasi,
-              dan insight AI melalui ekosistem Nexapa yang aman,
-              terukur, dan siap berkembang.
+              Manage publishing, customers, communication,
+              automation, and AI insights through a secure,
+              measurable, and scalable Nexapa ecosystem.
             </p>
 
             <div className="mt-10 grid max-w-[570px] grid-cols-2 gap-3">
@@ -103,11 +103,11 @@ export function AuthLayout() {
                   />
                 </div>
                 <p className="mt-4 text-[13px] font-semibold">
-                  Aman dan terkendali
+                  Secure and controlled
                 </p>
                 <p className="mt-1.5 text-[12px] leading-5 text-slate-400">
-                  Akses, data, dan operasional berada dalam sistem
-                  yang terstruktur.
+                  Access, data, and operations stay within a
+                  structured system.
                 </p>
               </div>
 
@@ -122,14 +122,14 @@ export function AuthLayout() {
                   Satu ekosistem
                 </p>
                 <p className="mt-1.5 text-[12px] leading-5 text-slate-400">
-                  Publisher, CRM, WhatsApp, automasi, dan AI bekerja
-                  dalam satu alur.
+                  Publisher, CRM, WhatsApp, automation, and AI work
+                  together in one workflow.
                 </p>
               </div>
             </div>
 
             <div className="mt-8 flex items-center gap-2 text-[12px] text-slate-400">
-              <span>Teknologi untuk bisnis yang bergerak</span>
+              <span>Technology for businesses in motion</span>
               <ArrowUpRight
                 className="h-3.5 w-3.5 text-blue-300"
                 aria-hidden="true"

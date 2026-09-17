@@ -1,6 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  type ChangeEvent,
+} from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { CustomField, Tag } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -91,6 +97,8 @@ export function Step2SelectAudience({
   const [loadingFields, setLoadingFields] = useState(false);
   const [estimatedCount, setEstimatedCount] = useState<number | null>(null);
   const [loadingCount, setLoadingCount] = useState(false);
+  const [csvError, setCsvError] = useState('');
+  const [csvFileName, setCsvFileName] = useState('');
 
   // Tags are used both by the primary "Filter by Tags" audience type
   // AND by the exclude-list below — so always load once on mount.
@@ -194,7 +202,9 @@ export function Step2SelectAudience({
         // "All" — fetch the total, then subtract exclude set if any.
         const { count } = await supabase
           .from('contacts')
-          .select('*', { count: 'exact', head: true });
+          .select('*', { count: 'exact', head: true })
+          .eq('broadcast_enabled', true)
+          .eq('broadcast_only', false);
         const total = count ?? 0;
         setEstimatedCount(excludeSet ? Math.max(0, total - excludeSet.size) : total);
       }
@@ -236,6 +246,117 @@ export function Step2SelectAudience({
       value: '',
     };
     onUpdate({ ...audience, customField: { ...prev, ...patch } });
+  }
+
+  async function handleCsvUpload(
+    event: ChangeEvent<HTMLInputElement>,
+  ) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setCsvError('');
+    setCsvFileName(file.name);
+
+    try {
+      const text = await file.text();
+      const lines = text
+        .replace(/^\uFEFF/, '')
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      if (lines.length === 0) {
+        throw new Error('File CSV kosong.');
+      }
+
+      const delimiter = lines[0].includes(';')
+        ? ';'
+        : lines[0].includes('\t')
+          ? '\t'
+          : ',';
+
+      const rows = lines.map((line) =>
+        line.split(delimiter).map((value) =>
+          value.trim().replace(/^["']|["']$/g, ''),
+        ),
+      );
+
+      const headers = rows[0].map((value) =>
+        value.toLowerCase().replace(/[\s-]+/g, '_'),
+      );
+
+      const phoneHeaders = [
+        'phone',
+        'phone_number',
+        'nomor',
+        'nomor_hp',
+        'no_hp',
+        'whatsapp',
+        'wa',
+      ];
+      const nameHeaders = ['name', 'nama', 'contact_name'];
+
+      const detectedPhoneIndex = headers.findIndex((header) =>
+        phoneHeaders.includes(header),
+      );
+      const detectedNameIndex = headers.findIndex((header) =>
+        nameHeaders.includes(header),
+      );
+      const hasHeader = detectedPhoneIndex >= 0;
+
+      const phoneIndex = hasHeader ? detectedPhoneIndex : 0;
+      const nameIndex = hasHeader ? detectedNameIndex : 1;
+      const dataRows = hasHeader ? rows.slice(1) : rows;
+
+      const contacts = new Map<
+        string,
+        { phone: string; name?: string }
+      >();
+
+      for (const row of dataRows) {
+        let phone = (row[phoneIndex] ?? '').replace(/\D/g, '');
+        const name =
+          nameIndex >= 0 ? (row[nameIndex] ?? '').trim() : '';
+
+        if (phone.startsWith('0')) {
+          phone = `62${phone.slice(1)}`;
+        } else if (phone.startsWith('8')) {
+          phone = `62${phone}`;
+        }
+
+        if (!/^62\d{7,13}$/.test(phone)) continue;
+
+        contacts.set(phone, {
+          phone,
+          ...(name ? { name } : {}),
+        });
+      }
+
+      const csvContacts = [...contacts.values()];
+
+      if (csvContacts.length === 0) {
+        throw new Error(
+          'Tidak ditemukan nomor valid. Gunakan format 08... atau 628...',
+        );
+      }
+
+      onUpdate({
+        ...audience,
+        type: 'csv',
+        csvContacts,
+      });
+    } catch (error) {
+      onUpdate({
+        ...audience,
+        type: 'csv',
+        csvContacts: [],
+      });
+      setCsvError(
+        error instanceof Error ? error.message : 'Gagal membaca file CSV.',
+      );
+    } finally {
+      event.target.value = '';
+    }
   }
 
   const isValid =
@@ -387,6 +508,46 @@ export function Step2SelectAudience({
                 className="h-9 rounded-lg border border-border bg-muted px-2.5 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
+          )}
+        </div>
+      )}
+
+      {audience.type === 'csv' && (
+        <div className="rounded-xl border border-border bg-card/50 p-4">
+          <p className="text-sm font-medium text-foreground">
+            Upload daftar nomor
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Mendukung CSV atau TXT. Kolom nama opsional; satu nomor per
+            baris juga bisa. Nomor ini tidak ditampilkan di menu Contacts.
+          </p>
+
+          <label className="mt-4 flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-primary/50 bg-primary/5 px-4 py-6 text-sm font-medium text-primary hover:bg-primary/10">
+            <Upload className="h-5 w-5" />
+            Pilih file CSV
+            <input
+              type="file"
+              accept=".csv,.txt,text/csv,text/plain"
+              className="sr-only"
+              onChange={handleCsvUpload}
+            />
+          </label>
+
+          {csvFileName && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              File: {csvFileName}
+            </p>
+          )}
+
+          {audience.csvContacts &&
+            audience.csvContacts.length > 0 && (
+              <p className="mt-2 text-sm font-medium text-green-600">
+                {audience.csvContacts.length} nomor valid siap dikirim
+              </p>
+            )}
+
+          {csvError && (
+            <p className="mt-2 text-sm text-red-500">{csvError}</p>
           )}
         </div>
       )}

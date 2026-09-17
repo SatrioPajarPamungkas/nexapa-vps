@@ -216,7 +216,7 @@
         <div>
             <h1>Tambah Pengguna Berlangganan</h1>
             <p>
-                Buat akun Publisher + CRM dan aktifkan paketnya.
+                Gunakan halaman khusus untuk membuat akun tiap platform.
             </p>
         </div>
 
@@ -362,7 +362,7 @@
         <div class="summary">
             <div class="summary-row">
                 <span>Produk</span>
-                <strong>Publisher + CRM + AI</strong>
+                <strong>Satu platform</strong>
             </div>
 
             <div class="summary-row">

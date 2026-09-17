@@ -1,10 +1,13 @@
 import Link from "next/link"
 import { LogoutButton } from "./logout-button"
+import { CheckoutButton } from "./checkout-button"
 
 type PageProps = {
   searchParams: Promise<{
     status?: string
     expires_at?: string
+    plan?: string
+    cycle?: string
   }>
 }
 
@@ -13,6 +16,12 @@ export default async function SubscriptionRequiredPage({
 }: PageProps) {
   const params = await searchParams
   const status = params.status ?? "missing"
+  const planCode = /^[a-z0-9_-]{1,100}$/.test(params.plan ?? "")
+    ? params.plan!
+    : null
+  const billingCycle = params.cycle === "yearly"
+    ? "yearly"
+    : "monthly"
 
   const content = {
     expired: {
@@ -36,9 +45,9 @@ export default async function SubscriptionRequiredPage({
         "Sistem belum dapat memverifikasi langganan. Silakan coba kembali beberapa saat lagi.",
     },
     missing: {
-      title: "Paket Nexapa belum aktif",
+      title: "Paket CRM belum aktif",
       description:
-        "Pilih paket untuk mengaktifkan CRM, Publisher, WhatsApp, dan AI.",
+        "Pilih paket CRM untuk mengaktifkan WhatsApp, automasi, dan AI CRM.",
     },
   }[status] ?? {
     title: "Langganan tidak aktif",
@@ -70,6 +79,20 @@ export default async function SubscriptionRequiredPage({
               timeZone: "Asia/Jakarta",
             }).format(new Date(params.expires_at))}
           </p>
+        )}
+
+        {planCode && (
+          <>
+            <p className="mt-5 rounded-xl border border-violet-700 bg-violet-950/50 p-4 text-sm text-violet-200">
+              Paket pilihan: <strong>{planCode}</strong> ·{" "}
+              {billingCycle === "yearly" ? "Tahunan" : "Bulanan"}
+            </p>
+
+            <CheckoutButton
+              planCode={planCode}
+              billingCycle={billingCycle}
+            />
+          </>
         )}
 
         <div className="mt-8 flex flex-wrap gap-3">

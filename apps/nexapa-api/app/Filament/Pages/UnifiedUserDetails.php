@@ -125,7 +125,7 @@ class UnifiedUserDetails extends Page
             'publisher_id' => $this->publisher?->getKey(),
             'crm_id' => $this->crm['id'] ?? null,
             'product' => match (true) {
-                $this->publisher !== null && $this->crm !== [] => 'Publisher + CRM',
+                $this->publisher !== null && $this->crm !== [] => 'Data legacy (akun terpisah)',
                 $this->publisher !== null => 'Publisher',
                 default => 'CRM',
             },

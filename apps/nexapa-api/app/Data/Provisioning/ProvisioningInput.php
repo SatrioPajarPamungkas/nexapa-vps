@@ -7,7 +7,7 @@ final readonly class ProvisioningInput
     public function __construct(
         public string $fullName,
         public string $email,
-        public string $product, // 'publisher', 'crm', 'both'
+        public string $product, // 'publisher' or 'crm'
         public string $deliveryMethod, // 'invitation', 'temporary_password'
         public ?string $temporaryPassword = null,
         public bool $emailVerified = false,
@@ -18,17 +18,17 @@ final readonly class ProvisioningInput
 
     public function wantsPublisher(): bool
     {
-        return $this->product === 'publisher' || $this->product === 'both';
+        return $this->product === 'publisher';
     }
 
     public function wantsCrm(): bool
     {
-        return $this->product === 'crm' || $this->product === 'both';
+        return $this->product === 'crm';
     }
 
     public function wantsBoth(): bool
     {
-        return $this->product === 'both';
+        return false;
     }
 
     public function useInvitation(): bool

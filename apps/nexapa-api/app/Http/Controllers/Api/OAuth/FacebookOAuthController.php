@@ -165,7 +165,7 @@ class FacebookOAuthController extends Controller
 
                 $adminAccount->external_account_id = $facebookUserId;
                 $adminAccount->display_name = $userInfo['name'];
-                $adminAccount->avatar_url = $userInfo['picture'] ?? null;
+                $adminAccount->avatar_url = null;
                 $adminAccount->status = 'connected';
                 $adminAccount->connection_method = 'oauth';
                 $adminAccount->last_validated_at = now();

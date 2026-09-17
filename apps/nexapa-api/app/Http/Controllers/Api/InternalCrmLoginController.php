@@ -3,14 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Services\Provisioning\CrmWorkspaceProvisioningService;
+use App\Models\CrmAccount;
 use App\Services\ActivityLogService;
+use App\Services\Provisioning\CrmProvisioningService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -18,278 +15,130 @@ use Throwable;
 class InternalCrmLoginController extends Controller
 {
     public function __construct(
-        private readonly CrmWorkspaceProvisioningService
-            $workspaceProvisioning,
+        private readonly CrmProvisioningService $crm,
         private readonly ActivityLogService $activityLog,
     ) {}
 
     public function store(Request $request): JsonResponse
     {
-        $configuredKey = trim((string) config(
-            'services.nexapa_internal.crm_auth_key'
-        ));
-
-        $providedKey = trim((string) $request->header(
-            'X-Nexapa-Crm-Auth-Key'
-        ));
-
-        if (
-            $configuredKey === '' ||
-            $providedKey === '' ||
-            ! hash_equals($configuredKey, $providedKey)
-        ) {
+        if (! $this->hasValidInternalKey($request)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized internal request.',
             ], Response::HTTP_UNAUTHORIZED);
         }
 
-        $validated = $request->validate([
-            'email' => [
-                'required',
-                'string',
-                'email',
-                'max:255',
-            ],
-            'password' => [
-                'required',
-                'string',
-                'max:4096',
-            ],
+        $data = $request->validate([
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'password' => ['required', 'string', 'max:4096'],
         ]);
+        $email = Str::lower(Str::trim($data['email']));
 
-        $email = Str::lower(
-            Str::trim($validated['email'])
-        );
+        try {
+            $identity = $this->crm->authenticateWithPassword(
+                $email,
+                $data['password'],
+            );
+        } catch (Throwable $exception) {
+            report($exception);
 
-        $user = User::query()
-            ->whereRaw('LOWER(email) = ?', [$email])
-            ->first();
+            return response()->json([
+                'success' => false,
+                'message' => 'Layanan login CRM belum tersedia.',
+            ], Response::HTTP_SERVICE_UNAVAILABLE);
+        }
 
-        if (
-            ! $user ||
-            ! Hash::check(
-                $validated['password'],
-                $user->password
-            )
-        ) {
-            $this->activityLog->log([
-                'category' => 'authentication',
-                'action' => 'auth.crm_login_failed',
-                'title' => 'Percobaan login CRM gagal.',
-                'status' => 'failed',
-                'product' => 'crm',
-                'metadata' => ['email_hash' => hash('sha256', $email)],
-            ]);
+        if ($identity === null) {
+            $this->audit('auth.crm_login_failed', $email, 'failed');
+
             return response()->json([
                 'success' => false,
                 'message' => 'Email atau password salah.',
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        if ((bool) ($user->is_suspended ?? false)) {
-            $this->audit($user, 'auth.crm_login_blocked', 'Login CRM ditolak karena akun disuspend.', 'blocked');
+        if (! $identity['email_verified']) {
             return response()->json([
                 'success' => false,
-                'message' =>
-                    'Akun sedang disuspend. Hubungi administrator.',
-            ], Response::HTTP_FORBIDDEN);
-        }
-
-        if (! $user->hasVerifiedEmail()) {
-            $this->audit($user, 'auth.crm_login_blocked', 'Login CRM ditolak karena email belum diverifikasi.', 'blocked');
-            return response()->json([
-                'success' => false,
-                'message' =>
-                    'Verifikasi email terlebih dahulu.',
+                'message' => 'Verifikasi email CRM terlebih dahulu.',
                 'code' => 'email_not_verified',
             ], Response::HTTP_FORBIDDEN);
         }
 
+        $profile = $this->crm->findProfileByUserId($identity['user_id']);
+        $account = $this->crm->findAccountByOwnerUserId($identity['user_id']);
+        $local = CrmAccount::query()->firstOrCreate(
+            ['crm_user_id' => $identity['user_id']],
+            [
+                'crm_account_id' => $profile['account_id']
+                    ?? ($account['account_id'] ?? null),
+                'crm_profile_id' => $profile['profile_id'] ?? null,
+                'name' => $account['name'] ?? $email,
+                'email' => $email,
+                'access_status' => 'active',
+                'registered_at' => now(),
+            ],
+        );
+
+        if ($local->access_status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses CRM tidak aktif.',
+                'code' => 'crm_access_'.$local->access_status,
+            ], Response::HTTP_FORBIDDEN);
+        }
+
         try {
-            $mapping =
-                $this->workspaceProvisioning
-                    ->ensureForUser($user);
+            $tokenHash = $this->crm->generateLoginToken(
+                $email,
+                $identity['user_id'],
+            );
         } catch (Throwable $exception) {
-            Log::error(
-                'CRM workspace provisioning during login failed.',
-                [
-                    'publisher_user_id' => $user->id,
-                    'exception' => $exception::class,
-                    'message' => $exception->getMessage(),
-                ]
-            );
+            report($exception);
 
             return response()->json([
                 'success' => false,
-                'message' =>
-                    'Akun CRM belum dapat disiapkan. Silakan coba kembali.',
-                'code' =>
-                    'crm_provisioning_failed',
-            ], Response::HTTP_SERVICE_UNAVAILABLE);
-        }
-
-        $crmUserId = trim(
-            (string) $mapping->crm_user_id
-        );
-
-        if ($crmUserId === '') {
-            return response()->json([
-                'success' => false,
-                'message' =>
-                    'Pemetaan akun CRM tidak valid.',
-                'code' =>
-                    'crm_account_missing',
-            ], Response::HTTP_CONFLICT);
-        }
-
-        $supabaseUrl = rtrim(
-            trim((string) config(
-                'services.crm_supabase.url'
-            )),
-            '/'
-        );
-
-        $serviceRoleKey = trim((string) config(
-            'services.crm_supabase.service_role_key'
-        ));
-
-        if (
-            $supabaseUrl === '' ||
-            $serviceRoleKey === ''
-        ) {
-            Log::error(
-                'CRM shared login configuration is incomplete.'
-            );
-
-            return response()->json([
-                'success' => false,
-                'message' =>
-                    'Layanan login CRM belum tersedia.',
-            ], Response::HTTP_SERVICE_UNAVAILABLE);
-        }
-
-        $supabaseResponse = Http::withHeaders([
-                'apikey' => $serviceRoleKey,
-            ])
-            ->withToken($serviceRoleKey)
-            ->acceptJson()
-            ->timeout(max(
-                1,
-                (int) config(
-                    'services.crm_supabase.timeout',
-                    10
-                )
-            ))
-            ->post(
-                $supabaseUrl .
-                '/auth/v1/admin/generate_link',
-                [
-                    'type' => 'magiclink',
-                    'email' => $email,
-                ]
-            );
-
-        if (! $supabaseResponse->successful()) {
-            Log::warning(
-                'Supabase CRM login-link generation failed.',
-                [
-                    'status' =>
-                        $supabaseResponse->status(),
-                    'publisher_user_id' => $user->id,
-                    'crm_user_id' => $crmUserId,
-                ]
-            );
-
-            return response()->json([
-                'success' => false,
-                'message' =>
-                    'Gagal membuat sesi CRM.',
+                'message' => 'Gagal membuat sesi CRM.',
             ], Response::HTTP_BAD_GATEWAY);
         }
 
-        $payload = $supabaseResponse->json();
-
-        $tokenHash = is_array($payload)
-            ? (
-                data_get($payload, 'properties.hashed_token')
-                ?? ($payload['hashed_token'] ?? null)
-            )
-            : null;
-
-        $generatedCrmUserId = is_array($payload)
-            ? (
-                data_get($payload, 'user.id')
-                ?? data_get($payload, 'properties.user.id')
-            )
-            : null;
-
-        if (
-            ! is_string($tokenHash) ||
-            trim($tokenHash) === ''
-        ) {
-            Log::error(
-                'Supabase CRM login response has no token hash.',
-                [
-                    'publisher_user_id' => $user->id,
-                    'crm_user_id' => $crmUserId,
-                ]
-            );
-
-            return response()->json([
-                'success' => false,
-                'message' =>
-                    'Respons autentikasi CRM tidak valid.',
-            ], Response::HTTP_BAD_GATEWAY);
-        }
-
-        if (
-            is_string($generatedCrmUserId) &&
-            $generatedCrmUserId !== '' &&
-            ! hash_equals(
-                $crmUserId,
-                $generatedCrmUserId
-            )
-        ) {
-            Log::error(
-                'CRM shared login user mapping mismatch.',
-                [
-                    'publisher_user_id' => $user->id,
-                    'expected_crm_user_id' => $crmUserId,
-                    'generated_crm_user_id' =>
-                        $generatedCrmUserId,
-                ]
-            );
-
-            return response()->json([
-                'success' => false,
-                'message' =>
-                    'Pemetaan akun CRM tidak sesuai.',
-            ], Response::HTTP_CONFLICT);
-        }
-
-        $this->audit($user, 'auth.crm_login_succeeded', 'Login CRM berhasil.');
+        $this->audit('auth.crm_login_succeeded', $email);
 
         return response()->json([
             'success' => true,
             'token_hash' => $tokenHash,
-            'crm_user_id' => $crmUserId,
+            'crm_user_id' => $identity['user_id'],
         ]);
     }
 
+    private function hasValidInternalKey(Request $request): bool
+    {
+        $configured = trim((string) config(
+            'services.nexapa_internal.crm_auth_key',
+        ));
+        $provided = trim((string) $request->header(
+            'X-Nexapa-Crm-Auth-Key',
+        ));
+
+        return $configured !== ''
+            && $provided !== ''
+            && hash_equals($configured, $provided);
+    }
+
     private function audit(
-        User $user,
         string $action,
-        string $title,
-        string $status = 'success'
+        string $email,
+        string $status = 'success',
     ): void {
         $this->activityLog->log([
-            'user' => $user,
             'category' => 'authentication',
             'action' => $action,
-            'title' => $title,
+            'title' => $action === 'auth.crm_login_succeeded'
+                ? 'Login CRM berhasil.'
+                : 'Percobaan login CRM gagal.',
             'status' => $status,
             'product' => 'crm',
+            'metadata' => ['email_hash' => hash('sha256', $email)],
         ]);
     }
 }

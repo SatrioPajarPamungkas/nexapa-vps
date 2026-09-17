@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\CrmUserMapping;
+use App\Models\CrmAccount;
 use App\Models\Subscription;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,44 +56,37 @@ class InternalCrmEntitlementController extends Controller
             ]);
         }
 
-        $mapping = CrmUserMapping::query()
-            ->with('publisherUser')
+        $account = CrmAccount::query()
             ->where('crm_user_id', $crmUserId)
             ->first();
 
-        if ($mapping === null) {
+        if ($account === null) {
             return response()->json([
                 'allowed' => false,
                 'whatsapp_enabled' => false,
-                'code' => 'crm_mapping_missing',
+                'code' => 'crm_account_missing',
                 'status' => 'invalid',
                 'message' =>
-                    'Pemetaan akun CRM tidak ditemukan.',
+                    'Akun CRM tidak ditemukan.',
             ], Response::HTTP_FORBIDDEN);
         }
 
         if (
-            $mapping->publisherUser === null ||
-            (bool) (
-                $mapping->publisherUser->is_suspended
-                ?? false
-            )
+            $account->access_status !== 'active'
         ) {
             return response()->json([
                 'allowed' => false,
                 'whatsapp_enabled' => false,
-                'code' => 'account_suspended',
-                'status' => 'suspended',
+                'code' => 'crm_access_'.$account->access_status,
+                'status' => $account->access_status,
                 'message' =>
                     'Akun sedang dinonaktifkan.',
             ], Response::HTTP_FORBIDDEN);
         }
 
         $subscription = Subscription::query()
-            ->where(
-                'publisher_user_id',
-                $mapping->publisher_user_id
-            )
+            ->where('product', 'crm')
+            ->where('crm_user_id', $crmUserId)
             ->latest('id')
             ->first();
 
@@ -107,7 +100,7 @@ class InternalCrmEntitlementController extends Controller
                 'status' => 'missing',
                 'plan' => null,
                 'crm_account_id' =>
-                    $mapping->crm_account_id,
+                    $account->crm_account_id,
                 'message' =>
                     'Pilih paket untuk mengaktifkan WhatsApp API.',
             ]);
@@ -121,6 +114,30 @@ class InternalCrmEntitlementController extends Controller
                 'status' => 'expired',
             ])->save();
         }
+
+        $limits = is_array($subscription->limits_snapshot)
+            ? $subscription->limits_snapshot
+            : [];
+
+        $wabaLimit = max(
+            0,
+            (int) (
+                $limits['waba_accounts']
+                ?? $limits['whatsapp_numbers']
+                ?? 0
+            ),
+        );
+
+        $replacementLimit = max(
+            0,
+            (int) (
+                $limits['waba_replacements_per_period']
+                ?? 3
+            ),
+        );
+
+        $replacementPeriod =
+            $this->wabaReplacementPeriod($subscription);
 
         $whatsappEnabled =
             $subscription->isActive();
@@ -140,12 +157,64 @@ class InternalCrmEntitlementController extends Controller
             'billing_cycle' =>
                 $subscription->billing_cycle,
             'crm_account_id' =>
-                $mapping->crm_account_id,
+                $account->crm_account_id,
             'expires_at' =>
                 $subscription->expires_at
                     ?->toIso8601String(),
-            'limits' =>
-                $subscription->limits_snapshot,
+            'waba_limit' => $wabaLimit,
+            'waba_replacement_limit' =>
+                $replacementLimit,
+            'waba_replacement_period' => [
+                'starts_at' =>
+                    $replacementPeriod['starts_at']
+                        ->toIso8601String(),
+                'ends_at' =>
+                    $replacementPeriod['ends_at']
+                        ->toIso8601String(),
+            ],
+            'limits' => $limits,
         ]);
     }
+
+    private function wabaReplacementPeriod(
+        Subscription $subscription,
+    ): array {
+        $startsAt = $subscription->starts_at
+            ?->copy()
+            ?? now();
+
+        $expiresAt = $subscription->expires_at
+            ?->copy();
+
+        $periodStart = $startsAt->copy();
+        $periodEnd = $periodStart
+            ->copy()
+            ->addMonthNoOverflow();
+
+        while (
+            $periodEnd->isPast()
+            && (
+                $expiresAt === null
+                || $periodEnd->lessThan($expiresAt)
+            )
+        ) {
+            $periodStart = $periodEnd->copy();
+            $periodEnd = $periodStart
+                ->copy()
+                ->addMonthNoOverflow();
+        }
+
+        if (
+            $expiresAt !== null
+            && $periodEnd->greaterThan($expiresAt)
+        ) {
+            $periodEnd = $expiresAt->copy();
+        }
+
+        return [
+            'starts_at' => $periodStart,
+            'ends_at' => $periodEnd,
+        ];
+    }
+
 }

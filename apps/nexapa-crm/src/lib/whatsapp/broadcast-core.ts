@@ -17,6 +17,7 @@
 // ============================================================
 
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { writeBroadcastRecipient } from '@/lib/whatsapp/broadcast-recipient-write';
 
 import { sendTemplateMessage } from '@/lib/whatsapp/meta-api';
 import { decrypt } from '@/lib/whatsapp/encryption';
@@ -154,9 +155,13 @@ export async function createBroadcast(
       rejected++;
       continue;
     }
-    const { id } = await findOrCreateContact(db, accountId, auditUserId, {
-      phone: sanitized,
-    });
+    const { id } = await findOrCreateContact(
+      db,
+      accountId,
+      auditUserId,
+      { phone: sanitized },
+      config.id,
+    );
     resolved.push({
       contactId: id,
       phone: sanitized,
@@ -198,6 +203,7 @@ export async function createBroadcast(
     .from('broadcasts')
     .insert({
       account_id: accountId,
+      whatsapp_config_id: config.id,
       user_id: auditUserId,
       name: name || `API broadcast (${templateName})`,
       template_name: templateName,
@@ -295,23 +301,17 @@ export async function deliverBroadcast(
 
     if (sentMessageId) {
       sentCount++;
-      await db
-        .from('broadcast_recipients')
-        .update({
+      await writeBroadcastRecipient(db, recipient.recipientRowId, {
           status: 'sent',
           sent_at: new Date().toISOString(),
           whatsapp_message_id: sentMessageId,
           error_message: null,
-        })
-        .eq('id', recipient.recipientRowId);
+        });
     } else {
-      await db
-        .from('broadcast_recipients')
-        .update({
+      await writeBroadcastRecipient(db, recipient.recipientRowId, {
           status: 'failed',
           error_message: lastError || 'Unknown error',
-        })
-        .eq('id', recipient.recipientRowId);
+        });
     }
   }
 

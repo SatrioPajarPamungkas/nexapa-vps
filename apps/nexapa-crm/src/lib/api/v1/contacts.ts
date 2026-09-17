@@ -112,7 +112,8 @@ export async function findOrCreateContact(
   db: SupabaseClient,
   accountId: string,
   auditUserId: string,
-  input: ContactInput
+  input: ContactInput,
+  whatsappConfigId?: string,
 ): Promise<{ id: string; created: boolean }> {
   const sanitized = sanitizePhoneForMeta(input.phone);
   if (!isValidE164(sanitized)) {
@@ -122,13 +123,14 @@ export async function findOrCreateContact(
     );
   }
 
-  const existing = await findExistingContact(db, accountId, sanitized);
+  const existing = await findExistingContact(db, accountId, sanitized, whatsappConfigId);
   if (existing) return { id: existing.id, created: false };
 
   const { data: created, error } = await db
     .from('contacts')
     .insert({
       account_id: accountId,
+      whatsapp_config_id: whatsappConfigId ?? null,
       user_id: auditUserId,
       phone: sanitized,
       name: input.name ?? sanitized,
@@ -142,7 +144,7 @@ export async function findOrCreateContact(
     // Lost a race against a concurrent create — the unique index
     // rejected the duplicate. Re-resolve to the winner.
     if (isUniqueViolation(error)) {
-      const raced = await findExistingContact(db, accountId, sanitized);
+      const raced = await findExistingContact(db, accountId, sanitized, whatsappConfigId);
       if (raced) return { id: raced.id, created: false };
     }
     console.error('[api/v1/contacts] create error:', error);

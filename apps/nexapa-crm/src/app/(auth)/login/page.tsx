@@ -10,6 +10,7 @@ import {
   Lock,
   Mail,
 } from "lucide-react";
+import { safeLocalPath } from "@/lib/safe-local-path";
 
 export default function LoginPage() {
   return (
@@ -22,6 +23,7 @@ export default function LoginPage() {
 function LoginPageInner() {
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get("invite");
+  const returnTo = safeLocalPath(searchParams.get("next"));
 
   const [showPassword, setShowPassword] =
     useState(false);
@@ -71,7 +73,7 @@ function LoginPageInner() {
 
       const destination = inviteToken
         ? `/join/${encodeURIComponent(inviteToken)}`
-        : result.destination ?? "/dashboard";
+        : returnTo;
 
       window.location.href = destination;
     } catch {
@@ -233,7 +235,7 @@ function LoginPageInner() {
             href={
               inviteToken
                 ? `/signup?invite=${encodeURIComponent(inviteToken)}`
-                : "/signup"
+                : `/signup?next=${encodeURIComponent(returnTo)}`
             }
             className="font-medium text-blue-600 hover:underline"
           >

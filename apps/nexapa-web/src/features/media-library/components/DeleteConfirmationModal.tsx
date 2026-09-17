@@ -40,7 +40,7 @@ export function DeleteConfirmationModal({
             <div className="flex-1">
               <h2 className="text-[15px] font-semibold text-white">Delete selected media?</h2>
               <p className="mt-1 text-[13px] text-white/65">
-                {selectedCount} media akan dihapus permanen dari Media Library dan private storage VPS.
+                {selectedCount} media item{selectedCount === 1 ? "" : "s"} will be permanently deleted from the Media Library and private VPS storage.
               </p>
             </div>
             <button

@@ -21,6 +21,7 @@ class SubscriptionService
         int $createdBy,
     ): Subscription {
         $plan = SubscriptionPlan::query()
+            ->where('product', 'publisher')
             ->where('code', $planCode)
             ->where('is_active', true)
             ->first();
@@ -139,6 +140,7 @@ class SubscriptionService
         int $adminUserId,
     ): Subscription {
         $plan = SubscriptionPlan::query()
+            ->where('product', 'publisher')
             ->where('code', $planCode)
             ->where('is_active', true)
             ->first();

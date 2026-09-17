@@ -3,6 +3,7 @@ import { Layers, Mail, RefreshCw, LogOut, CheckCircle, AlertCircle, Clock } from
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/features/auth/AuthContext";
 import * as verificationApi from "@/lib/api/verification";
+import { safeLocalRedirect } from "@/lib/safe-redirect";
 
 type VerifyStatus = "pending" | "verifying" | "verified" | "invalid" | "resent";
 
@@ -16,6 +17,15 @@ export function VerifyEmailPage() {
   const [message, setMessage] = useState<string>("");
 
   const verifyUrl = searchParams.get("verify_url");
+  const returnTo = safeLocalRedirect(
+    searchParams.get("redirect") ||
+      localStorage.getItem("nexapa_subscription_return"),
+  );
+
+  function finishVerification() {
+    localStorage.removeItem("nexapa_subscription_return");
+    navigate(returnTo, { replace: true });
+  }
 
   useEffect(() => {
     if (!user) {
@@ -27,7 +37,7 @@ export function VerifyEmailPage() {
       setStatus("verified");
       setMessage("Email already verified. Redirecting...");
       setTimeout(() => {
-        navigate("/dashboard", { replace: true });
+        finishVerification();
       }, 2000);
       return;
     }
@@ -62,7 +72,7 @@ export function VerifyEmailPage() {
         setMessage("Email verified successfully! Redirecting...");
         await refreshUser();
         setTimeout(() => {
-          navigate("/dashboard", { replace: true });
+          finishVerification();
         }, 2000);
       } else {
         setStatus("invalid");

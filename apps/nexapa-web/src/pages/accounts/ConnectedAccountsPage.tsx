@@ -32,8 +32,8 @@ export function ConnectedAccountsPage() {
       const timer = window.setTimeout(() => {
         if (connected === "facebook") {
           const message = hasSynced
-            ? "Facebook berhasil terhubung dan semua Page telah disinkronkan."
-            : "Facebook berhasil terhubung.";
+            ? "Facebook connected successfully and all Pages were synchronized."
+            : "Facebook connected successfully.";
           hook.showFeedback("success", message);
         } else {
           hook.showFeedback("success", "TikTok account connected.");
@@ -51,7 +51,7 @@ export function ConnectedAccountsPage() {
       hook.refetch();
       const timer = window.setTimeout(() => {
         if (reconnected === "facebook") {
-          hook.showFeedback("success", "Facebook berhasil dihubungkan ulang dan Page telah disinkronkan.");
+          hook.showFeedback("success", "Facebook reconnected successfully and Pages were synchronized.");
         } else {
           hook.showFeedback("success", "TikTok permissions updated successfully.");
         }
@@ -80,17 +80,17 @@ export function ConnectedAccountsPage() {
         reconnect_account_mismatch: "You authorized a different TikTok account. Reconnect using the same account.",
         access_denied: "TikTok authorization was cancelled.",
         // Facebook errors
-        facebook_access_denied: "Izin Facebook dibatalkan. Silakan coba hubungkan kembali.",
-        facebook_admin_account_mismatch: "Akun Facebook yang digunakan berbeda dari akun Admin yang sebelumnya terhubung.",
-        facebook_invalid_state: "Sesi koneksi Facebook sudah kedaluwarsa. Silakan mulai kembali.",
-        facebook_configuration_error: "Konfigurasi Facebook belum lengkap. Periksa Developer Settings.",
-        facebook_oauth_failed: "Facebook gagal dihubungkan. Silakan coba kembali.",
-        facebook_page_sync_failed: "Facebook terhubung, tetapi sinkronisasi Page gagal.",
-        facebook_invalid_scope: "Facebook tidak memberikan izin yang diperlukan.",
-        facebook_invalid_request: "Permintaan Facebook tidak valid.",
-        facebook_invalid_grant: "Kode otorisasi Facebook tidak valid.",
-        facebook_temporarily_unavailable: "Facebook sementara tidak tersedia. Silakan coba lagi nanti.",
-        facebook_server_error: "Terjadi kesalahan pada server Facebook.",
+        facebook_access_denied: "Facebook authorization was cancelled. Please connect again.",
+        facebook_admin_account_mismatch: "The Facebook account differs from the previously connected admin account.",
+        facebook_invalid_state: "The Facebook connection session expired. Please start again.",
+        facebook_configuration_error: "Facebook configuration is incomplete. Check Developer Settings.",
+        facebook_oauth_failed: "Failed to connect Facebook. Please try again.",
+        facebook_page_sync_failed: "Facebook connected, but Page synchronization failed.",
+        facebook_invalid_scope: "Facebook did not grant the required permissions.",
+        facebook_invalid_request: "The Facebook request is invalid.",
+        facebook_invalid_grant: "The Facebook authorization code is invalid.",
+        facebook_temporarily_unavailable: "Facebook is temporarily unavailable. Please try again later.",
+        facebook_server_error: "A Facebook server error occurred.",
       };
 
       const message = errorMessages[oauthError] ?? "Failed to connect account. Please try again.";
@@ -199,14 +199,14 @@ export function ConnectedAccountsPage() {
 
       <ConfirmDialog
         open={hook.removeCandidate !== null}
-        title="Hapus akun terhubung?"
+        title="Delete connected account?"
         description={
           hook.removeCandidate?.account_type === "facebook_admin"
-            ? `${hook.removeCandidate.display_name} dan seluruh Facebook Page di bawahnya akan dihapus permanen dari Nexapa. Tindakan ini tidak dapat dibatalkan.`
-            : `${hook.removeCandidate?.display_name ?? "Akun ini"} akan dihapus permanen dari Nexapa. Tindakan ini tidak dapat dibatalkan.`
+            ? `${hook.removeCandidate.display_name} and all Facebook Pages under it will be permanently deleted from Nexapa. This action cannot be undone.`
+            : `${hook.removeCandidate?.display_name ?? "This account"} will be permanently deleted from Nexapa. This action cannot be undone.`
         }
-        confirmLabel="Hapus permanen"
-        cancelLabel="Batal"
+        confirmLabel="Delete Permanently"
+        cancelLabel="Cancel"
         variant="danger"
         loading={
           hook.removeCandidate !== null &&
@@ -245,7 +245,7 @@ function ShopeeApprovalPanel() {
           <button
             type="button"
             disabled
-            title="Tersedia setelah profil developer Shopee disetujui"
+            title="Available after the Shopee developer profile is approved"
             className="inline-flex h-9 cursor-not-allowed items-center gap-2 rounded-xl border border-orange-300/30 bg-orange-500/10 px-4 text-[12px] font-semibold text-orange-800 opacity-70"
           >
             Connect Shopee

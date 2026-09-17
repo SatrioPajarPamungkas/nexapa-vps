@@ -115,7 +115,7 @@ class AllUsers extends Page implements HasTable
             ->filters([
                 Tables\Filters\SelectFilter::make('source')
                     ->label('Asal pengguna')
-                    ->options(['publisher' => 'Publisher', 'crm' => 'CRM', 'both' => 'Publisher + CRM']),
+                    ->options(['publisher' => 'Publisher', 'crm' => 'CRM']),
             ])
             ->recordUrl(fn (UnifiedUserRecord $record): string => UnifiedUserDetails::getUrl(['record' => $record->getKey()]))
             ->actions([
@@ -192,6 +192,7 @@ class AllUsers extends Page implements HasTable
                             ->options(
                                 fn (): array =>
                                     SubscriptionPlan::query()
+                                        ->where('product', 'publisher')
                                         ->where(
                                             'is_active',
                                             true

@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\URL;
 class VerifyEmailNotification extends BaseVerifyEmail
 {
     public function __construct(
-        private readonly string $destination = 'app'
+        private readonly string $destination = 'app',
+        private readonly string $routeName = 'verification.verify',
     ) {
     }
 
@@ -19,6 +20,10 @@ class VerifyEmailNotification extends BaseVerifyEmail
             'crm' => config(
                 'app.crm_frontend_url',
                 'https://crm.nexapa.app'
+            ),
+            'store' => config(
+                'app.store_frontend_url',
+                'https://store.nexapa.app'
             ),
             default => config(
                 'app.frontend_url',
@@ -32,7 +37,7 @@ class VerifyEmailNotification extends BaseVerifyEmail
         );
 
         $verifyUrl = URL::temporarySignedRoute(
-            'verification.verify',
+            $this->routeName,
             now()->addMinutes(
                 (int) config(
                     'auth.verification.expire',

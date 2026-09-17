@@ -23,14 +23,19 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'email' => ['required', 'email', 'max:255'],
             'password' => ['required', 'confirmed', 'min:8'],
             'terms_accepted' => ['accepted'],
             'remember' => ['sometimes', 'boolean'],
+            'product' => [
+                'sometimes',
+                'string',
+                'in:publisher',
+            ],
             'verification_destination' => [
                 'sometimes',
                 'string',
-                'in:app,crm',
+                'in:app',
             ],
         ]);
 
@@ -52,13 +57,39 @@ class AuthController extends Controller
             ]
         );
         $email = Str::lower(Str::trim($data['email']));
+        $user = User::withTrashed()
+            ->whereRaw('LOWER(email) = ?', [$email])
+            ->first();
+        $wasNew = $user === null;
+        $original = $user?->getAttributes();
 
-        $user = User::create([
+        if (
+            $user !== null
+            && ($user->publisher_access_status ?? 'active')
+                !== 'not_provisioned'
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email sudah terdaftar di Publisher.',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $user ??= new User();
+        if ($user->trashed()) {
+            $user->restore();
+        }
+        $user->forceFill([
             'name' => $data['name'],
             'email' => $email,
             'password' => $data['password'],
             'role' => 'user',
-        ]);
+            'email_verified_at' => null,
+            'is_admin' => false,
+            'is_suspended' => false,
+            'publisher_access_status' => 'active',
+            'publisher_suspended_at' => null,
+            'publisher_suspension_reason' => null,
+        ])->save();
 
         try {
             $user->notify(
@@ -78,7 +109,11 @@ class AuthController extends Controller
 
             // Jangan tinggalkan akun setengah jadi jika email
             // verifikasi pertama gagal dikirim.
-            $user->delete();
+            if ($wasNew) {
+                $user->forceDelete();
+            } elseif ($original !== null) {
+                $user->setRawAttributes($original)->save();
+            }
 
             return response()->json([
                 'success' => false,
@@ -121,6 +156,11 @@ class AuthController extends Controller
             'email' => ['required', 'email'],
             'password' => ['required'],
             'remember' => ['sometimes', 'boolean'],
+            'product' => [
+                'sometimes',
+                'string',
+                'in:publisher',
+            ],
         ]);
 
         if ($validator->fails()) {
@@ -133,7 +173,10 @@ class AuthController extends Controller
         $credentials = $validator->validated();
         $credentials['email'] = strtolower($credentials['email']);
         $remember = $credentials['remember'] ?? false;
-        unset($credentials['remember']);
+        unset(
+            $credentials['remember'],
+            $credentials['product'],
+        );
 
         $loginUser = User::query()
             ->whereRaw('LOWER(email) = LOWER(?)', [
@@ -160,6 +203,23 @@ class AuthController extends Controller
             $request->session()->regenerate();
         }
         $user = $request->user();
+
+        if (
+            ! $user->isAdmin()
+            && ($user->publisher_access_status ?? 'active')
+                !== 'active'
+        ) {
+            Auth::guard('web')->logout();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun Publisher tidak aktif.',
+                'code' => 'publisher_access_'.(
+                    $user->publisher_access_status
+                        ?? 'not_provisioned'
+                ),
+            ], Response::HTTP_FORBIDDEN);
+        }
 
         return response()->json([
             'success' => true,

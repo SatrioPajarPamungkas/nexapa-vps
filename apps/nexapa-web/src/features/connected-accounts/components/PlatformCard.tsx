@@ -80,11 +80,11 @@ export function PlatformCard({ platform, count, comingSoon, isSelected, onClick 
               ? "border-emerald-400/25 bg-emerald-400/10 text-emerald-800"
               : "border-white/15 bg-white/8 text-slate-500"
           }`}>
-            {count === 0 ? "Belum terhubung" : `${count} akun terhubung`}
+            {count === 0 ? "Not connected" : `${count} connected account${count === 1 ? "" : "s"}`}
           </span>
           {isSelected && (
             <span className="rounded-full border border-blue-400/30 bg-blue-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-blue-800">
-              Dipilih
+              Selected
             </span>
           )}
         </div>

@@ -107,25 +107,25 @@ export function PublisherHistoryWorkspace() {
 
   const getConfirmDialogTitle = () => {
     if (confirmMode === "selected") {
-      return "Hapus riwayat terpilih?";
+      return "Delete selected history?";
     }
-    return "Hapus riwayat pada filter ini?";
+    return "Delete history matching this filter?";
   };
 
   const getConfirmDialogDescription = () => {
     if (confirmMode === "selected") {
-      return `${selectedIds.size} data riwayat akan dihapus dari Nexapa. Postingan yang sudah tayang dan file media tidak akan dihapus.`;
+      return `${selectedIds.size} history record${selectedIds.size === 1 ? "" : "s"} will be deleted from Nexapa. Published posts and media files will not be deleted.`;
     }
 
-    const filterDesc = filter.platform !== "all" ? ` untuk ${filter.platform === "facebook" ? "Facebook" : filter.platform}` : "";
-    return `Semua data riwayat selesai${filterDesc} akan dihapus. Postingan di platform dan file media tetap aman.`;
+    const filterDesc = filter.platform !== "all" ? ` for ${filter.platform === "facebook" ? "Facebook" : filter.platform}` : "";
+    return `All completed history records${filterDesc} will be deleted. Platform posts and media files will remain intact.`;
   };
 
   const getConfirmLabel = () => {
     if (confirmMode === "selected") {
-      return `Hapus ${selectedIds.size} Riwayat`;
+      return `Delete ${selectedIds.size} Record${selectedIds.size === 1 ? "" : "s"}`;
     }
-    return "Hapus Riwayat";
+    return "Delete History";
   };
 
   return (
@@ -203,7 +203,7 @@ export function PublisherHistoryWorkspace() {
         title={getConfirmDialogTitle()}
         description={getConfirmDialogDescription()}
         confirmLabel={getConfirmLabel()}
-        cancelLabel="Batal"
+        cancelLabel="Cancel"
         variant="danger"
         loading={deleteLoading}
         onConfirm={handleConfirmDelete}

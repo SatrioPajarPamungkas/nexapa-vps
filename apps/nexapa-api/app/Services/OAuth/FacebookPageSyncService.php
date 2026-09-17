@@ -162,7 +162,7 @@ class FacebookPageSyncService
 
         $existing->display_name = $page['name'];
         $existing->username = $page['username'] ?? null;
-        $existing->avatar_url = $page['picture'] ?? null;
+        $existing->avatar_url = null;
         $existing->parent_connected_account_id = $adminAccount->id;
         $existing->access_token_encrypted = $page['access_token'];
         $existing->status = 'connected';
@@ -229,7 +229,7 @@ class FacebookPageSyncService
         $newPage->external_account_id = $page['id'];
         $newPage->display_name = $page['name'];
         $newPage->username = $page['username'] ?? null;
-        $newPage->avatar_url = $page['picture'] ?? null;
+        $newPage->avatar_url = null;
         $newPage->status = 'connected';
         $newPage->connection_method = 'oauth';
         $newPage->is_default = !$hasDefault;

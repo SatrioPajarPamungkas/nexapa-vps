@@ -32,322 +32,762 @@
         rel="stylesheet"
         href="assets/css/nexapa.css?v=20260827-154500"
     >
+
+
+
+
+<style id="nx-pricing-v2-style">
+:root {
+    --nxv2-bg: #070b14;
+    --nxv2-panel: #0d1422;
+    --nxv2-panel-soft: #111a2b;
+    --nxv2-border: rgba(148, 163, 184, .19);
+    --nxv2-text: #f8fafc;
+    --nxv2-muted: #9aa8bd;
+    --nxv2-purple: #7257f5;
+    --nxv2-purple-light: #927eff;
+    --nxv2-green: #24d6a3;
+}
+
+.nxv2-page {
+    background:
+        linear-gradient(
+            rgba(148, 163, 184, .035) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(148, 163, 184, .035) 1px,
+            transparent 1px
+        ),
+        var(--nxv2-bg);
+    background-size: 52px 52px;
+    color: var(--nxv2-text);
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.nxv2-container {
+    margin: 0 auto;
+    max-width: 1180px;
+    padding-left: 24px;
+    padding-right: 24px;
+    position: relative;
+    width: 100%;
+}
+
+.nxv2-hero {
+    padding: 110px 0 72px;
+    position: relative;
+    text-align: center;
+}
+
+.nxv2-orb {
+    border-radius: 999px;
+    filter: blur(90px);
+    opacity: .17;
+    pointer-events: none;
+    position: absolute;
+}
+
+.nxv2-orb-one {
+    background: #7055ff;
+    height: 340px;
+    left: 15%;
+    top: 30px;
+    width: 340px;
+}
+
+.nxv2-orb-two {
+    background: #12c99b;
+    height: 280px;
+    right: 12%;
+    top: 90px;
+    width: 280px;
+}
+
+.nxv2-eyebrow {
+    align-items: center;
+    color: var(--nxv2-purple-light);
+    display: inline-flex;
+    font-size: 13px;
+    font-weight: 800;
+    gap: 8px;
+    letter-spacing: .16em;
+    margin-bottom: 22px;
+    text-transform: uppercase;
+}
+
+.nxv2-eyebrow::before {
+    background: var(--nxv2-green);
+    border-radius: 999px;
+    box-shadow: 0 0 16px var(--nxv2-green);
+    content: "";
+    height: 7px;
+    width: 7px;
+}
+
+.nxv2-hero h1 {
+    color: var(--nxv2-text);
+    font-size: clamp(46px, 7vw, 78px);
+    font-weight: 800;
+    letter-spacing: -.055em;
+    line-height: .98;
+    margin: 0 auto;
+    max-width: 920px;
+}
+
+.nxv2-hero h1 span {
+    background: linear-gradient(
+        90deg,
+        #9c8aff,
+        #6f59ef,
+        #3cd9b0
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: block;
+}
+
+.nxv2-lead {
+    color: var(--nxv2-muted);
+    font-size: 18px;
+    line-height: 1.75;
+    margin: 28px auto 0;
+    max-width: 750px;
+}
+
+.nxv2-benefits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 28px;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.nxv2-benefits span {
+    color: #c8d2e2;
+    font-size: 14px;
+}
+
+.nxv2-catalog {
+    padding: 30px 0 90px;
+}
+
+.nxv2-toolbar {
+    align-items: flex-end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: space-between;
+    margin-bottom: 36px;
+}
+
+.nxv2-toolbar-label {
+    color: var(--nxv2-muted);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.nxv2-tabs {
+    align-items: center;
+    background: rgba(13, 20, 34, .88);
+    border: 1px solid var(--nxv2-border);
+    border-radius: 14px;
+    display: inline-flex;
+    gap: 5px;
+    padding: 5px;
+}
+
+.nxv2-tab,
+.nxv2-cycle {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    border-radius: 10px;
+    color: #94a3b8;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 14px;
+    font-weight: 750;
+    gap: 9px;
+    justify-content: center;
+    min-height: 44px;
+    padding: 9px 20px;
+    transition: .2s ease;
+}
+
+.nxv2-tab:hover,
+.nxv2-cycle:hover {
+    color: #fff;
+}
+
+.nxv2-tab.is-active,
+.nxv2-cycle.is-active {
+    background: linear-gradient(
+        135deg,
+        #6046dc,
+        #7d67f8
+    );
+    box-shadow: 0 10px 25px rgba(96, 70, 220, .27);
+    color: #fff;
+}
+
+.nxv2-tab-icon {
+    align-items: center;
+    background: rgba(255, 255, 255, .13);
+    border-radius: 7px;
+    display: inline-flex;
+    font-size: 11px;
+    height: 23px;
+    justify-content: center;
+    width: 23px;
+}
+
+.nxv2-cycle small {
+    background: rgba(36, 214, 163, .13);
+    border-radius: 999px;
+    color: #65e9c1;
+    font-size: 10px;
+    padding: 3px 7px;
+}
+
+.nxv2-product-intro {
+    background:
+        radial-gradient(
+            circle at 100% 0,
+            rgba(114, 87, 245, .14),
+            transparent 40%
+        ),
+        var(--nxv2-panel);
+    border: 1px solid var(--nxv2-border);
+    border-radius: 20px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    padding: 28px 30px;
+}
+
+.nxv2-product-intro span {
+    color: var(--nxv2-green);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.nxv2-product-intro h2 {
+    color: var(--nxv2-text);
+    font-size: 25px;
+    margin: 8px 0 5px;
+}
+
+.nxv2-product-intro p {
+    color: var(--nxv2-muted);
+    line-height: 1.6;
+    margin: 0;
+    max-width: 760px;
+}
+
+.nxv2-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.nxv2-card {
+    background:
+        linear-gradient(
+            160deg,
+            rgba(255, 255, 255, .025),
+            transparent 45%
+        ),
+        var(--nxv2-panel);
+    border: 1px solid var(--nxv2-border);
+    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+    min-height: 515px;
+    overflow: hidden;
+    padding: 28px;
+    position: relative;
+    transition:
+        border-color .2s ease,
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+.nxv2-card:hover {
+    border-color: rgba(146, 126, 255, .58);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .24);
+    transform: translateY(-4px);
+}
+
+.nxv2-card.is-featured {
+    border-color: rgba(146, 126, 255, .7);
+    box-shadow: 0 24px 70px rgba(75, 52, 180, .18);
+}
+
+.nxv2-popular {
+    background: linear-gradient(90deg, #654deb, #8974ff);
+    border-radius: 0 0 0 13px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    padding: 8px 14px;
+    position: absolute;
+    right: 0;
+    text-transform: uppercase;
+    top: 0;
+}
+
+.nxv2-card-product {
+    color: var(--nxv2-purple-light);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+}
+
+.nxv2-card h3 {
+    color: #fff;
+    font-size: 28px;
+    margin: 14px 0 8px;
+}
+
+.nxv2-card-description {
+    color: var(--nxv2-muted);
+    line-height: 1.6;
+    margin: 0;
+    min-height: 76px;
+}
+
+.nxv2-price {
+    border-bottom: 1px solid var(--nxv2-border);
+    margin: 25px 0 22px;
+    padding-bottom: 22px;
+}
+
+.nxv2-price-old {
+    color: #69768a;
+    font-size: 14px;
+    min-height: 21px;
+    text-decoration: line-through;
+}
+
+.nxv2-price-main {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.nxv2-price-main strong {
+    color: #fff;
+    font-size: 37px;
+    letter-spacing: -.045em;
+    line-height: 1.1;
+}
+
+.nxv2-price-main span {
+    color: #7f8ca1;
+    font-size: 13px;
+}
+
+.nxv2-features {
+    display: grid;
+    gap: 11px;
+    list-style: none;
+    margin: 0 0 28px;
+    padding: 0;
+}
+
+.nxv2-features li {
+    color: #bec8d7;
+    display: flex;
+    font-size: 14px;
+    gap: 9px;
+    line-height: 1.45;
+}
+
+.nxv2-features li::before {
+    color: var(--nxv2-green);
+    content: "✓";
+    font-weight: 900;
+}
+
+.nxv2-card-action {
+    align-items: center;
+    background: #fff;
+    border-radius: 12px;
+    color: #111827;
+    display: flex;
+    font-size: 14px;
+    font-weight: 800;
+    justify-content: space-between;
+    margin-top: auto;
+    padding: 15px 17px;
+    text-decoration: none;
+    transition: .2s ease;
+}
+
+.nxv2-card.is-featured .nxv2-card-action {
+    background: linear-gradient(
+        135deg,
+        #654bea,
+        #806af7
+    );
+    color: #fff;
+}
+
+.nxv2-card-action:hover {
+    box-shadow: 0 12px 30px rgba(114, 87, 245, .25);
+    color: #111827;
+    transform: translateY(-2px);
+}
+
+.nxv2-card.is-featured .nxv2-card-action:hover {
+    color: #fff;
+}
+
+.nxv2-feedback {
+    border: 1px solid var(--nxv2-border);
+    border-radius: 16px;
+    color: var(--nxv2-muted);
+    margin-bottom: 20px;
+    padding: 22px;
+    text-align: center;
+}
+
+.nxv2-feedback.is-error {
+    border-color: rgba(239, 68, 68, .6);
+    color: #fca5a5;
+}
+
+.nxv2-feedback[hidden] {
+    display: none;
+}
+
+.nxv2-assurance {
+    background: rgba(8, 13, 23, .75);
+    border-bottom: 1px solid var(--nxv2-border);
+    border-top: 1px solid var(--nxv2-border);
+    padding: 60px 0;
+}
+
+.nxv2-assurance-grid {
+    display: grid;
+    gap: 1px;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.nxv2-assurance-grid article {
+    padding: 15px 38px;
+}
+
+.nxv2-assurance-grid article + article {
+    border-left: 1px solid var(--nxv2-border);
+}
+
+.nxv2-assurance-grid strong {
+    color: #fff;
+    display: block;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+.nxv2-assurance-grid p {
+    color: var(--nxv2-muted);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.nxv2-help {
+    padding: 80px 0;
+}
+
+.nxv2-help-card {
+    align-items: center;
+    background:
+        radial-gradient(
+            circle at 85% 10%,
+            rgba(114, 87, 245, .22),
+            transparent 38%
+        ),
+        var(--nxv2-panel-soft);
+    border: 1px solid var(--nxv2-border);
+    border-radius: 24px;
+    display: flex;
+    gap: 30px;
+    justify-content: space-between;
+    padding: 38px 42px;
+}
+
+.nxv2-help-card span {
+    color: var(--nxv2-green);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.nxv2-help-card h2 {
+    color: #fff;
+    font-size: 27px;
+    margin: 8px 0 0;
+    max-width: 650px;
+}
+
+.nxv2-help-card a {
+    background: #fff;
+    border-radius: 12px;
+    color: #111827;
+    flex: none;
+    font-size: 14px;
+    font-weight: 800;
+    padding: 15px 20px;
+    text-decoration: none;
+}
+
+.nxv2-help-card a span {
+    color: inherit;
+    margin-left: 12px;
+}
+
+@media (max-width: 900px) {
+    .nxv2-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nxv2-card {
+        min-height: 0;
+    }
+
+    .nxv2-assurance-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nxv2-assurance-grid article + article {
+        border-left: 0;
+        border-top: 1px solid var(--nxv2-border);
+    }
+}
+
+@media (max-width: 650px) {
+    .nxv2-hero {
+        padding: 80px 0 55px;
+    }
+
+    .nxv2-hero h1 {
+        font-size: 45px;
+    }
+
+    .nxv2-toolbar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .nxv2-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+    }
+
+    .nxv2-tab,
+    .nxv2-cycle {
+        padding-inline: 10px;
+    }
+
+    .nxv2-help-card {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 28px;
+    }
+
+    .nxv2-help-card a {
+        text-align: center;
+    }
+}
+</style>
+
 </head>
 
 <body class="nx-pricing-body">
 
     <!--# include virtual="/partials/global-header.html" -->
 
-    <main class="nx-pricing-page">
-        <section class="nx-pricing-hero">
-            <div class="nx-pricing-glow nx-pricing-glow-blue"></div>
-            <div class="nx-pricing-glow nx-pricing-glow-green"></div>
 
-            <div class="container">
-                <header class="nx-pricing-heading">
-                    <span>Paket Nexapa</span>
+<main class="nxv2-page">
+    <section class="nxv2-hero">
+        <div class="nxv2-orb nxv2-orb-one"></div>
+        <div class="nxv2-orb nxv2-orb-two"></div>
 
-                    <h1>
-                        Satu akun untuk menjalankan
-                        bisnis lebih pintar.
-                    </h1>
+        <div class="nxv2-container">
+            <div class="nxv2-eyebrow">
+                Paket Nexapa
+            </div>
 
-                    <p>
-                        Kelola media sosial melalui Nexapa Publisher,
-                        layani pelanggan melalui Nexapa CRM, dan
-                        percepat pekerjaan menggunakan AI.
+            <h1>
+                Pilih produk yang sesuai
+                <span>untuk bisnismu.</span>
+            </h1>
+
+            <p class="nxv2-lead">
+                Publisher dan CRM memiliki paket, fitur, serta
+                harga yang dikelola terpisah. Pilih produk,
+                periode pembayaran, lalu lanjutkan melalui
+                Midtrans.
+            </p>
+
+            <div class="nxv2-benefits">
+                <span>✓ Pembayaran melalui Midtrans</span>
+                <span>✓ Aktivasi otomatis</span>
+                <span>✓ Harga transparan</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="nxv2-catalog">
+        <div class="nxv2-container">
+            <div class="nxv2-toolbar">
+                <div>
+                    <p class="nxv2-toolbar-label">
+                        Pilih produk
                     </p>
 
-                    <div
-                        class="nx-billing-toggle"
-                        aria-label="Pilih periode langganan"
-                    >
+                    <div class="nxv2-tabs" role="tablist">
                         <button
                             type="button"
-                            class="is-active"
-                            data-billing="monthly"
+                            class="nxv2-tab is-active"
+                            data-product="publisher"
+                        >
+                            <span class="nxv2-tab-icon">P</span>
+                            Publisher
+                        </button>
+
+                        <button
+                            type="button"
+                            class="nxv2-tab"
+                            data-product="crm"
+                        >
+                            <span class="nxv2-tab-icon">C</span>
+                            CRM
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <p class="nxv2-toolbar-label">
+                        Periode pembayaran
+                    </p>
+
+                    <div class="nxv2-tabs" role="tablist">
+                        <button
+                            type="button"
+                            class="nxv2-cycle is-active"
+                            data-cycle="monthly"
                         >
                             Bulanan
                         </button>
 
                         <button
                             type="button"
-                            data-billing="yearly"
+                            class="nxv2-cycle"
+                            data-cycle="yearly"
                         >
                             Tahunan
-                            <span>Hemat 2 bulan</span>
+                            <small>Hemat</small>
                         </button>
                     </div>
-                </header>
+                </div>
+            </div>
 
-                <div class="nx-pricing-grid">
+            <div class="nxv2-product-intro">
+                <div>
+                    <span id="nxv2-product-label">
+                        Nexapa Publisher
+                    </span>
 
-                    <article
-                        class="nx-pricing-card is-crm"
-                        data-plan="starter"
-                    >
-                        <div class="nx-pricing-card-head">
-                            <div class="nx-pricing-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M5 5h14v10H9l-4 4V5Z"/>
-                                    <path d="M8 9h8M8 12h5"/>
-                                </svg>
-                            </div>
+                    <h2 id="nxv2-product-title">
+                        Kelola dan publikasikan konten lebih cepat
+                    </h2>
 
-                            <span class="nx-pricing-status is-active">
-                                Starter
-                            </span>
-                        </div>
+                    <p id="nxv2-product-description">
+                        Susun konten, hubungkan akun sosial,
+                        jadwalkan publikasi, dan gunakan bantuan AI
+                        dalam satu ruang kerja.
+                    </p>
+                </div>
+            </div>
 
-                        <span class="nx-pricing-category">
-                            Mulai Berjualan
-                        </span>
+            <div
+                id="nxv2-feedback"
+                class="nxv2-feedback"
+            >
+                Memuat paket Publisher...
+            </div>
 
-                        <h2>Starter</h2>
+            <div
+                id="nxv2-grid"
+                class="nxv2-grid"
+            ></div>
+        </div>
+    </section>
 
-                        <p class="nx-pricing-description">
-                            Untuk pemilik usaha yang ingin mulai
-                            mengelola konten dan komunikasi pelanggan
-                            dari satu platform.
-                        </p>
+    <section class="nxv2-assurance">
+        <div class="nxv2-container">
+            <div class="nxv2-assurance-grid">
+                <article>
+                    <strong>Harga terpisah</strong>
+                    <p>
+                        Paket Publisher tidak memengaruhi harga
+                        atau langganan CRM.
+                    </p>
+                </article>
 
-                        <div class="nx-pricing-price">
-                            <small>Mulai dari</small>
+                <article>
+                    <strong>Aktif otomatis</strong>
+                    <p>
+                        Webhook Midtrans mengaktifkan paket setelah
+                        pembayaran berhasil.
+                    </p>
+                </article>
 
-                            <strong
-                                data-monthly="Rp50.000"
-                                data-yearly="Rp500.000"
-                            >
-                                Rp50.000
-                            </strong>
+                <article>
+                    <strong>Bisa dikelola</strong>
+                    <p>
+                        Harga, deskripsi, dan promosi dapat diubah
+                        dari panel Commerce.
+                    </p>
+                </article>
+            </div>
+        </div>
+    </section>
 
-                            <span
-                                data-monthly="/bulan"
-                                data-yearly="/tahun"
-                            >
-                                /bulan
-                            </span>
-
-                            <em>Publisher + CRM + AI</em>
-                        </div>
-
-                        <ul>
-                            <li>1 pengguna</li>
-                            <li>3 akun media sosial</li>
-                            <li>1 nomor WhatsApp Business</li>
-                            <li>1.000 kontak CRM</li>
-                            <li>50 penggunaan AI per bulan</li>
-                            <li>Inbox, pipeline, dan penjadwalan</li>
-                        </ul>
-
-                        <a
-                            class="nx-pricing-button"
-                            href="https://app.nexapa.app/register?plan=starter&billing=monthly"
-                            data-base-url="https://app.nexapa.app/register?plan=starter"
-                        >
-                            Mulai Starter
-                            <span>→</span>
-                        </a>
-                    </article>
-
-                    <article
-                        class="nx-pricing-card is-publisher is-featured"
-                        data-plan="pro"
-                    >
-                        <div class="nx-pricing-popular">
-                            Paling Populer
-                        </div>
-
-                        <div class="nx-pricing-card-head">
-                            <div class="nx-pricing-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <rect
-                                        x="3"
-                                        y="4"
-                                        width="18"
-                                        height="16"
-                                        rx="3"
-                                    />
-                                    <path d="M3 9h18"/>
-                                    <path d="M8 14h8M8 17h5"/>
-                                </svg>
-                            </div>
-
-                            <span class="nx-pricing-status is-active">
-                                Pro
-                            </span>
-                        </div>
-
-                        <span class="nx-pricing-category">
-                            Bertumbuh Lebih Cepat
-                        </span>
-
-                        <h2>Pro</h2>
-
-                        <p class="nx-pricing-description">
-                            Untuk bisnis berkembang yang membutuhkan
-                            kolaborasi tim, automasi, broadcast, dan
-                            kapasitas AI lebih besar.
-                        </p>
-
-                        <div class="nx-pricing-price">
-                            <small>Mulai dari</small>
-
-                            <strong
-                                data-monthly="Rp75.000"
-                                data-yearly="Rp750.000"
-                            >
-                                Rp75.000
-                            </strong>
-
-                            <span
-                                data-monthly="/bulan"
-                                data-yearly="/tahun"
-                            >
-                                /bulan
-                            </span>
-
-                            <em>Hemat Rp150.000 per tahun</em>
-                        </div>
-
-                        <ul>
-                            <li>5 pengguna</li>
-                            <li>10 akun media sosial</li>
-                            <li>1 nomor WhatsApp Business</li>
-                            <li>5.000 kontak CRM</li>
-                            <li>300 penggunaan AI per bulan</li>
-                            <li>Broadcast dan automasi CRM</li>
-                            <li>Analisis konten dan laporan</li>
-                        </ul>
-
-                        <a
-                            class="nx-pricing-button"
-                            href="https://app.nexapa.app/register?plan=pro&billing=monthly"
-                            data-base-url="https://app.nexapa.app/register?plan=pro"
-                        >
-                            Pilih Pro
-                            <span>→</span>
-                        </a>
-                    </article>
-
-                    <article
-                        class="nx-pricing-card is-custom"
-                        data-plan="business"
-                    >
-                        <div class="nx-pricing-card-head">
-                            <div class="nx-pricing-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M4 7h16M4 17h16"/>
-                                    <circle cx="9" cy="7" r="2"/>
-                                    <circle cx="15" cy="17" r="2"/>
-                                    <path d="M12 4v16"/>
-                                </svg>
-                            </div>
-
-                            <span class="nx-pricing-status is-custom">
-                                Business
-                            </span>
-                        </div>
-
-                        <span class="nx-pricing-category">
-                            Operasional Lengkap
-                        </span>
-
-                        <h2>Business</h2>
-
-                        <p class="nx-pricing-description">
-                            Untuk bisnis dengan tim dan volume
-                            pelanggan lebih besar yang membutuhkan
-                            AI Agent serta automasi lanjutan.
-                        </p>
-
-                        <div class="nx-pricing-price">
-                            <small>Mulai dari</small>
-
-                            <strong
-                                data-monthly="Rp100.000"
-                                data-yearly="Rp1.000.000"
-                            >
-                                Rp100.000
-                            </strong>
-
-                            <span
-                                data-monthly="/bulan"
-                                data-yearly="/tahun"
-                            >
-                                /bulan
-                            </span>
-
-                            <em>Hemat Rp200.000 per tahun</em>
-                        </div>
-
-                        <ul>
-                            <li>15 pengguna</li>
-                            <li>30 akun media sosial</li>
-                            <li>3 nomor WhatsApp Business</li>
-                            <li>25.000 kontak CRM</li>
-                            <li>1.000 penggunaan AI per bulan</li>
-                            <li>AI Agent dan automasi lanjutan</li>
-                            <li>Broadcast terjadwal</li>
-                            <li>Dukungan prioritas</li>
-                        </ul>
-
-                        <a
-                            class="nx-pricing-button"
-                            href="https://app.nexapa.app/register?plan=business&billing=monthly"
-                            data-base-url="https://app.nexapa.app/register?plan=business"
-                        >
-                            Pilih Business
-                            <span>→</span>
-                        </a>
-                    </article>
+    <section class="nxv2-help">
+        <div class="nxv2-container">
+            <div class="nxv2-help-card">
+                <div>
+                    <span>Butuh bantuan memilih?</span>
+                    <h2>
+                        Diskusikan kebutuhan bisnismu bersama tim
+                        Nexapa.
+                    </h2>
                 </div>
 
-                <section class="nx-access-products">
-                    <span>Termasuk dalam setiap paket</span>
-
-                    <div>
-                        <a href="https://app.nexapa.app">
-                            <strong>Nexapa Publisher</strong>
-                            <small>Konten dan media sosial</small>
-                        </a>
-
-                        <a href="https://crm.nexapa.app">
-                            <strong>Nexapa CRM</strong>
-                            <small>WhatsApp dan pelanggan</small>
-                        </a>
-
-                        <article>
-                            <strong>Nexapa AI</strong>
-                            <small>Konten, respons, dan automasi</small>
-                        </article>
-                    </div>
-                </section>
-
-                <section class="nx-pricing-note">
-                    <div>
-                        <span>Satu Ekosistem Nexapa</span>
-
-                        <h2>
-                            Satu langganan untuk Publisher,
-                            CRM, WhatsApp, dan AI.
-                        </h2>
-
-                        <p>
-                            Kuota diperbarui setiap bulan. Paket
-                            tahunan memberikan akses selama 12 bulan
-                            dengan harga setara 10 bulan.
-                        </p>
-                    </div>
-
-                    <a href="contact.html?service=nexapa-subscription">
-                        Konsultasi Paket
-                        <span>↗</span>
-                    </a>
-                </section>
+                <a href="contact.html">
+                    Hubungi Nexapa
+                    <span aria-hidden="true">→</span>
+                </a>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
+</main>
+
 
     <!--# include virtual="/partials/global-footer.html" -->
 
@@ -422,5 +862,330 @@
         setBilling(selected);
     })();
     </script>
+
+
+
+
+<script id="nx-pricing-v2-script">
+(() => {
+    const API = "/api/subscription-plans";
+
+    const productContent = {
+        publisher: {
+            label: "Nexapa Publisher",
+            title:
+                "Kelola dan publikasikan konten lebih cepat",
+            description:
+                "Susun konten, hubungkan akun sosial, " +
+                "jadwalkan publikasi, dan gunakan bantuan AI " +
+                "dalam satu ruang kerja.",
+            destination:
+                "https://app.nexapa.app/subscription"
+        },
+        crm: {
+            label: "Nexapa CRM",
+            title:
+                "Kelola pelanggan dan percakapan dalam satu tempat",
+            description:
+                "Atur kontak, pipeline, WhatsApp Business, " +
+                "broadcast, serta automasi penjualan dari satu " +
+                "dashboard.",
+            destination:
+                "https://crm.nexapa.app/subscription-required"
+        }
+    };
+
+    const featureLabels = {
+        team_members: "Anggota tim",
+        social_accounts: "Akun sosial",
+        whatsapp_numbers: "Nomor WhatsApp",
+        crm_contacts: "Kontak CRM",
+        ai_requests_per_month:
+            "Permintaan AI per bulan",
+        waba_accounts:
+            "Akun WhatsApp Business",
+        waba_replacements_per_period:
+            "Penggantian WABA per periode"
+    };
+
+    const state = {
+        product: "publisher",
+        cycle: "monthly",
+        cache: {
+            publisher: null,
+            crm: null
+        }
+    };
+
+    const grid =
+        document.getElementById("nxv2-grid");
+
+    const feedback =
+        document.getElementById("nxv2-feedback");
+
+    const label =
+        document.getElementById("nxv2-product-label");
+
+    const title =
+        document.getElementById("nxv2-product-title");
+
+    const description =
+        document.getElementById(
+            "nxv2-product-description"
+        );
+
+    if (
+        !grid ||
+        !feedback ||
+        !label ||
+        !title ||
+        !description
+    ) {
+        return;
+    }
+
+    const escapeHtml = value =>
+        String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+
+    const money = value =>
+        new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            maximumFractionDigits: 0
+        }).format(Number(value || 0));
+
+    function destination(plan) {
+        const base =
+            productContent[state.product].destination;
+
+        const query = new URLSearchParams({
+            plan: plan.code,
+            cycle: state.cycle
+        });
+
+        return `${base}?${query.toString()}`;
+    }
+
+    function renderFeatures(plan) {
+        return Object.entries(plan.limits || {})
+            .slice(0, 6)
+            .map(([key, value]) => {
+                const name =
+                    featureLabels[key] ||
+                    key.replaceAll("_", " ");
+
+                return `
+                    <li>
+                        ${escapeHtml(name)}:
+                        <strong>${escapeHtml(value)}</strong>
+                    </li>
+                `;
+            })
+            .join("");
+    }
+
+    function render() {
+        const plans = state.cache[state.product];
+        const content =
+            productContent[state.product];
+
+        label.textContent = content.label;
+        title.textContent = content.title;
+        description.textContent =
+            content.description;
+
+        if (!Array.isArray(plans)) return;
+
+        feedback.hidden = true;
+
+        grid.innerHTML = plans
+            .map((plan, index) => {
+                const monthly =
+                    state.cycle === "monthly";
+
+                const normal = monthly
+                    ? plan.monthly_price
+                    : plan.yearly_price;
+
+                const finalPrice = monthly
+                    ? plan.monthly_final_price
+                    : plan.yearly_final_price;
+
+                const promotion =
+                    Number(finalPrice) <
+                    Number(normal);
+
+                return `
+                    <article class="nxv2-card ${
+                        index === 1
+                            ? "is-featured"
+                            : ""
+                    }">
+                        ${
+                            index === 1
+                                ? '<div class="nxv2-popular">Paling populer</div>'
+                                : ""
+                        }
+
+                        <span class="nxv2-card-product">
+                            ${escapeHtml(content.label)}
+                        </span>
+
+                        <h3>${escapeHtml(plan.name)}</h3>
+
+                        <p class="nxv2-card-description">
+                            ${escapeHtml(
+                                plan.description ||
+                                `Paket ${content.label}.`
+                            )}
+                        </p>
+
+                        <div class="nxv2-price">
+                            <div class="nxv2-price-old">
+                                ${
+                                    promotion
+                                        ? money(normal)
+                                        : "&nbsp;"
+                                }
+                            </div>
+
+                            <div class="nxv2-price-main">
+                                <strong>
+                                    ${money(finalPrice)}
+                                </strong>
+
+                                <span>
+                                    / ${
+                                        monthly
+                                            ? "bulan"
+                                            : "tahun"
+                                    }
+                                </span>
+                            </div>
+                        </div>
+
+                        <ul class="nxv2-features">
+                            ${renderFeatures(plan)}
+                        </ul>
+
+                        <a
+                            class="nxv2-card-action"
+                            href="${destination(plan)}"
+                        >
+                            Pilih ${escapeHtml(plan.name)}
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </article>
+                `;
+            })
+            .join("");
+    }
+
+    async function load(product) {
+        state.product = product;
+
+        document
+            .querySelectorAll(".nxv2-tab")
+            .forEach(button => {
+                button.classList.toggle(
+                    "is-active",
+                    button.dataset.product === product
+                );
+            });
+
+        const content = productContent[product];
+        label.textContent = content.label;
+        title.textContent = content.title;
+        description.textContent =
+            content.description;
+
+        if (state.cache[product]) {
+            render();
+            return;
+        }
+
+        grid.innerHTML = "";
+        feedback.hidden = false;
+        feedback.classList.remove("is-error");
+        feedback.textContent =
+            `Memuat paket ${content.label}...`;
+
+        try {
+            const response = await fetch(
+                `${API}?product=${encodeURIComponent(product)}`,
+                {
+                    headers: {
+                        Accept: "application/json"
+                    },
+                    cache: "no-store"
+                }
+            );
+
+            const body = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    body.message ||
+                    "Daftar paket gagal dimuat."
+                );
+            }
+
+            state.cache[product] =
+                body.data || [];
+
+            render();
+        } catch (error) {
+            feedback.hidden = false;
+            feedback.classList.add("is-error");
+            feedback.textContent =
+                error instanceof Error
+                    ? error.message
+                    : "Daftar paket gagal dimuat.";
+        }
+    }
+
+    document
+        .querySelectorAll(".nxv2-tab")
+        .forEach(button => {
+            button.addEventListener(
+                "click",
+                () => load(button.dataset.product)
+            );
+        });
+
+    document
+        .querySelectorAll(".nxv2-cycle")
+        .forEach(button => {
+            button.addEventListener(
+                "click",
+                () => {
+                    state.cycle =
+                        button.dataset.cycle;
+
+                    document
+                        .querySelectorAll(
+                            ".nxv2-cycle"
+                        )
+                        .forEach(item => {
+                            item.classList.toggle(
+                                "is-active",
+                                item === button
+                            );
+                        });
+
+                    render();
+                }
+            );
+        });
+
+    load("publisher");
+})();
+</script>
+
 </body>
 </html>

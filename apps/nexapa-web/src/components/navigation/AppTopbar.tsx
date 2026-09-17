@@ -4,6 +4,11 @@ import { routeLabels } from "@/lib/navigation";
 import { useAuth } from "@/features/auth/AuthContext";
 import { getUnreadNotificationCount } from "@/lib/api/notifications";
 import { useState, useRef, useEffect } from "react";
+import {
+  PublisherPlanMenuItem,
+  SubscriptionUpgradeModal,
+  usePublisherSubscription,
+} from "@/features/subscription/PublisherSubscriptionManager";
 
 type AppTopbarProps = {
   onMenuClick: () => void;
@@ -21,6 +26,8 @@ export function AppTopbar({
   const { user, logout } = useAuth();
   const [loggingOut, setLoggingOut] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [managePlanOpen, setManagePlanOpen] = useState(false);
+  const { data: subscription } = usePublisherSubscription();
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const currentLabel =
@@ -264,6 +271,13 @@ export function AppTopbar({
                 </div>
               </div>
 
+              <PublisherPlanMenuItem
+                onClick={() => {
+                  setDropdownOpen(false);
+                  setManagePlanOpen(true);
+                }}
+              />
+
               <div className="py-1">
                 <button
                   onClick={() => handleNavigate("/profile")}
@@ -332,6 +346,11 @@ export function AppTopbar({
           )}
         </div>
       </div>
+      <SubscriptionUpgradeModal
+        open={managePlanOpen}
+        onClose={() => setManagePlanOpen(false)}
+        current={subscription}
+      />
     </header>
   );
 }

@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\Worker\WorkerJobController;
 use App\Http\Controllers\Api\Worker\WorkerResultsController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CommerceProductController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\InternalCrmEntitlementController;
 use App\Http\Controllers\Api\InternalCrmLoginController;
@@ -149,6 +150,11 @@ Route::prefix('v1')
         // Connected Accounts
         Route::get('connected-accounts', [\App\Http\Controllers\Api\ConnectedAccountController::class, 'index']);
         Route::get(
+            'connected-accounts/{connectedAccount}/avatar',
+            \App\Http\Controllers\Api\ConnectedAccountAvatarController::class
+        )->middleware('throttle:180,1')
+            ->name('api.v1.connected-accounts.avatar');
+        Route::get(
             'connected-accounts/{connectedAccount}/facebook-insights',
             FacebookPageInsightController::class
         )->middleware('throttle:60,1');
@@ -260,6 +266,14 @@ Route::prefix('v1/auth')->middleware('auth:sanctum')->group(function () {
         ->name('verification.send');
     Route::get('email/verify/status', [EmailVerificationController::class, 'status']);
 });
+
+// Nexapa Commerce administration. This is the native Laravel backend;
+// no Medusa service, SDK, or database is involved.
+Route::prefix('v1/commerce')
+    ->middleware(['auth:sanctum', 'verified', 'admin'])
+    ->group(function () {
+        Route::apiResource('products', CommerceProductController::class);
+    });
 
 // Email Verification Callback (no auth required - manual signature validation)
 Route::get('v1/auth/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])

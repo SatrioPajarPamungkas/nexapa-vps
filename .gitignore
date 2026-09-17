@@ -1,3 +1,18 @@
+# Local deployment/build output
+/apps/nexapa-web/assets/
+/apps/nexapa-web/favicon.svg
+/apps/nexapa-web/favicon.svg.svg
+
+# Supabase CLI local project metadata
+/apps/nexapa-crm/supabase/.temp/
+
+# Historical Nginx configuration backups
+/nginx/sites-available/*backup*
+
+# Temporary source snapshots
+*.auto-checkout-*
+*.force-filter-*
+
 # VPS backups
 backup/
 

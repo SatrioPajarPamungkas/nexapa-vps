@@ -324,17 +324,17 @@
       "deleteAction": "Delete",
       "showingPagination": "Showing {start}-{end} of {total}",
       "pageCount": "Page {page} of {total}",
-      "deleteContactTitle": "Delete Contact",
-      "deleteContactDesc": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "deleteContactTitle": "Exclude from Broadcasts",
+      "deleteContactDesc": "Exclude {name} from future broadcasts? The contact and complete chat history will remain available.",
       "cancel": "Cancel",
       "deleteBtn": "Delete",
-      "deleteBulkTitle": "Delete Contacts",
-      "deleteBulkDesc": "Are you sure you want to delete {count} selected contacts? This action cannot be undone.",
+      "deleteBulkTitle": "Exclude Contacts from Broadcasts",
+      "deleteBulkDesc": "Exclude {count} selected contacts from future broadcasts? Their chat history will not be deleted.",
       "toastFailedLoad": "Failed to load contacts",
       "toastFailedDelete": "Failed to delete contact",
-      "toastDeleted": "Contact deleted",
+      "toastDeleted": "Contact excluded from future broadcasts",
       "toastBulkFailedDelete": "Failed to delete contacts",
-      "toastBulkDeleted": "{count} contacts deleted"
+      "toastBulkDeleted": "{count} contacts excluded from future broadcasts"
     },
     "form": {
       "addTitle": "Add Contact",

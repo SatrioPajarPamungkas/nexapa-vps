@@ -21,3 +21,9 @@ Schedule::call(function () {
         now()->addHours(24)
     );
 })->everyMinute()->name('system-health-heartbeat');
+
+\Illuminate\Support\Facades\Schedule::command('commerce:expire-unsold-products')->hourly()->withoutOverlapping();
+
+Schedule::command('commerce:expire-pending-orders')
+    ->everyMinute()
+    ->withoutOverlapping();

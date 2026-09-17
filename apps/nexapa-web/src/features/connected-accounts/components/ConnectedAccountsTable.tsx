@@ -211,7 +211,7 @@ export function ConnectedAccountsTable({
                     )}
                   </div>
                   {account.username && <div className="truncate text-[11px] text-slate-600">@{account.username}</div>}
-                  <div className="mt-1 text-[10px] font-medium text-slate-600">Tidak untuk Publish</div>
+                  <div className="mt-1 text-[10px] font-medium text-slate-600">Not Available for Publishing</div>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium backdrop-blur-xl ${statusGlass.tone}`}>
                       {STATUS_LABEL[account.status] ?? statusGlass.label}

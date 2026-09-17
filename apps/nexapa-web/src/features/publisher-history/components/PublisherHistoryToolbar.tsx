@@ -72,7 +72,7 @@ export function PublisherHistoryToolbar({
                 className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-400/25 bg-red-500/10 px-3 py-2 text-[13px] font-medium text-red-800 backdrop-blur-xl transition-colors hover:bg-red-500/18 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-                Hapus Riwayat
+                Delete History
               </button>
             </>
           )}

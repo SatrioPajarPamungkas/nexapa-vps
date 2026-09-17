@@ -55,15 +55,15 @@ export function FacebookPublishSettings({ settings, onChange, caption, mediaKind
       </div>
 
       <p className="rounded-xl border border-white/15 bg-white/8 px-3 py-2 text-[10px] leading-4 text-slate-600 backdrop-blur-xl">
-        {settings.postType === "text" && "Text post akan dipublish ke Facebook Page feed tanpa media."}
-        {settings.postType === "image" && "Image post akan dipublish ke Facebook Page photos."}
-        {settings.postType === "video" && "Video post akan diupload ke Facebook Page videos."}
+        {settings.postType === "text" && "The text post will be published to the Facebook Page feed without media."}
+        {settings.postType === "image" && "The image post will be published to Facebook Page photos."}
+        {settings.postType === "video" && "The video will be uploaded to Facebook Page videos."}
       </p>
 
       <div className="border-t border-white/10 pt-4">
         <label className="flex items-center gap-2 text-[11px] font-medium text-slate-700"><input type="checkbox" checked={settings.captionOverrideEnabled} onChange={(e) => onChange({ ...settings, captionOverrideEnabled: e.target.checked })} className="h-3.5 w-3.5 rounded border-white/30 text-blue-600 focus:ring-blue-600" /> Platform-specific caption override</label>
         {settings.captionOverrideEnabled && <textarea value={settings.captionOverride} onChange={(e) => onChange({ ...settings, captionOverride: e.target.value })} placeholder={`Override for Facebook. Shared: ${caption.slice(0, 60)}...`} rows={3} className="mt-2 w-full rounded-xl border border-white/20 bg-white/12 p-2.5 text-[11px] backdrop-blur-xl placeholder:text-slate-500 focus:border-blue-400/60 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-blue-400/20" />}
-        {settings.postType === "text" && <p className="mt-2 rounded-xl border border-amber-400/25 bg-amber-500/10 px-2 py-1 text-[10px] text-amber-800 backdrop-blur-xl">Caption wajib diisi untuk Text Post</p>}
+        {settings.postType === "text" && <p className="mt-2 rounded-xl border border-amber-400/25 bg-amber-500/10 px-2 py-1 text-[10px] text-amber-800 backdrop-blur-xl">A caption is required for a text post.</p>}
       </div>
     </div>
   );

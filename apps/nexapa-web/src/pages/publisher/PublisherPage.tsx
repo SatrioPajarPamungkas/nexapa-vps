@@ -154,8 +154,8 @@ export function PublisherPage() {
 
       <SaveDraftDialog open={showSaveDialog} onClose={() => setShowSaveDialog(false)} onSave={(name) => { ws.saveLocalDraft(name); setShowSaveDialog(false); }} initialName="" />
 
-      {pendingPlatform && <ConfirmDialog title="Ganti platform posting?" description="Media, destination, dan pengaturan khusus platform saat ini akan dibersihkan. Teks akan dipertahankan jika masih kompatibel." confirmLabel="Switch Platform" onCancel={() => setPendingPlatform(null)} onConfirm={() => switchPlatform(pendingPlatform)} />}
-      {showResetDialog && <ConfirmDialog title="Reset composer?" description="Media, teks, destination, dan pengaturan platform saat ini akan dibersihkan." confirmLabel="Reset" destructive onCancel={() => setShowResetDialog(false)} onConfirm={resetComposer} />}
+      {pendingPlatform && <ConfirmDialog title="Switch publishing platform?" description="The current media, destinations, and platform-specific settings will be cleared. Compatible text will be preserved." confirmLabel="Switch Platform" onCancel={() => setPendingPlatform(null)} onConfirm={() => switchPlatform(pendingPlatform)} />}
+      {showResetDialog && <ConfirmDialog title="Reset composer?" description="The current media, text, destinations, and platform settings will be cleared." confirmLabel="Reset" destructive onCancel={() => setShowResetDialog(false)} onConfirm={resetComposer} />}
       <div className="sr-only" aria-live="polite" aria-atomic="true">{ws.feedback}</div>
     </div>
   );

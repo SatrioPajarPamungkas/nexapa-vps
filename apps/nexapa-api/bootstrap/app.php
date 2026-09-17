@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'worker.token' => \App\Http\Middleware\EnsureWorkerToken::class,
             'guest.api' => \App\Http\Middleware\EnsureGuestApiAccess::class,
             'admin' => \App\Http\Middleware\EnsureAdminAccess::class,
+            'product.access' =>
+                \App\Http\Middleware\EnsureProductAccess::class,
             'subscription.active' =>
                 \App\Http\Middleware\EnsureActiveSubscription::class,
         ]);

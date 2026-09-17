@@ -89,7 +89,6 @@ class UserActivityLogResource extends Resource
                     ->options([
                         'publisher' => 'Publisher',
                         'crm' => 'CRM',
-                        'both' => 'Publisher + CRM',
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         $value = $data['value'] ?? null;

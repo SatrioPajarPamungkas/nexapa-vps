@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { safeLocalPath } from '@/lib/safe-local-path'
 
 type EntitlementResponse = {
   allowed: boolean
@@ -91,8 +92,12 @@ export async function middleware(request: NextRequest) {
         `/join/${encodeURIComponent(inviteToken)}`
       url.search = ''
     } else {
-      url.pathname = '/dashboard'
-      url.search = ''
+      const destination = safeLocalPath(
+        request.nextUrl.searchParams.get('next')
+      )
+      const resolved = new URL(destination, request.url)
+      url.pathname = resolved.pathname
+      url.search = resolved.search
     }
 
     return withRefreshedCookies(
@@ -112,6 +117,7 @@ export async function middleware(request: NextRequest) {
     '/notifications',
     '/settings',
     '/super-admin',
+    '/subscription-required',
   ]
 
   const isProtectedPage = protectedPaths.some(
@@ -120,7 +126,11 @@ export async function middleware(request: NextRequest) {
 
   if (!user && isProtectedPage) {
     const url = request.nextUrl.clone()
+    const returnTo =
+      request.nextUrl.pathname + request.nextUrl.search
     url.pathname = '/login'
+    url.search = ''
+    url.searchParams.set('next', returnTo)
 
     return withRefreshedCookies(
       NextResponse.redirect(url)

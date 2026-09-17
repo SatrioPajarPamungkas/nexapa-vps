@@ -35,7 +35,7 @@ export function PublisherHistorySelectionBar({
           )}
         >
           <Trash2 className="h-3.5 w-3.5" />
-          Hapus Terpilih {selectedCount > 0 && `(${selectedCount})`}
+          Delete Selected {selectedCount > 0 && `(${selectedCount})`}
         </button>
 
         <button
@@ -45,7 +45,7 @@ export function PublisherHistorySelectionBar({
           className="inline-flex h-9 items-center gap-1 rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-[13px] font-medium text-white backdrop-blur-xl transition-colors hover:bg-white/18 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <X className="h-3.5 w-3.5" />
-          Batal
+          Cancel
         </button>
       </div>
     </div>

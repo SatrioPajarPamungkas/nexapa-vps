@@ -245,6 +245,39 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
+  // Persist delivery receipts BEFORE acknowledging Meta. If storage fails,
+  // return 503 so the provider can retry; never discard an early receipt.
+  // This RPC also updates linked broadcast recipients atomically.
+  try {
+    for (const entry of body.entry ?? []) {
+      for (const change of entry.changes ?? []) {
+        const value = change.value
+        for (const status of value?.statuses ?? []) {
+          if (!['sent', 'delivered', 'read', 'failed'].includes(status.status)) continue
+          const errorText = status.status === 'failed'
+            ? (status.errors ?? []).map(err =>
+                [err.code, err.title, err.error_data?.details || err.message]
+                  .filter(part => part !== undefined && part !== '').join(' — ')
+              ).join('; ') || 'Meta delivery failed'
+            : null
+          const { error } = await supabaseAdmin().rpc('crm_blast_record_status', {
+            p_phone_number_id: value.metadata?.phone_number_id,
+            p_message_id: status.id,
+            p_status: status.status,
+            p_event_at: new Date(Number(status.timestamp) * 1000).toISOString(),
+            p_error_message: errorText,
+          })
+          if (error) throw error
+        }
+      }
+    }
+  } catch (error) {
+    console.error('[webhook] receipt persistence failed:', {
+      code: (error as { code?: string })?.code ?? 'INVALID_RECEIPT',
+    })
+    return NextResponse.json({ error: 'Receipt storage unavailable' }, { status: 503 })
+  }
+
   // Process AFTER the response so we ack Meta within their ~20s timeout
   // (a slow ack triggers Meta retries + duplicate inserts), while still
   // guaranteeing the work runs to completion.
@@ -447,6 +480,7 @@ async function persistCoexistenceMessage(args: {
 
   const contactOutcome = await findOrCreateContact(
     config.account_id,
+    config.id,
     config.user_id,
     phone,
     args.contactName || phone,
@@ -593,6 +627,7 @@ async function handleCoexistenceStateSync(
 
     await findOrCreateContact(
       config.account_id,
+      config.id,
       config.user_id,
       phone,
       item.contact.full_name?.trim() ||
@@ -605,48 +640,6 @@ async function handleCoexistenceStateSync(
       item.contact.username?.trim() || null,
     )
   }
-}
-
-// The happy-path status ladder — pending → sent → delivered → read →
-// replied. Webhook replays must never regress a recipient back down
-// this ladder.
-//
-// `failed` is NOT on this ladder. It's a terminal side branch that is
-// only valid from the early states (pending / sent) — once Meta has
-// delivered or the user has read or replied, a later "failed" status
-// event is a bug in Meta's pipeline or a spoof attempt and must be
-// ignored.
-const RECIPIENT_STATUS_LADDER = [
-  'pending',
-  'sent',
-  'delivered',
-  'read',
-  'replied',
-] as const
-
-function ladderLevel(s: string): number {
-  const idx = (RECIPIENT_STATUS_LADDER as readonly string[]).indexOf(s)
-  return idx < 0 ? -1 : idx
-}
-
-/**
- * Can a recipient transition from `current` to `incoming`?
- *   - Along the ladder, only forward moves are allowed.
- *   - `failed` is accepted only from `pending` or `sent`; it's refused
- *     once the recipient has reached any of the success states.
- */
-function isValidStatusTransition(current: string, incoming: string): boolean {
-  if (incoming === 'failed') {
-    return current === 'pending' || current === 'sent'
-  }
-  if (current === 'failed') {
-    return false // failed is terminal
-  }
-  const ci = ladderLevel(current)
-  const ii = ladderLevel(incoming)
-  if (ii < 0) return false // unknown incoming status
-  if (ci < 0) return true // unknown current — accept anything on the ladder
-  return ii > ci
 }
 
 async function handleStatusUpdate(status: {
@@ -689,44 +682,10 @@ async function handleStatusUpdate(status: {
     console.error('Error updating message status:', msgErr)
   }
 
-  // Webhook fan-out for this status change happens at the END of this
-  // handler (after the broadcast mirror below), so a slow subscriber
-  // endpoint can't delay the broadcast_recipients update.
+  // Broadcast receipts were committed before this background callback.
 
-  // 2) Mirror onto broadcast_recipients via whatsapp_message_id
-  //    (added in migration 003). The aggregate trigger on
-  //    broadcast_recipients re-derives the parent broadcast's
-  //    sent/delivered/read/failed counts automatically.
-  const tsIso = new Date(parseInt(status.timestamp) * 1000).toISOString()
-
-  const { data: recipient, error: recFetchErr } = await supabaseAdmin()
-    .from('broadcast_recipients')
-    .select('id, status')
-    .eq('whatsapp_message_id', status.id)
-    .maybeSingle()
-
-  if (recFetchErr) {
-    console.error('Error fetching broadcast recipient:', recFetchErr)
-  } else if (
-    recipient &&
-    // Guard transitions — forward-only on the success ladder, and
-    // `failed` only from pre-delivered states.
-    isValidStatusTransition(recipient.status, status.status)
-  ) {
-    const update: Record<string, unknown> = { status: status.status }
-    if (status.status === 'sent' && !('sent_at' in update)) update.sent_at = tsIso
-    if (status.status === 'delivered') update.delivered_at = tsIso
-    if (status.status === 'read') update.read_at = tsIso
-
-    const { error: recUpdateErr } = await supabaseAdmin()
-      .from('broadcast_recipients')
-      .update(update)
-      .eq('id', recipient.id)
-
-    if (recUpdateErr) {
-      console.error('Error updating broadcast recipient status:', recUpdateErr)
-    }
-  }
+  // 2) Broadcast state is already committed by crm_blast_record_status in
+  // POST, before HTTP 200. Do not reapply it through a read/then/write race.
 
   // 3) Webhook fan-out for messages we store (inbox / API sends).
   //    Runs last so a slow subscriber can't delay the mirrors above.
@@ -931,6 +890,7 @@ async function processMessage(
   // phone remains the backwards-compatible secondary identity.
   const contactOutcome = await findOrCreateContact(
     accountId,
+    whatsappConfigId,
     configOwnerUserId,
     senderPhone,
     contactName,
@@ -1356,6 +1316,7 @@ interface ContactOutcome {
 
 async function findOrCreateContact(
   accountId: string,
+  whatsappConfigId: string,
   configOwnerUserId: string,
   phone: string | null,
   name: string,
@@ -1376,6 +1337,7 @@ async function findOrCreateContact(
       .from('contacts')
       .select('*')
       .eq('account_id', accountId)
+      .eq('whatsapp_config_id', whatsappConfigId)
       .eq('whatsapp_user_id', whatsappUserId)
       .maybeSingle()
 
@@ -1426,6 +1388,7 @@ async function findOrCreateContact(
       supabaseAdmin(),
       accountId,
       phone,
+      whatsappConfigId,
     )
 
     if (existingContact) {
@@ -1485,6 +1448,7 @@ async function findOrCreateContact(
     .from('contacts')
     .insert({
       account_id: accountId,
+      whatsapp_config_id: whatsappConfigId,
       user_id: configOwnerUserId,
       phone,
       whatsapp_user_id: whatsappUserId,

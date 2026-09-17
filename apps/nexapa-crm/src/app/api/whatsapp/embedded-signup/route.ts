@@ -16,6 +16,10 @@ import {
 } from '@/lib/whatsapp/embedded-signup';
 import { encrypt } from '@/lib/whatsapp/encryption';
 import {
+  reserveWabaConnection,
+  WabaQuotaError,
+} from '@/lib/whatsapp/waba-quota';
+import {
   listWabaPhoneNumbers,
   registerPhoneNumber,
   subscribeWabaToApp,
@@ -24,6 +28,17 @@ import {
 const META_ID_PATTERN = /^\d{5,32}$/;
 
 function embeddedSignupErrorResponse(error: unknown): NextResponse {
+  if (error instanceof WabaQuotaError) {
+    return NextResponse.json(
+      {
+        error: error.message,
+        code: error.code,
+        details: error.details,
+      },
+      { status: error.status }
+    );
+  }
+
   if (error instanceof EmbeddedSignupError) {
     return NextResponse.json(
       { error: error.message },
@@ -190,7 +205,7 @@ export async function POST(request: Request) {
 
     const { data: existing, error: existingError } = await ctx.supabase
       .from('whatsapp_config')
-      .select('id, phone_number_id, registered_at')
+      .select('id, phone_number_id, registered_at, waba_id')
       .eq('account_id', ctx.accountId)
       .eq('phone_number_id', phoneNumberId)
       .maybeSingle();
@@ -201,6 +216,20 @@ export async function POST(request: Request) {
         existingError
       );
       throw new Error('Existing config lookup failed');
+    }
+
+    let wabaReservationId: string | null = null;
+
+    if (!existing || existing.waba_id !== wabaId) {
+      const reservation =
+        await reserveWabaConnection({
+          crmUserId: ctx.userId,
+          accountId: ctx.accountId,
+          wabaId,
+        });
+
+      wabaReservationId =
+        reservation.reservation_id;
     }
 
     try {
@@ -271,6 +300,12 @@ export async function POST(request: Request) {
       subscribed_apps_at: now,
       last_registration_error: null,
       updated_at: now,
+      ...(wabaReservationId
+        ? {
+            waba_reservation_id:
+              wabaReservationId,
+          }
+        : {}),
     };
 
     let savedConnectionId = existing?.id ?? null;

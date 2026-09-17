@@ -22,7 +22,12 @@ class ConnectedAccountResource extends JsonResource
             'external_account_id' => $this->external_account_id,
             'display_name' => $this->display_name,
             'username' => $this->username,
-            'avatar_url' => $this->whenNotNull($this->avatar_url),
+            'avatar_url' => $this->platform === 'facebook'
+                ? route('api.v1.connected-accounts.avatar', [
+                    'connectedAccount' => $this->id,
+                    'v' => $this->updated_at?->timestamp,
+                ])
+                : $this->whenNotNull($this->avatar_url),
             'status' => $this->status,
             'connection_method' => $this->connection_method,
             'is_default' => $this->is_default,

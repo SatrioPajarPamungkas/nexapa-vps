@@ -89,7 +89,7 @@ export function FacebookAdminPageSelector({
       setError(
         reason instanceof Error
           ? reason.message
-          : "Gagal mengambil akun Facebook Admin.",
+          : "Failed to load the Facebook admin account.",
       );
     } finally {
       if (!signal?.aborted) setLoading(false);

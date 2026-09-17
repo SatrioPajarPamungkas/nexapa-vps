@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Eye, EyeOff, Info, Layers, Lock, Mail } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/features/auth/AuthContext";
+import { safeLocalRedirect } from "@/lib/safe-redirect";
 
 export function LoginPage() {
   const { login, loading, authenticated } = useAuth();
@@ -13,13 +14,28 @@ export function LoginPage() {
   const [remember, setRemember] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const from = (location.state as any)?.from?.pathname || "/dashboard";
+  const source = (
+    location.state as {
+      from?: {
+        pathname?: string;
+        search?: string;
+        hash?: string;
+      };
+    } | null
+  )?.from;
+  const stateRedirect = source?.pathname
+    ? `${source.pathname}${source.search || ""}${source.hash || ""}`
+    : null;
+  const queryRedirect = new URLSearchParams(location.search).get(
+    "redirect",
+  );
+  const from = safeLocalRedirect(queryRedirect || stateRedirect);
 
   useEffect(() => {
     if (authenticated) {
-      navigate("/dashboard", { replace: true });
+      navigate(from, { replace: true });
     }
-  }, [authenticated, navigate]);
+  }, [authenticated, from, navigate]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -154,7 +170,13 @@ export function LoginPage() {
 
         <div className="mt-6 text-center text-[13px] text-slate-600">
           Don't have an account?{" "}
-          <Link to="/signup" className="font-medium text-blue-600 hover:underline">
+          <Link
+            to={
+              "/signup?redirect=" +
+              encodeURIComponent(from)
+            }
+            className="font-medium text-blue-600 hover:underline"
+          >
             Sign up
           </Link>
         </div>

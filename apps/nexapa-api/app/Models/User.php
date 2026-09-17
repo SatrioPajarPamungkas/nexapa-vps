@@ -11,12 +11,13 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
 
-#[Fillable(['name', 'email', 'password', 'role', 'email_verified_at', 'google_id', 'google_avatar_url', 'is_suspended', 'suspended_at'])]
+#[Fillable(['name', 'email', 'password', 'role', 'email_verified_at', 'google_id', 'google_avatar_url', 'is_suspended', 'suspended_at', 'publisher_access_status', 'publisher_suspended_at', 'publisher_suspension_reason', 'crm_access_status', 'crm_suspended_at', 'crm_suspension_reason', 'commerce_access_status', 'commerce_registered_at', 'commerce_suspended_at', 'commerce_suspension_reason'])]
 #[Hidden(['password', 'remember_token', 'google_id'])]
 class User extends Authenticatable implements FilamentUser, MustVerifyEmail
 {
@@ -36,6 +37,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
             'is_admin' => 'boolean',
             'is_suspended' => 'boolean',
             'suspended_at' => 'datetime',
+            'publisher_suspended_at' => 'datetime',
+            'crm_suspended_at' => 'datetime',
+            'commerce_registered_at' => 'datetime',
+            'commerce_suspended_at' => 'datetime',
             'google_id' => 'string',
         ];
     }
@@ -79,6 +84,38 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     public function publisherPosts(): HasMany
     {
         return $this->hasMany(PublisherPost::class);
+    }
+
+    public function latestSubscription(): HasOne
+    {
+        return $this->hasOne(
+            Subscription::class,
+            'publisher_user_id',
+        )->where('product', 'publisher')->latestOfMany();
+    }
+
+    public function crmUserMapping(): HasOne
+    {
+        return $this->hasOne(
+            CrmUserMapping::class,
+            'publisher_user_id',
+        );
+    }
+
+    public function commerceOrders(): HasMany
+    {
+        return $this->hasMany(
+            CommerceOrder::class,
+            'user_id',
+        );
+    }
+
+    public function latestCommerceOrder(): HasOne
+    {
+        return $this->hasOne(
+            CommerceOrder::class,
+            'user_id',
+        )->latestOfMany('created_at');
     }
 
     public function collections(): HasMany

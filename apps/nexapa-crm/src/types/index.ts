@@ -100,6 +100,7 @@ export interface Contact {
   id: string;
   user_id: string;
   account_id: string;
+  whatsapp_config_id?: string | null;
   phone: string;
   /** WhatsApp Business-Scoped User ID. Present for WhatsApp contacts and
    * usable as Meta's outbound `to` when the phone number is unavailable. */

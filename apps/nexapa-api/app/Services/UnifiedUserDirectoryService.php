@@ -93,7 +93,6 @@ class UnifiedUserDirectoryService
             $records = array_values(array_filter($records, fn (array $record): bool => match ($source) {
                 'publisher' => $record['publisher_user_id'] !== null,
                 'crm' => $record['crm_user_id'] !== null,
-                'both' => $record['publisher_user_id'] !== null && $record['crm_user_id'] !== null,
                 default => true,
             }));
         }
@@ -108,7 +107,7 @@ class UnifiedUserDirectoryService
     }
 
     /**
-     * Matching is deliberately email-only. Names are never used as identity keys.
+     * Accounts stay separate even when their email addresses are identical.
      *
      * @param list<User> $publisherUsers
      * @param list<CrmUserData> $crmUsers
@@ -117,13 +116,9 @@ class UnifiedUserDirectoryService
     public function merge(array $publisherUsers, array $crmUsers): array
     {
         $records = [];
-        $emailIndex = [];
-
         foreach ($publisherUsers as $user) {
-            $emailKey = self::normalizeEmail($user->email);
-            $index = count($records);
             $records[] = [
-                'id' => '',
+                'id' => self::encodeKey((string) $user->getKey(), null),
                 'source' => 'publisher',
                 'source_user_id' => (string) $user->getKey(),
                 'publisher_user_id' => (string) $user->getKey(),
@@ -139,35 +134,9 @@ class UnifiedUserDirectoryService
                 'crm_email_verified' => false,
                 'link_status' => null,
             ];
-
-            if ($emailKey !== '') {
-                $emailIndex[$emailKey] = $index;
-            }
         }
 
         foreach ($crmUsers as $crmUser) {
-            $emailKey = self::normalizeEmail($crmUser->email);
-            if ($emailKey !== '' && array_key_exists($emailKey, $emailIndex)) {
-                $index = $emailIndex[$emailKey];
-                $publisherVerified = (bool) $records[$index]['publisher_email_verified'];
-                $crmVerified = $crmUser->emailConfirmedAt !== null;
-                $records[$index] = [
-                    ...$records[$index],
-                    'id' => self::encodeKey($records[$index]['publisher_user_id'], $crmUser->id),
-                    'source' => 'publisher_crm',
-                    'source_user_id' => $records[$index]['publisher_user_id'].' / '.$crmUser->id,
-                    'crm_user_id' => $crmUser->id,
-                    'product' => 'Publisher + CRM',
-                    'registered_at' => max((string) $records[$index]['registered_at'], (string) $crmUser->createdAt),
-                    'crm_registered_at' => $crmUser->createdAt,
-                    'email_verified' => $publisherVerified && $crmVerified,
-                    'crm_email_verified' => $crmVerified,
-                    'link_status' => $publisherVerified && $crmVerified ? 'Terkait melalui email' : 'Kemungkinan akun terkait',
-                ];
-
-                continue;
-            }
-
             $records[] = [
                 'id' => self::encodeKey(null, $crmUser->id),
                 'source' => 'crm',
@@ -185,10 +154,6 @@ class UnifiedUserDirectoryService
                 'crm_email_verified' => $crmUser->emailConfirmedAt !== null,
                 'link_status' => null,
             ];
-        }
-
-        foreach ($records as &$record) {
-            $record['id'] = $record['id'] ?: self::encodeKey($record['publisher_user_id'], $record['crm_user_id']);
         }
 
         return $records;

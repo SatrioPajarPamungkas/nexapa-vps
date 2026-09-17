@@ -132,7 +132,10 @@ class FacebookPageInsightsService
                     $page->external_account_id,
                 'display_name' => $page->display_name,
                 'username' => $page->username,
-                'avatar_url' => $page->avatar_url,
+                'avatar_url' => route('api.v1.connected-accounts.avatar', [
+                    'connectedAccount' => $page->id,
+                    'v' => $page->updated_at?->timestamp,
+                ]),
                 'status' => $page->status,
             ],
             'period' => [

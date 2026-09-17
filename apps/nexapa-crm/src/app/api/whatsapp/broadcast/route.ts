@@ -15,6 +15,7 @@ import {
   rateLimitResponse,
   RATE_LIMITS,
 } from '@/lib/rate-limit'
+import { resolveConversationByPhone } from '@/lib/whatsapp/resolve-conversation'
 
 interface BroadcastResult {
   phone: string
@@ -213,6 +214,63 @@ export async function POST(request: Request) {
       }
 
       if (sentMessageId) {
+        // Keep every successful broadcast in the contact's canonical
+        // conversation so subsequent campaigns append to the same thread.
+        try {
+          const { conversationId } = await resolveConversationByPhone(
+            supabase,
+            accountId,
+            sanitized,
+            null,
+            config.id
+          )
+
+          const now = new Date().toISOString()
+          const previewText = `[Template: ${template_name}]`
+
+          const { error: messageError } = await supabase
+            .from('messages')
+            .insert({
+              conversation_id: conversationId,
+              sender_type: 'agent',
+              content_type: 'template',
+              content_text: previewText,
+              template_name,
+              message_id: sentMessageId,
+              status: 'sent',
+            })
+
+          if (messageError) {
+            console.error(
+              '[broadcast] message sent but history persistence failed:',
+              messageError
+            )
+          } else {
+            const { error: conversationError } = await supabase
+              .from('conversations')
+              .update({
+                last_message_text: previewText,
+                last_message_at: now,
+                updated_at: now,
+              })
+              .eq('id', conversationId)
+
+            if (conversationError) {
+              console.error(
+                '[broadcast] conversation preview update failed:',
+                conversationError
+              )
+            }
+          }
+        } catch (persistenceError) {
+          // Sending already succeeded at Meta, so do not retry and risk
+          // delivering the same template twice.
+          console.error(
+            '[broadcast] message sent but could not persist history:',
+            persistenceError
+          )
+        }
+
         results.push({
           phone: recipient.phone,
           status: 'sent',

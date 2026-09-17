@@ -111,6 +111,12 @@ const DeveloperSettingsPage = lazy(() =>
   })),
 );
 
+const SubscriptionCheckoutPage = lazy(() =>
+  import("@/pages/subscription/SubscriptionCheckoutPage").then(
+    (module) => ({ default: module.SubscriptionCheckoutPage }),
+  ),
+);
+
 const NotFoundPage = lazy(() =>
   import("@/pages/not-found/NotFoundPage").then(
     (module) => ({ default: module.NotFoundPage }),
@@ -139,6 +145,15 @@ export function AppRouter() {
       <Route element={<AuthGuard><AuthLayout /></AuthGuard>}>
         <Route path="/verify-email" element={<VerifyEmailPage />} />
       </Route>
+
+      <Route
+        path="/subscription"
+        element={
+          <AuthGuard>
+            <SubscriptionCheckoutPage />
+          </AuthGuard>
+        }
+      />
 
       <Route element={<AuthGuard><AppLayout /></AuthGuard>}>
         <Route index element={<Navigate to="/dashboard" replace />} />

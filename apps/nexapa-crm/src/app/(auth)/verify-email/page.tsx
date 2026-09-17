@@ -30,12 +30,21 @@ function VerifyEmailPageInner() {
   const searchParams = useSearchParams();
   const verifyUrl =
     searchParams.get("verify_url");
+  const [returnTo, setReturnTo] = useState("/dashboard");
 
   const [status, setStatus] =
     useState<Status>("loading");
   const [message, setMessage] = useState(
     "Memverifikasi alamat email...",
   );
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setReturnTo(safeStoredReturn());
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -170,7 +179,10 @@ function VerifyEmailPageInner() {
 
         {status !== "loading" && (
           <Link
-            href="/login"
+            href={
+              "/login?next=" +
+              encodeURIComponent(returnTo)
+            }
             className="mt-6 inline-flex h-10 w-full items-center justify-center rounded-lg bg-slate-900 px-4 text-[13px] font-medium text-white transition hover:bg-slate-800"
           >
             {status === "success"
@@ -181,4 +193,19 @@ function VerifyEmailPageInner() {
       </div>
     </div>
   );
+}
+
+function safeStoredReturn(): string {
+  if (typeof window === "undefined") return "/dashboard";
+
+  const value = window.localStorage.getItem(
+    "nexapa_crm_auth_return",
+  );
+
+  return value &&
+    value.startsWith("/") &&
+    !value.startsWith("//") &&
+    !value.includes("\\")
+    ? value
+    : "/dashboard";
 }

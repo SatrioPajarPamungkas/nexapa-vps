@@ -60,7 +60,9 @@ export function Step4ScheduleSend({
         if (audience.type === 'all') {
           const { count } = await supabase
             .from('contacts')
-            .select('*', { count: 'exact', head: true });
+            .select('*', { count: 'exact', head: true })
+          .eq('broadcast_enabled', true)
+          .eq('broadcast_only', false);
           setEstimatedReach(count ?? 0);
         } else if (audience.type === 'tags' && audience.tagIds && audience.tagIds.length > 0) {
           const { data: contactTags } = await supabase

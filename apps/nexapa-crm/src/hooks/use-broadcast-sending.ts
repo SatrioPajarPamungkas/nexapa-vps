@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
 import { Contact, MessageTemplate } from '@/types';
+import { BroadcastPersistenceError, writeBroadcastRecipient } from '@/lib/whatsapp/broadcast-recipient-write';
 
 export type CustomFieldOperator = 'is' | 'is_not' | 'contains';
 
@@ -158,7 +159,11 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
     let contacts: Contact[] = [];
 
     if (audience.type === 'all') {
-      const { data, error } = await supabase.from('contacts').select('*');
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('*')
+        .eq('broadcast_enabled', true)
+        .eq('broadcast_only', false);
       if (error) throw new Error(`Failed to fetch contacts: ${error.message}`);
       contacts = data ?? [];
     } else if (
@@ -181,7 +186,9 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
         const { data, error } = await supabase
           .from('contacts')
           .select('*')
-          .in('id', uniqueContactIds);
+          .in('id', uniqueContactIds)
+          .eq('broadcast_enabled', true)
+          .eq('broadcast_only', false);
         if (error) throw new Error(`Failed to fetch contacts: ${error.message}`);
         contacts = data ?? [];
       }
@@ -263,7 +270,9 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
         user_id: user.id,
         account_id: accountId,
         phone,
-        name: uniqueByPhone.get(phone)?.name ?? null,
+        name: uniqueByPhone.get(phone)?.name ?? phone,
+        broadcast_enabled: false,
+        broadcast_only: true,
       }));
 
     const INSERT_CHUNK = 200;
@@ -315,7 +324,9 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
     const { data, error } = await supabase
       .from('contacts')
       .select('*')
-      .in('id', contactIds);
+      .in('id', contactIds)
+      .eq('broadcast_enabled', true)
+      .eq('broadcast_only', false);
     if (error) throw new Error(`Failed to fetch contacts: ${error.message}`);
     return data ?? [];
   }
@@ -501,47 +512,39 @@ export function useBroadcastSending(): UseBroadcastSendingReturn {
 
             if (!result) {
               failedCount++;
-              await supabase
-                .from('broadcast_recipients')
-                .update({
+              await writeBroadcastRecipient(supabase, recipient.id, {
                   status: 'failed',
                   error_message: 'No phone number on contact',
-                })
-                .eq('id', recipient.id);
+                });
               continue;
             }
 
             if (result.status === 'sent') {
-              await supabase
-                .from('broadcast_recipients')
-                .update({
+              if (!result.whatsapp_message_id) throw new BroadcastPersistenceError();
+              await writeBroadcastRecipient(supabase, recipient.id, {
                   status: 'sent',
                   sent_at: new Date().toISOString(),
-                  whatsapp_message_id: result.whatsapp_message_id ?? null,
+                  whatsapp_message_id: result.whatsapp_message_id,
                   error_message: null,
-                })
-                .eq('id', recipient.id);
+                });
             } else {
               failedCount++;
-              await supabase
-                .from('broadcast_recipients')
-                .update({
+              await writeBroadcastRecipient(supabase, recipient.id, {
                   status: 'failed',
                   error_message: result.error ?? 'Unknown error',
-                })
-                .eq('id', recipient.id);
+                });
             }
           }
         } catch (err) {
+          // A DB failure after sending is not a delivery failure. Preserve
+          // existing recipients and stop; never mark the entire batch failed.
+          if (err instanceof BroadcastPersistenceError) throw err;
           for (const recipient of batch) {
             failedCount++;
-            await supabase
-              .from('broadcast_recipients')
-              .update({
+            await writeBroadcastRecipient(supabase, recipient.id, {
                 status: 'failed',
                 error_message: err instanceof Error ? err.message : 'Unknown error',
-              })
-              .eq('id', recipient.id);
+              });
           }
         }
 

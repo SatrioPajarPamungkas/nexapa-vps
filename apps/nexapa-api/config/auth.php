@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\CommerceCustomer;
 
 return [
 
@@ -42,6 +43,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'commerce' => [
+            'driver' => 'session',
+            'provider' => 'commerce_customers',
+        ],
     ],
 
     /*
@@ -65,6 +70,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+        'commerce_customers' => [
+            'driver' => 'eloquent',
+            'model' => CommerceCustomer::class,
         ],
 
         // 'users' => [
@@ -96,6 +105,15 @@ return [
         'users' => [
             'provider' => 'users',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'commerce_customers' => [
+            'provider' => 'commerce_customers',
+            'table' => env(
+                'AUTH_PASSWORD_RESET_TOKEN_TABLE',
+                'password_reset_tokens',
+            ),
             'expire' => 60,
             'throttle' => 60,
         ],

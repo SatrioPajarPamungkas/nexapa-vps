@@ -26,6 +26,7 @@ class EnsureActiveSubscription
         }
 
         $subscription = Subscription::query()
+            ->where('product', 'publisher')
             ->where(function ($query) use ($user): void {
                 $query
                     ->where(

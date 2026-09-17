@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Eye, EyeOff, Info, Layers, Lock, Mail, User } from "lucide-react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "@/features/auth/AuthContext";
 import * as authApi from "@/lib/api/auth";
+import { safeLocalRedirect } from "@/lib/safe-redirect";
 
 export function SignupPage() {
   const {
@@ -10,6 +11,10 @@ export function SignupPage() {
     refreshUser,
   } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo = safeLocalRedirect(
+    new URLSearchParams(location.search).get("redirect"),
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [name, setName] = useState("");
@@ -23,9 +28,13 @@ export function SignupPage() {
 
   useEffect(() => {
     if (authenticated) {
-      navigate("/dashboard", { replace: true });
+      navigate(
+        "/verify-email?redirect=" +
+          encodeURIComponent(returnTo),
+        { replace: true },
+      );
     }
-  }, [authenticated, navigate]);
+  }, [authenticated, navigate, returnTo]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -54,9 +63,11 @@ export function SignupPage() {
 
       await refreshUser();
 
-      navigate("/verify-email", {
-        replace: true,
-      });
+      navigate(
+        "/verify-email?redirect=" +
+          encodeURIComponent(returnTo),
+        { replace: true },
+      );
     } catch (err: any) {
       setError(err?.message || "Registration failed");
     } finally {
@@ -262,7 +273,13 @@ export function SignupPage() {
 
         <div className="mt-6 text-center text-[13px] text-slate-600">
           Already have an account?{" "}
-          <Link to="/login" className="font-medium text-blue-600 hover:underline">
+          <Link
+            to={
+              "/login?redirect=" +
+              encodeURIComponent(returnTo)
+            }
+            className="font-medium text-blue-600 hover:underline"
+          >
             Sign in
           </Link>
         </div>

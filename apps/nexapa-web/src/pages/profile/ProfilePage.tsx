@@ -9,6 +9,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/AuthContext";
+import { SubscriptionStatusCard } from "./SubscriptionStatusCard";
 
 function getInitials(name: string): string {
   return name
@@ -46,6 +47,8 @@ export function ProfilePage() {
           Manage your Nexapa account identity.
         </p>
       </div>
+
+      <SubscriptionStatusCard />
 
       <section className="overflow-hidden rounded-2xl border border-white/30 bg-white/80 shadow-sm backdrop-blur-xl">
         <div className="border-b border-slate-200/70 px-6 py-6 sm:px-8">

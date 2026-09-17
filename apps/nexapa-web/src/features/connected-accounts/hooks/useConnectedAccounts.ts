@@ -227,7 +227,7 @@ export function useConnectedAccounts() {
         ),
       );
       setRemoveCandidate(null);
-      showFeedback("success", "Account dan data terkait berhasil dihapus permanen.");
+      showFeedback("success", "The account and related data were permanently deleted.");
 
       // Reconcile silently against an explicitly uncached server response.
       void getConnectedAccounts()
@@ -238,9 +238,9 @@ export function useConnectedAccounts() {
         });
     } catch (err) {
       if (err instanceof ApiError) {
-        showFeedback("error", `Penghapusan gagal: ${err.message}`);
+        showFeedback("error", `Deletion failed: ${err.message}`);
       } else {
-        showFeedback("error", "Akun gagal dihapus.");
+        showFeedback("error", "Failed to delete the account.");
       }
     } finally {
       setLoading((prev) => ({ ...prev, removingId: null }));

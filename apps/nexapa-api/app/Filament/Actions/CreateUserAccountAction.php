@@ -47,7 +47,6 @@ class CreateUserAccountAction
                             ->options([
                                 'publisher' => 'Publisher',
                                 'crm' => 'CRM',
-                                'both' => 'Publisher + CRM',
                             ])
                             ->default('publisher')
                             ->required()
@@ -58,8 +57,8 @@ class CreateUserAccountAction
                             ->placeholder('Nama workspace/perusahaan')
                             ->maxLength(255)
                             ->minLength(2)
-                            ->visible(fn (array $get): bool => in_array($get('product'), ['crm', 'both']))
-                            ->required(fn (array $get): bool => in_array($get('product'), ['crm', 'both'])),
+                            ->visible(fn (array $get): bool => $get('product') === 'crm')
+                            ->required(fn (array $get): bool => $get('product') === 'crm'),
 
                         TextInput::make('temporary_password')
                             ->label('Password Akun')
@@ -68,7 +67,7 @@ class CreateUserAccountAction
                             ->revealable()
                             ->minLength(8)
                             ->maxLength(128)
-                            ->helperText('Password yang sama dipakai untuk semua produk dan disimpan terenkripsi di vault admin.')
+                            ->helperText('Password hanya berlaku untuk platform yang dipilih.')
                             ->required(),
 
                         Select::make('publisher_role')
@@ -78,7 +77,7 @@ class CreateUserAccountAction
                                 'admin' => 'Admin',
                             ])
                             ->default('user')
-                            ->visible(fn (array $get): bool => in_array($get('product'), ['publisher', 'both'])),
+                            ->visible(fn (array $get): bool => $get('product') === 'publisher'),
 
                         Checkbox::make('email_verified')
                             ->label('Email sudah diverifikasi')
@@ -88,7 +87,7 @@ class CreateUserAccountAction
                 self::handleCreateAccount($data);
             })
             ->modalHeading('Buat Akun Baru')
-            ->modalDescription('Buat akun Publisher, CRM, atau keduanya.')
+            ->modalDescription('Buat satu akun khusus Publisher atau CRM.')
             ->modalWidth('lg')
             ->modalSubmitActionLabel('Buat Akun')
             ->modalCancelActionLabel('Batal');

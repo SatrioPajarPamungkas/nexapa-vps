@@ -157,6 +157,7 @@ export default function ContactsPage() {
       let query = supabase
         .from('contacts')
         .select('*', { count: 'exact' })
+        .eq('broadcast_only', false)
         .order('created_at', { ascending: false })
         .range(from, to);
 
@@ -255,14 +256,14 @@ export default function ContactsPage() {
 
     const { error } = await supabase
       .from('contacts')
-      .delete()
+      .update({ broadcast_enabled: false })
       .eq('id', deleteTarget.id);
 
     if (error) {
-      toast.error(t('toastFailedDelete'));
+      toast.error('Gagal mengeluarkan kontak dari broadcast.');
     } else {
-      toast.success(t('toastDeleted'));
-      fetchContacts();
+      toast.success('Kontak tidak akan menerima broadcast berikutnya.');
+      await fetchContacts();
     }
 
     setDeleting(false);
@@ -300,14 +301,17 @@ export default function ContactsPage() {
     if (ids.length === 0) return;
     setDeleting(true);
 
-    const { error } = await supabase.from('contacts').delete().in('id', ids);
+    const { error } = await supabase
+      .from('contacts')
+      .update({ broadcast_enabled: false })
+      .in('id', ids);
 
     if (error) {
-      toast.error(t('toastBulkFailedDelete'));
+      toast.error('Gagal mengeluarkan kontak dari broadcast.');
     } else {
-      toast.success(t('toastBulkDeleted', { count: ids.length }));
+      toast.success(`${ids.length} kontak dikeluarkan dari broadcast.`);
       setSelected(new Set());
-      fetchContacts();
+      await fetchContacts();
     }
 
     setDeleting(false);

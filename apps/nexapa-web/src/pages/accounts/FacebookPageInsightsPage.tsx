@@ -87,7 +87,7 @@ function InsightChart({
   if (data.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center text-[13px] text-slate-500">
-        Belum ada data tayangan untuk periode ini.
+        No view data is available for this period.
       </div>
     );
   }
@@ -98,7 +98,7 @@ function InsightChart({
         viewBox={`0 0 ${width} ${height}`}
         className="min-w-[700px]"
         role="img"
-        aria-label="Grafik tayangan Facebook Page"
+        aria-label="Facebook Page views chart"
       >
         {[0.25, 0.5, 0.75, 1].map((position) => (
           <line
@@ -137,7 +137,7 @@ function InsightChart({
               fill="#2563eb"
             >
               <title>
-                {point.date}: {formatter.format(point.views)} tayangan
+                {point.date}: {formatter.format(point.views)} views
               </title>
             </circle>
           );
@@ -173,7 +173,7 @@ export function FacebookPageInsightsPage() {
         setError(
           reason instanceof Error
             ? reason.message
-            : "Gagal mengambil Facebook Insights.",
+            : "Failed to load Facebook Insights.",
         );
       })
       .finally(() => {
@@ -191,7 +191,7 @@ export function FacebookPageInsightsPage() {
         description={
           data
             ? `${data.period.since} — ${data.period.until}`
-            : "Performa dan jangkauan Facebook Page."
+            : "Facebook Page performance and reach."
         }
         actions={
           <Link
@@ -232,21 +232,21 @@ export function FacebookPageInsightsPage() {
           <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-6 text-center">
             <BarChart3 className="mx-auto h-9 w-9 text-red-600" />
             <h2 className="mt-3 font-semibold text-red-900">
-              Insight tidak dapat dimuat
+              Insights could not be loaded
             </h2>
             <p className="mt-2 text-[13px] text-red-800">
               {error}
             </p>
             <p className="mt-3 text-[12px] text-red-700">
-              Jalankan Reconnect &amp; Sync Pages untuk memberikan
-              izin read_insights.
+              Run Reconnect &amp; Sync Pages to grant the
+              read_insights permission.
             </p>
           </div>
         ) : data ? (
           <>
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <MetricCard
-                label="Total Tayangan"
+                label="Total Views"
                 value={data.summary.views}
                 icon={Eye}
                 tone="bg-blue-500/15 text-blue-700"
@@ -274,11 +274,11 @@ export function FacebookPageInsightsPage() {
             <div className="mt-5 rounded-2xl border border-white/20 bg-white/12 p-5 shadow-sm backdrop-blur-2xl">
               <div className="mb-4">
                 <h2 className="text-[15px] font-semibold text-slate-950">
-                  Tayangan Harian
+                  Daily Views
                 </h2>
                 <p className="mt-1 text-[12px] text-slate-600">
-                  Jumlah konten Page diputar atau ditampilkan setiap
-                  hari.
+                  Number of times Page content was played or displayed
+                  each day.
                 </p>
               </div>
 
@@ -287,8 +287,8 @@ export function FacebookPageInsightsPage() {
 
             {data.warnings.length > 0 && (
               <div className="mt-5 rounded-2xl border border-amber-400/30 bg-amber-500/10 p-4 text-[12px] text-amber-900">
-                Sebagian metrik tidak tersedia dari Meta. Data yang
-                berhasil diambil tetap ditampilkan.
+                Some metrics are unavailable from Meta. Successfully
+                retrieved data is still displayed.
               </div>
             )}
           </>

@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
 import * as authApi from "@/lib/api/auth";
 import type { AuthUser } from "@/types/auth";
 
@@ -18,7 +17,6 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   const refreshUser = async () => {
     try {
@@ -28,7 +26,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       if (error?.status === 401) {
         setUser(null);
-        navigate("/login", { replace: true });
         return undefined;
       }
       throw error;

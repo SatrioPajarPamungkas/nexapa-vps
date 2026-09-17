@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { SECTION_META, type SettingsSection } from './settings-sections';
 import { SettingsChip, StatusDot } from './settings-chip';
 import { ROLE_META } from './role-meta';
+import { SubscriptionStatusCard } from './subscription-status-card';
 
 interface OverviewCounts {
   members: number | null;
@@ -249,6 +250,8 @@ export function SettingsOverview({
           </SettingsChip>
         ) : null}
       </Card>
+
+      <SubscriptionStatusCard />
 
       {/* Status tiles */}
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

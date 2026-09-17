@@ -64,6 +64,77 @@ class CrmProvisioningService
         }
     }
 
+    public function authenticateWithPassword(
+        string $email,
+        string $password,
+    ): ?array {
+        $this->ensureConfigured();
+
+        $path = '/auth/v1/token?grant_type=password';
+        $response = $this->request()->post($path, [
+            'email' => Str::lower(Str::trim($email)),
+            'password' => $password,
+        ]);
+
+        if (in_array($response->status(), [400, 401], true)) {
+            return null;
+        }
+
+        $this->ensureSuccessful($response, $path);
+        $payload = $response->json();
+        $user = is_array($payload)
+            ? ($payload['user'] ?? null)
+            : null;
+
+        if (! is_array($user) || empty($user['id'])) {
+            throw CrmIntegrationException::invalidResponse();
+        }
+
+        return [
+            'user_id' => (string) $user['id'],
+            'email' => (string) ($user['email'] ?? $email),
+            'email_verified' => filled(
+                $user['email_confirmed_at'] ?? null,
+            ),
+        ];
+    }
+
+    public function generateLoginToken(
+        string $email,
+        string $expectedUserId,
+    ): string {
+        $this->ensureConfigured();
+
+        $path = '/auth/v1/admin/generate_link';
+        $response = $this->post($path, [
+            'type' => 'magiclink',
+            'email' => Str::lower(Str::trim($email)),
+        ]);
+        $payload = $response->json();
+        $tokenHash = is_array($payload)
+            ? data_get($payload, 'properties.hashed_token')
+                ?? ($payload['hashed_token'] ?? null)
+            : null;
+        $generatedUserId = is_array($payload)
+            ? data_get($payload, 'user.id')
+                ?? data_get($payload, 'properties.user.id')
+            : null;
+
+        if (! is_string($tokenHash) || trim($tokenHash) === '') {
+            throw CrmIntegrationException::invalidResponse();
+        }
+
+        if (
+            is_string($generatedUserId)
+            && $generatedUserId !== ''
+            && ! hash_equals($expectedUserId, $generatedUserId)
+        ) {
+            throw CrmIntegrationException::invalidResponse();
+        }
+
+        return $tokenHash;
+    }
+
     public function createAccount(string $ownerUserId, string $workspaceName): array
     {
         $this->ensureConfigured();

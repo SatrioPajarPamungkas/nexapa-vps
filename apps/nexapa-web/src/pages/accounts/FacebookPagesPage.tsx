@@ -64,7 +64,7 @@ export function FacebookPagesPage() {
       setError(
         reason instanceof Error
           ? reason.message
-          : "Gagal mengambil Facebook Page.",
+          : "Failed to load Facebook Pages.",
       );
     } finally {
       if (!signal?.aborted) setLoading(false);
@@ -99,7 +99,7 @@ export function FacebookPagesPage() {
       <PageHeader
         eyebrow="FACEBOOK"
         title={admin?.display_name ?? "Facebook Pages"}
-        description="Seluruh Facebook Page yang dikelola oleh akun ini."
+        description="All Facebook Pages managed by this account."
         actions={
           <div className="flex items-center gap-2">
             <Link
@@ -146,7 +146,7 @@ export function FacebookPagesPage() {
                 onChange={(event) =>
                   setSearch(event.target.value)
                 }
-                placeholder="Cari nama, username, atau Page ID..."
+                placeholder="Search by name, username, or Page ID..."
                 className="h-10 w-full rounded-xl border border-white/25 bg-white/20 pl-10 pr-4 text-[13px] text-slate-900 outline-none backdrop-blur-xl placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </label>
@@ -172,11 +172,11 @@ export function FacebookPagesPage() {
           <div className="rounded-2xl border border-dashed border-white/25 bg-white/10 px-6 py-16 text-center backdrop-blur-xl">
             <PanelsTopLeft className="mx-auto h-10 w-10 text-blue-600" />
             <h2 className="mt-4 text-lg font-semibold text-slate-950">
-              Facebook Page tidak ditemukan
+              No Facebook Pages found
             </h2>
             <p className="mt-2 text-[13px] text-slate-600">
-              Jalankan Reconnect &amp; Sync Pages jika Page belum
-              tampil.
+              Run Reconnect &amp; Sync Pages if a Page is not
+              displayed yet.
             </p>
           </div>
         ) : (

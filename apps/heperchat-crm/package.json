@@ -1,17 +1,14 @@
 {
-  "name": "wacrm",
+  "name": "heperchat-crm",
   "version": "0.8.0",
   "private": true,
-  "description": "Self-hostable CRM template for WhatsApp built on Next.js and Supabase — shared inbox, contacts, sales pipelines, broadcasts, and no-code automations.",
+  "description": "HeperChat CRM for WhatsApp customer communication, team inboxes, contacts, pipelines, broadcasts, and automations.",
   "license": "MIT",
-  "author": "Arnas Donauskas",
-  "homepage": "https://github.com/ArnasDon/wacrm",
+  "author": "CV TATA MITRA SENTOSA",
+  "homepage": "https://crm.hepermadi.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ArnasDon/wacrm.git"
-  },
-  "bugs": {
-    "url": "https://github.com/ArnasDon/wacrm/issues"
+    "url": "git+https://github.com/SatrioPajarPamungkas/nexapa-vps.git"
   },
   "keywords": [
     "crm",

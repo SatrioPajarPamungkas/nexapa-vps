@@ -22,10 +22,10 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Nexapa CRM",
-    template: "%s — Nexapa CRM",
+    default: "HeperChat CRM",
+    template: "%s — HeperChat CRM",
   },
-  description: "Nexapa CRM for WhatsApp customer communication.",
+  description: "HeperChat CRM for WhatsApp customer communication.",
   robots: {
     index: false,
     follow: false,

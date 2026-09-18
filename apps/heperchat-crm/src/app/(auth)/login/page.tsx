@@ -90,8 +90,8 @@ function LoginPageInner() {
       <div className="rounded-2xl border border-white/30 bg-white/80 p-6 shadow-sm backdrop-blur-xl sm:p-8">
         <div className="mb-6 flex flex-col items-center">
           <img
-            src="/assets/branding/nexapa-app-logo.svg"
-            alt="Nexapa"
+            src="/assets/branding/heperchat-logo.svg"
+            alt="HeperChat"
             className="mb-3 h-10 w-auto"
           />
 

@@ -17,7 +17,7 @@ export default async function SuperAdminPage() {
   ] as const
 
   return <main className="mx-auto max-w-[1500px] space-y-8 px-6 py-8">
-    <div><p className="text-sm font-medium text-violet-400">SUPER ADMIN NEXAPA</p><h1 className="mt-1 text-3xl font-bold tracking-tight">Platform overview</h1><p className="mt-2 text-zinc-400">Pantau tenant, koneksi WhatsApp, paket dan batas pemakaian dari satu panel.</p></div>
+    <div><p className="text-sm font-medium text-violet-400">SUPER ADMIN HEPERCHAT</p><h1 className="mt-1 text-3xl font-bold tracking-tight">Platform overview</h1><p className="mt-2 text-zinc-400">Pantau tenant, koneksi WhatsApp, paket dan batas pemakaian dari satu panel.</p></div>
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">{cards.map(([label, value, Icon]) => <div key={label} className="rounded-2xl border border-white/10 bg-white/[.04] p-4"><div className="flex items-center justify-between text-zinc-400"><span className="text-xs font-medium uppercase tracking-wide">{label}</span><Icon className="size-4" /></div><div className="mt-3 text-2xl font-bold">{number.format(value)}</div></div>)}</section>
     <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/[.03]">
       <div className="border-b border-white/10 px-5 py-4"><h2 className="font-semibold">Workspace</h2><p className="text-sm text-zinc-500">Token dan secret WhatsApp tidak pernah ditampilkan.</p></div>

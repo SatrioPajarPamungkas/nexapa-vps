@@ -64,14 +64,14 @@ export default function AuthLayout({
           <header className="relative flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.07] shadow-2xl shadow-blue-950/30 backdrop-blur-xl">
               <img
-                src="/assets/branding/nexapa-app-logo.svg"
+                src="/assets/branding/heperchat-logo.svg"
                 alt=""
                 className="h-7 w-7"
               />
             </div>
             <div>
               <p className="text-[15px] font-semibold tracking-[0.22em]">
-                NEXAPA
+                HEPERCHAT
               </p>
               <p className="mt-0.5 text-[10px] tracking-[0.16em] text-slate-400">
                 DIGITAL WORKSPACE
@@ -94,7 +94,7 @@ export default function AuthLayout({
 
             <p className="mt-6 max-w-[540px] text-[15px] leading-7 text-slate-300">
               Kelola publikasi, pelanggan, komunikasi, automasi,
-              dan insight AI melalui ekosistem Nexapa yang aman,
+              dan insight AI melalui ekosistem HeperChat yang aman,
               terukur, dan siap berkembang.
             </p>
 
@@ -142,7 +142,7 @@ export default function AuthLayout({
           </main>
 
           <footer className="relative flex items-center justify-between border-t border-white/[0.08] pt-5 text-[11px] text-slate-500">
-            <span>© {new Date().getFullYear()} Nexapa</span>
+            <span>© {new Date().getFullYear()} HeperChat</span>
             <span>PT Deaji Anggayuh Trisna</span>
           </footer>
         </section>
@@ -151,13 +151,13 @@ export default function AuthLayout({
           <div className="absolute left-5 top-5 flex items-center gap-2.5 lg:hidden">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/70 bg-white/80 shadow-sm backdrop-blur-xl">
               <img
-                src="/assets/branding/nexapa-app-logo.svg"
-                alt="Nexapa"
+                src="/assets/branding/heperchat-logo.svg"
+                alt="HeperChat"
                 className="h-6 w-6"
               />
             </div>
             <span className="text-[13px] font-semibold tracking-[0.18em] text-slate-900">
-              NEXAPA
+              HEPERCHAT
             </span>
           </div>
 

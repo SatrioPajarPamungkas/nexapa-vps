@@ -42,7 +42,7 @@ function LoginPageInner() {
 
     try {
       const response = await fetch(
-        "/api/auth/nexapa-login",
+        "/api/auth/heperchat-login",
         {
           method: "POST",
           headers: {

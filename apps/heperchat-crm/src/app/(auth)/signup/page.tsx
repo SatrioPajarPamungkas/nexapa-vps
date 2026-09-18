@@ -80,13 +80,13 @@ function SignupPageInner() {
 
     setLoading(true);
     window.localStorage.setItem(
-      "nexapa_crm_auth_return",
+      "heperchat_crm_auth_return",
       returnTo,
     );
 
     try {
       const response = await fetch(
-        "/api/auth/nexapa-register",
+        "/api/auth/heperchat-register",
         {
           method: "POST",
           headers: {
@@ -144,7 +144,7 @@ function SignupPageInner() {
           </h1>
 
           <p className="mt-2 text-[13px] leading-6 text-slate-500">
-            Nexapa telah mengirim tautan verifikasi ke{" "}
+            HeperChat telah mengirim tautan verifikasi ke{" "}
             <span className="font-medium text-slate-800">
               {email}
             </span>

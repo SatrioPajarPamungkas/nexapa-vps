@@ -1,0 +1,1703 @@
+{
+  "info": {
+    "_postman_id": "4a8adc34-4577-491e-ad28-34784c8ad707",
+    "name": "Nexapa CRM - WhatsApp & Messaging API",
+    "description": "Expanded Postman collection for Nexapa CRM WhatsApp and messaging workflows.\n\nBase URL: https://crm.nexapa.app\n\nCovers:\n- WhatsApp configuration\n- Send / react\n- Templates\n- Media\n- Broadcasts\n- Meta webhook verification & sample events\n- CRM Conversations\n- CRM Messages\n- CRM Contacts\n- CRM Broadcast API\n- CRM Webhook API\n- Quick Replies\n- AI drafting / autoreply support\n- Account / current user checks\n\nImportant:\n- Some request bodies are safe example templates inferred from the active route structure and UI workflows. Adjust fields to match the exact server implementation when needed.\n- Protected endpoints require a valid authenticated CRM session.\n- Do not disable Meta webhook signature verification in production.\n",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://crm.nexapa.app"
+    },
+    {
+      "key": "phone_number",
+      "value": "628xxxxxxxxxx"
+    },
+    {
+      "key": "conversation_id",
+      "value": ""
+    },
+    {
+      "key": "media_id",
+      "value": ""
+    },
+    {
+      "key": "template_id",
+      "value": ""
+    },
+    {
+      "key": "message_id",
+      "value": ""
+    },
+    {
+      "key": "verify_token",
+      "value": ""
+    },
+    {
+      "key": "contact_id",
+      "value": ""
+    },
+    {
+      "key": "broadcast_id",
+      "value": ""
+    },
+    {
+      "key": "webhook_id",
+      "value": ""
+    },
+    {
+      "key": "account_id",
+      "value": ""
+    },
+    {
+      "key": "phone_number_id",
+      "value": ""
+    },
+    {
+      "key": "waba_id",
+      "value": ""
+    },
+    {
+      "key": "quick_reply_id",
+      "value": ""
+    },
+    {
+      "key": "flow_id",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Configuration",
+      "item": [
+        {
+          "name": "Get WhatsApp Config",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/config",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "config"
+              ]
+            },
+            "description": "Ambil status/config WhatsApp akun CRM."
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Registration",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/config/verify-registration",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "config",
+                "verify-registration"
+              ]
+            },
+            "description": "Verifikasi konfigurasi/registrasi nomor.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - Messaging",
+      "item": [
+        {
+          "name": "Send Text Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/send",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "send"
+              ]
+            },
+            "description": "Template kirim pesan teks.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"{{phone_number}}\",\n  \"type\": \"text\",\n  \"text\": \"Halo dari Nexapa CRM\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send by Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/send",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "send"
+              ]
+            },
+            "description": "Alternatif template berbasis conversation_id.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": \"{{conversation_id}}\",\n  \"type\": \"text\",\n  \"text\": \"Test message from Postman\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "React to Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/react",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "react"
+              ]
+            },
+            "description": "Kirim reaction ke pesan.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message_id\": \"{{message_id}}\",\n  \"emoji\": \"\\ud83d\\udc4d\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - Templates",
+      "item": [
+        {
+          "name": "Sync Templates",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/templates/sync",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "templates",
+                "sync"
+              ]
+            },
+            "description": "Sinkronisasi template WhatsApp.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Template",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/templates/submit",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "templates",
+                "submit"
+              ]
+            },
+            "description": "Contoh payload submit template.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"nexapa_test_template\",\n  \"language\": \"en_US\",\n  \"category\": \"UTILITY\",\n  \"body\": \"Hello {{1}}, this is a test message from Nexapa.\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Template Action by ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/templates/{{template_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "templates",
+                "{{template_id}}"
+              ]
+            },
+            "description": "Endpoint berbasis template ID.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - Media",
+      "item": [
+        {
+          "name": "Get WhatsApp Media",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/media/{{media_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "media",
+                "{{media_id}}"
+              ]
+            },
+            "description": "Ambil media WhatsApp via media ID."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - Broadcast",
+      "item": [
+        {
+          "name": "Send Broadcast",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/broadcast",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "broadcast"
+              ]
+            },
+            "description": "Template broadcast sederhana.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipients\": [\n    \"{{phone_number}}\"\n  ],\n  \"type\": \"text\",\n  \"text\": \"Broadcast test from Nexapa CRM\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 - Webhook",
+      "item": [
+        {
+          "name": "Webhook Verification",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/webhook?hub.mode=subscribe&hub.verify_token={{verify_token}}&hub.challenge=123456789",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "webhook"
+              ],
+              "query": [
+                {
+                  "key": "hub.mode",
+                  "value": "subscribe"
+                },
+                {
+                  "key": "hub.verify_token",
+                  "value": "{{verify_token}}"
+                },
+                {
+                  "key": "hub.challenge",
+                  "value": "123456789"
+                }
+              ]
+            },
+            "description": "Simulasi challenge verification Meta."
+          },
+          "response": []
+        },
+        {
+          "name": "Webhook Event Sample",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/webhook",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "webhook"
+              ]
+            },
+            "description": "Contoh inbound webhook. Production Meta POST memakai X-Hub-Signature-256.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"object\": \"whatsapp_business_account\",\n  \"entry\": [\n    {\n      \"id\": \"WABA_ID\",\n      \"changes\": [\n        {\n          \"field\": \"messages\",\n          \"value\": {\n            \"messaging_product\": \"whatsapp\",\n            \"metadata\": {\n              \"display_phone_number\": \"15550000000\",\n              \"phone_number_id\": \"PHONE_NUMBER_ID\"\n            },\n            \"contacts\": [\n              {\n                \"profile\": {\n                  \"name\": \"Postman Test\"\n                },\n                \"wa_id\": \"{{phone_number}}\"\n              }\n            ],\n            \"messages\": [\n              {\n                \"from\": \"{{phone_number}}\",\n                \"id\": \"wamid.POSTMAN_TEST\",\n                \"timestamp\": \"1755300000\",\n                \"text\": {\n                  \"body\": \"Test inbound webhook from Postman\"\n                },\n                \"type\": \"text\"\n              }\n            ]\n          }\n        }\n      ]\n    }\n  ]\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 - CRM Conversations",
+      "description": "Supporting CRM endpoints commonly used alongside WhatsApp inbox workflows.",
+      "item": [
+        {
+          "name": "List Conversations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations?page=1&per_page=25",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "conversations"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "List account-scoped conversations."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Conversation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/{{conversation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "conversations",
+                "{{conversation_id}}"
+              ]
+            },
+            "description": "Get a single conversation by ID."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Conversation",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/{{conversation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "conversations",
+                "{{conversation_id}}"
+              ]
+            },
+            "description": "Example update for conversation status or other supported fields.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"open\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Conversation Messages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/conversations/{{conversation_id}}/messages?page=1&per_page=50",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "conversations",
+                "{{conversation_id}}",
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "List messages for a conversation."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "08 - CRM Messages",
+      "item": [
+        {
+          "name": "Create Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/messages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "messages"
+              ]
+            },
+            "description": "Create/send a CRM message. Exact supported fields may vary.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": \"{{conversation_id}}\",\n  \"type\": \"text\",\n  \"text\": \"Hello from Nexapa CRM API\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Send WhatsApp Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/send",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "send"
+              ]
+            },
+            "description": "Combined example with both conversation and recipient reference.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": \"{{conversation_id}}\",\n  \"to\": \"{{phone_number}}\",\n  \"type\": \"text\",\n  \"text\": \"Hello from Nexapa CRM\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "React to WhatsApp Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/react",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "react"
+              ]
+            },
+            "description": "Send a WhatsApp reaction.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message_id\": \"{{message_id}}\",\n  \"emoji\": \"❤️\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "09 - Contacts",
+      "item": [
+        {
+          "name": "List Contacts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts?page=1&per_page=25",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "contacts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "List CRM contacts."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "contacts"
+              ]
+            },
+            "description": "Create a CRM contact.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test\",\n  \"phone\": \"{{phone_number}}\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Contact",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts/{{contact_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "contacts",
+                "{{contact_id}}"
+              ]
+            },
+            "description": "Get contact details."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Contact",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts/{{contact_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "contacts",
+                "{{contact_id}}"
+              ]
+            },
+            "description": "Update contact fields.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test Updated\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Contact",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/contacts/{{contact_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "contacts",
+                "{{contact_id}}"
+              ]
+            },
+            "description": "Delete contact if supported by the active route handler."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Contact Tags",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/contacts/{{contact_id}}/tags",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "contacts",
+                "{{contact_id}}",
+                "tags"
+              ]
+            },
+            "description": "Example account contact-tag operation.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tags\": [\n    \"vip\",\n    \"whatsapp\"\n  ]\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10 - Broadcast API",
+      "item": [
+        {
+          "name": "List Broadcasts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/broadcasts?page=1&per_page=25",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "broadcasts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "List broadcasts."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Broadcast",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/broadcasts",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "broadcasts"
+              ]
+            },
+            "description": "Example create broadcast payload.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman WhatsApp Broadcast\",\n  \"recipients\": [\n    \"{{phone_number}}\"\n  ],\n  \"message\": \"Broadcast from Nexapa CRM\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Broadcast",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/broadcasts/{{broadcast_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "broadcasts",
+                "{{broadcast_id}}"
+              ]
+            },
+            "description": "Get a broadcast."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Broadcast",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/broadcasts/{{broadcast_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "broadcasts",
+                "{{broadcast_id}}"
+              ]
+            },
+            "description": "Update broadcast if supported.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Postman Broadcast\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Broadcast",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/broadcasts/{{broadcast_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "broadcasts",
+                "{{broadcast_id}}"
+              ]
+            },
+            "description": "Delete broadcast if supported."
+          },
+          "response": []
+        },
+        {
+          "name": "Execute WhatsApp Broadcast",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/broadcast",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "broadcast"
+              ]
+            },
+            "description": "Direct WhatsApp broadcast endpoint.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipients\": [\n    \"{{phone_number}}\"\n  ],\n  \"type\": \"text\",\n  \"text\": \"WhatsApp broadcast test\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "11 - Webhook Management",
+      "item": [
+        {
+          "name": "List Webhooks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/webhooks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks"
+              ]
+            },
+            "description": "List configured Nexapa CRM webhooks."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/webhooks",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks"
+              ]
+            },
+            "description": "Example webhook registration payload.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"url\": \"https://example.com/webhook\",\n  \"events\": [\n    \"message.created\"\n  ]\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Webhook",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/webhooks/{{webhook_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks",
+                "{{webhook_id}}"
+              ]
+            },
+            "description": "Get webhook details."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Webhook",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/webhooks/{{webhook_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks",
+                "{{webhook_id}}"
+              ]
+            },
+            "description": "Update webhook configuration.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"events\": [\n    \"message.created\",\n    \"conversation.updated\"\n  ]\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Webhook",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/webhooks/{{webhook_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks",
+                "{{webhook_id}}"
+              ]
+            },
+            "description": "Delete webhook."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "12 - Quick Replies",
+      "item": [
+        {
+          "name": "List Quick Replies",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quick-replies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quick-replies"
+              ]
+            },
+            "description": "List saved quick replies."
+          },
+          "response": []
+        },
+        {
+          "name": "Create Quick Reply",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quick-replies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quick-replies"
+              ]
+            },
+            "description": "Create a quick reply.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Greeting\",\n  \"content\": \"Halo, ada yang bisa kami bantu?\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Quick Reply",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quick-replies/{{quick_reply_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quick-replies",
+                "{{quick_reply_id}}"
+              ]
+            },
+            "description": "Get a quick reply."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Quick Reply",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quick-replies/{{quick_reply_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quick-replies",
+                "{{quick_reply_id}}"
+              ]
+            },
+            "description": "Update a quick reply.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Greeting Updated\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Quick Reply",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/quick-replies/{{quick_reply_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "quick-replies",
+                "{{quick_reply_id}}"
+              ]
+            },
+            "description": "Delete a quick reply."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "13 - AI Assist for WhatsApp",
+      "description": "Optional CRM AI endpoints useful for WhatsApp agent workflows.",
+      "item": [
+        {
+          "name": "Draft Reply",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/ai/draft",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "draft"
+              ]
+            },
+            "description": "Generate an AI-assisted draft reply.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversation_id\": \"{{conversation_id}}\",\n  \"instruction\": \"Draft a concise and polite reply\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Autoreply Conversation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/ai/autoreply/{{conversation_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "autoreply",
+                "{{conversation_id}}"
+              ]
+            },
+            "description": "Trigger AI autoreply flow for a conversation if enabled.",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get AI Config",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/ai/config",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "config"
+              ]
+            },
+            "description": "Read AI configuration."
+          },
+          "response": []
+        },
+        {
+          "name": "AI Playground",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/ai/playground",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "ai",
+                "playground"
+              ]
+            },
+            "description": "Test AI response without touching a real WhatsApp conversation.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Create a helpful WhatsApp support reply\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "14 - Account & Session Checks",
+      "item": [
+        {
+          "name": "Current CRM User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "me"
+              ]
+            },
+            "description": "Check the authenticated CRM user/session."
+          },
+          "response": []
+        },
+        {
+          "name": "Account Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/account",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "account"
+              ]
+            },
+            "description": "Read current CRM account/workspace details."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "15 - Webhook Event Samples",
+      "description": "Additional sample Meta WhatsApp webhook payloads for local/Postman testing.",
+      "item": [
+        {
+          "name": "Inbound Text Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/webhook",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "webhook"
+              ]
+            },
+            "description": "Inbound text webhook sample.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"object\": \"whatsapp_business_account\",\n  \"entry\": [\n    {\n      \"id\": \"{{waba_id}}\",\n      \"changes\": [\n        {\n          \"field\": \"messages\",\n          \"value\": {\n            \"messaging_product\": \"whatsapp\",\n            \"metadata\": {\n              \"display_phone_number\": \"15550000000\",\n              \"phone_number_id\": \"{{phone_number_id}}\"\n            },\n            \"contacts\": [\n              {\n                \"profile\": {\n                  \"name\": \"Postman User\"\n                },\n                \"wa_id\": \"{{phone_number}}\"\n              }\n            ],\n            \"messages\": [\n              {\n                \"from\": \"{{phone_number}}\",\n                \"id\": \"wamid.TEXT_SAMPLE\",\n                \"timestamp\": \"1755300000\",\n                \"type\": \"text\",\n                \"text\": {\n                  \"body\": \"Hello Nexapa\"\n                }\n              }\n            ]\n          }\n        }\n      ]\n    }\n  ]\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delivered Status Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/webhook",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "webhook"
+              ]
+            },
+            "description": "Message delivered status sample.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"object\": \"whatsapp_business_account\",\n  \"entry\": [\n    {\n      \"id\": \"{{waba_id}}\",\n      \"changes\": [\n        {\n          \"field\": \"messages\",\n          \"value\": {\n            \"messaging_product\": \"whatsapp\",\n            \"metadata\": {\n              \"phone_number_id\": \"{{phone_number_id}}\"\n            },\n            \"statuses\": [\n              {\n                \"id\": \"{{message_id}}\",\n                \"status\": \"delivered\",\n                \"timestamp\": \"1755300000\",\n                \"recipient_id\": \"{{phone_number}}\"\n              }\n            ]\n          }\n        }\n      ]\n    }\n  ]\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Read Status Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/whatsapp/webhook",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "whatsapp",
+                "webhook"
+              ]
+            },
+            "description": "Message read status sample.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"object\": \"whatsapp_business_account\",\n  \"entry\": [\n    {\n      \"id\": \"{{waba_id}}\",\n      \"changes\": [\n        {\n          \"field\": \"messages\",\n          \"value\": {\n            \"messaging_product\": \"whatsapp\",\n            \"statuses\": [\n              {\n                \"id\": \"{{message_id}}\",\n                \"status\": \"read\",\n                \"timestamp\": \"1755300000\",\n                \"recipient_id\": \"{{phone_number}}\"\n              }\n            ]\n          }\n        }\n      ]\n    }\n  ]\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

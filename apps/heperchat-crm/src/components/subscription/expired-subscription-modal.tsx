@@ -94,11 +94,11 @@ export function ExpiredSubscriptionModal() {
 
   useEffect(() => {
     const status = readCookie(
-      "nexapa_subscription_status"
+      "heperchat_subscription_status"
     )
 
     const expiry = readCookie(
-      "nexapa_subscription_expires_at"
+      "heperchat_subscription_expires_at"
     )
 
     setExpired(status === "expired")
@@ -178,7 +178,7 @@ export function ExpiredSubscriptionModal() {
 
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-400 sm:text-base">
               Workspace dan data Anda tetap aman. Aktifkan
-              kembali paket untuk menggunakan Nexapa CRM,
+              kembali paket untuk menggunakan HeperChat CRM,
               Publisher, WhatsApp, automasi, dan AI.
             </p>
 
@@ -278,7 +278,7 @@ export function ExpiredSubscriptionModal() {
 
                   <a
                     href={
-                      "https://nexapa.app/pricing.html" +
+                      "https://hepermadi.com/pricing.html" +
                       `?plan=${plan.code}` +
                       `&billing=${billing}` +
                       "&source=crm-expired"
@@ -294,16 +294,16 @@ export function ExpiredSubscriptionModal() {
 
           <footer className="relative mt-7 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row">
             <p className="text-center text-xs text-slate-500 sm:text-left">
-              Butuh paket khusus? Hubungi tim Nexapa untuk
+              Butuh paket khusus? Hubungi tim HeperChat untuk
               menyesuaikan kebutuhan bisnis Anda.
             </p>
 
             <div className="flex items-center gap-3">
               <a
-                href="https://nexapa.app/contact.html?service=subscription"
+                href="https://hepermadi.com/contact.html?service=subscription"
                 className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-slate-800"
               >
-                Hubungi Nexapa
+                Hubungi HeperChat
               </a>
 
               <button

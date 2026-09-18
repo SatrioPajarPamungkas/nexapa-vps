@@ -61,10 +61,10 @@ export async function middleware(request: NextRequest) {
 
   // Paywall global lama sudah tidak digunakan.
   supabaseResponse.cookies.delete(
-    'nexapa_subscription_status'
+    'heperchat_subscription_status'
   )
   supabaseResponse.cookies.delete(
-    'nexapa_subscription_expires_at'
+    'heperchat_subscription_expires_at'
   )
 
   const authPaths = [
@@ -234,10 +234,10 @@ export async function middleware(request: NextRequest) {
 
     // Cookie lama tidak boleh lagi mengunci seluruh dashboard.
     supabaseResponse.cookies.delete(
-      'nexapa_subscription_status'
+      'heperchat_subscription_status'
     )
     supabaseResponse.cookies.delete(
-      'nexapa_subscription_expires_at'
+      'heperchat_subscription_expires_at'
     )
 
     const isPaidWhatsappApi =
@@ -285,7 +285,7 @@ export async function middleware(request: NextRequest) {
       // non-dismissible package modal locks all interaction.
       if (entitlement.status === 'expired') {
         supabaseResponse.cookies.set(
-          'nexapa_subscription_status',
+          'heperchat_subscription_status',
           'expired',
           {
             path: '/',
@@ -297,7 +297,7 @@ export async function middleware(request: NextRequest) {
         )
 
         supabaseResponse.cookies.set(
-          'nexapa_subscription_expires_at',
+          'heperchat_subscription_expires_at',
           entitlement.expires_at ?? '',
           {
             path: '/',
@@ -312,11 +312,11 @@ export async function middleware(request: NextRequest) {
       }
 
       supabaseResponse.cookies.delete(
-        'nexapa_subscription_status'
+        'heperchat_subscription_status'
       )
 
       supabaseResponse.cookies.delete(
-        'nexapa_subscription_expires_at'
+        'heperchat_subscription_expires_at'
       )
 
       const url = request.nextUrl.clone()
@@ -340,11 +340,11 @@ export async function middleware(request: NextRequest) {
 
     // Paket kembali aktif: bersihkan status popup.
     supabaseResponse.cookies.delete(
-      'nexapa_subscription_status'
+      'heperchat_subscription_status'
     )
 
     supabaseResponse.cookies.delete(
-      'nexapa_subscription_expires_at'
+      'heperchat_subscription_expires_at'
     )
   }
 
